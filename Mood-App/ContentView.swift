@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Mood-App
+//  Mental_Health
 //
 //  Created by Hieu Hoang on 4/10/25.
 //
