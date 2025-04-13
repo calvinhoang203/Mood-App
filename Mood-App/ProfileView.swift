@@ -48,7 +48,7 @@ struct ProfileView: View {
             if let document = document, document.exists, let data = document.data() {
                 let email = data["email"] as? String ?? "No email"
                 let name = data["name"] as? String ?? "No name"
-                let profile = Mental_Health.userProfile(firebase_uid: user.uid, email: email, name: name)
+                let profile = userProfile(firebase_uid: user.uid, email: email, name: name)
                 completion(profile)
             } else {
                 completion(nil)
