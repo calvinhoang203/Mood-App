@@ -54,6 +54,14 @@ class StoreData: ObservableObject {
         }
     }
     
+    // Notification variables
+    @Published var notifications: [String: Bool] = [
+        "account_created": false,
+        "point_checkpoint": false,
+        "daily_check_in": false
+    ]
+    
+    //  Mark notification as seen for users
     func markNotificationAsSeen(_ key: String) {
         guard let currentUser = Auth.auth().currentUser else { return }
         let db = Firestore.firestore()
@@ -72,7 +80,7 @@ class StoreData: ObservableObject {
         }
     }
 
-    
+    // Load the notifications that have already been seen by users
     func loadUserDataFromFirestore() {
         guard let currentUser = Auth.auth().currentUser else { return }
         let db = Firestore.firestore()
@@ -107,11 +115,6 @@ class StoreData: ObservableObject {
     }
 
     
-    @Published var notifications: [String: Bool] = [
-        "account_created": false,
-        "point_checkpoint": false,
-        "daily_check_in": false
-    ]
 
 }
 
