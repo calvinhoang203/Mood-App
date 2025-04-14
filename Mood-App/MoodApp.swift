@@ -9,7 +9,7 @@ import SwiftUI
 import Firebase
 
 @main
-struct Mental_HealthApp: App {
+struct MoodApp: App {
     @State private var showSplash = true
     @StateObject var storeData = StoreData()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate

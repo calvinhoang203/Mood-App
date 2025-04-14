@@ -113,64 +113,43 @@ struct LoginView: View {
                 }
 
                 guard let firebaseUser = authResult?.user else { return }
-
-                let db = Firestore.firestore()
-                let email = firebaseUser.email ?? ""
-                let displayName = firebaseUser.displayName ?? ""
                 let uid = firebaseUser.uid
 
-                let nameParts = displayName.split(separator: " ")
-                let firstName = nameParts.first.map(String.init) ?? ""
-                let lastName = nameParts.dropFirst().joined(separator: " ")
+                let db = Firestore.firestore()
+                let userDocRef = db.collection("Users' info").document(uid)
 
-                let fullName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
-                let documentID = fullName.isEmpty ? uid : fullName
-                let storeRef = db.collection("Users' info").document(documentID)
+                userDocRef.getDocument { document, error in
+                    if let error = error {
+                        print("❌ Error checking user info: \(error.localizedDescription)")
+                        return
+                    }
 
-                storeRef.getDocument { document, error in
-                    if let document = document, document.exists {
-                        let data = document.data()
-                        let hasScores = data?["scores"] as? [String: Int] != nil
-                        let hasFirst = (data?["firstName"] as? String)?.isEmpty == false
-                        let hasLast = (data?["lastName"] as? String)?.isEmpty == false
-                        let hasPhone = (data?["phoneNumber"] as? String)?.isEmpty == false
+                    guard let doc = document, doc.exists, let data = doc.data() else {
+                        print("🔸 No document found. Going to GetProfileView.")
+                        goToGetProfile = true
+                        return
+                    }
 
-                        storeRef.updateData(["email": email]) { err in
-                            if let err = err {
-                                print("⚠️ Failed to update email: \(err.localizedDescription)")
-                            }
-                        }
+                    let hasFirst = (data["firstName"] as? String)?.isEmpty == false
+                    let hasLast = (data["lastName"] as? String)?.isEmpty == false
+                    let hasPhone = (data["phoneNumber"] as? String)?.isEmpty == false
+                    let scores = data["scores"] as? [String: Any] ?? [:]
+                    let hasValidScores = scores.keys.count == 4 && scores.values.allSatisfy {
+                        if let val = $0 as? Int { return val >= 0 } else { return false }
+                    }
 
-                        if hasFirst && hasLast && hasPhone && hasScores {
-                            goToProfile = true
-                        } else {
-                            goToGetProfile = true
-                        }
+                    if hasFirst && hasLast && hasPhone && hasValidScores {
+                        print("✅ Profile complete. Going to ProfileView.")
+                        goToProfile = true
                     } else {
-                        let newUserData: [String: Any] = [
-                            "email": email,
-                            "firstName": firstName,
-                            "lastName": lastName,
-                            "phoneNumber": "",
-                            "scores": [
-                                "ANXIETY DUE TO LIFE CIRCUMSTANCES": 0,
-                                "NEED PEER/SOCIAL SUPPORT SYSTEM": 0,
-                                "STRESS DUE TO ACADEMIC PRESSURE": 0,
-                                "LOW ENERGY / MOTIVATION": 0
-                            ]
-                        ]
-
-                        storeRef.setData(newUserData) { error in
-                            if let error = error {
-                                print("❌ Error saving Google user data: \(error.localizedDescription)")
-                            }
-                            goToGetProfile = true
-                        }
+                        print("⚠️ Incomplete info. Going to GetProfileView.")
+                        goToGetProfile = true
                     }
                 }
             }
         }
     }
+
 }
 
 

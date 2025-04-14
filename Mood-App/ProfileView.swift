@@ -1,54 +1,56 @@
 //
 //  ProfileView.swift
-//  Mental Health
-//
-//  
+//  MoodApp
 //
 
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestoreInternal
+import FirebaseFirestore
 
-struct userProfile: Codable {
+struct UserProfile: Codable {
     let firebase_uid: String
     let email: String
     let name: String
 }
 
 struct ProfileView: View {
-    @State private var userProfile: userProfile?
-    
+    @State private var userProfile: UserProfile?
+
     var body: some View {
-        VStack{
-            if let profile = userProfile{
+        VStack {
+            if let profile = userProfile {
                 Text("Hello \(profile.name)")
             } else {
                 Text("Loading profile...")
-                    .onAppear{
+                    .onAppear {
                         getProfile { profile in
-                            self.userProfile = profile}
+                            self.userProfile = profile
+                        }
                     }
             }
         }
     }
-    
-    func getProfile(completion: @escaping(userProfile?)->Void){
+
+    func getProfile(completion: @escaping (UserProfile?) -> Void) {
         guard let user = Auth.auth().currentUser else {
             completion(nil)
             return
         }
-        
+
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(user.uid)
-        userRef.getDocument{document, error in
-            if error != nil {
-                return completion(nil)
+
+        userRef.getDocument { document, error in
+            if let error = error {
+                print("Error fetching profile: \(error.localizedDescription)")
+                completion(nil)
+                return
             }
-            
+
             if let document = document, document.exists, let data = document.data() {
                 let email = data["email"] as? String ?? "No email"
                 let name = data["name"] as? String ?? "No name"
-                let profile = Mental_Health.userProfile(firebase_uid: user.uid, email: email, name: name)
+                let profile = UserProfile(firebase_uid: user.uid, email: email, name: name)
                 completion(profile)
             } else {
                 completion(nil)
@@ -56,7 +58,6 @@ struct ProfileView: View {
         }
     }
 }
-
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
