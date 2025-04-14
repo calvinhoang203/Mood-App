@@ -1,0 +1,138 @@
+//
+//  GoalView.swift
+//  Mood-App
+//
+//
+//
+
+import SwiftUI
+
+struct GoalView: View {
+    @State private var currentStep = 0
+    @State private var selectedOption: String?
+    @State private var showAlert = false
+    @State private var isCompleted = false
+
+    let steps: [GoalStep] = [
+        GoalStep(
+            title: "Set a tangible goal for yourself.",
+            options: ["Daily Check Ins", "300 Points", "500 Points", "Custom Goal Set"]
+        ),
+        GoalStep(
+            title: "Set your timeline.",
+            options: ["1 Week", "1 Month", "3 Months", "Custom Time Frame"]
+        )
+    ]
+
+    var progress: CGFloat {
+        CGFloat(currentStep + 1) / CGFloat(steps.count)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color("lavenderColor").ignoresSafeArea()
+
+                VStack(spacing: 20) {
+                    // Top Title
+                    HStack {
+                        Text("Goal Setting")
+                            .font(.custom("Alexandria", size: 20))
+                            .foregroundColor(.black)
+                            .padding(.leading)
+                        Spacer()
+                    }
+
+                    // Cow Icon
+                    Image("QuestionIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+
+                    // Motivational Text
+                    VStack(spacing: 5) {
+                        Text("Let’s get on track!\nTime to set a goal for yourself.")
+                            .font(.custom("Alexandria", size: 18))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.black)
+
+                        Text(steps[currentStep].title)
+                            .font(.custom("Alexandria", size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.top, 5)
+                    }
+
+                    // Options
+                    ForEach(steps[currentStep].options, id: \.self) { option in
+                        Button(action: {
+                            selectedOption = option
+                        }) {
+                            Text(option)
+                                .font(.custom("Alexandria", size: 16))
+                                .foregroundColor(.black)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(selectedOption == option ? Color.purple : Color.clear, lineWidth: 2)
+                                )
+                        }
+                    }
+
+                    // Next Button
+                    Button(action: {
+                        if selectedOption == nil {
+                            showAlert = true
+                        } else {
+                            if currentStep < steps.count - 1 {
+                                currentStep += 1
+                                selectedOption = nil
+                            } else {
+                                isCompleted = true
+                            }
+                        }
+                    }) {
+                        Text("Next")
+                            .font(.custom("Alexandria", size: 16))
+                            .foregroundColor(.white)
+                            .frame(width: 160, height: 50)
+                            .background(Color(hex: "#8F81DC"))
+                            .cornerRadius(10)
+                            .shadow(radius: 4)
+                    }
+                    .alert("Please choose an option before continuing.", isPresented: $showAlert) {
+                        Button("OK", role: .cancel) {}
+                    }
+
+                    // Progress Bar
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .frame(width: 319, height: 14)
+                            .foregroundColor(Color(hex: "#C3B9D1"))
+
+                        Capsule()
+                            .frame(width: 319 * progress, height: 14)
+                            .foregroundColor(Color(hex: "#8F81DC"))
+                    }
+                    .cornerRadius(20)
+                    .padding(.top, 5)
+                }
+                .padding()
+            }
+            .navigationDestination(isPresented: $isCompleted) {
+                // Dashboard()
+            }
+        }
+    }
+}
+
+struct GoalStep {
+    let title: String
+    let options: [String]
+}
+
+#Preview {
+    GoalView()
+}
