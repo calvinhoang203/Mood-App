@@ -236,7 +236,7 @@ struct QuestionaireView: View {
                 currentIndex += 1
             }
         } else {
-            // 👇 This will allow the progress bar to visually fill before transitioning
+            // This will allow the progress bar to visually fill before transitioning
             showLoading = true
             storeData.saveToFirestore()
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {

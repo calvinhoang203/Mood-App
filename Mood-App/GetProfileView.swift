@@ -38,7 +38,7 @@ struct GetProfileView: View {
                     customTextField(title: "Last Name *", text: $lastName)
                     customTextField(title: "Phone Number *", text: $phoneNumber)
 
-                    // 🔘 Save and trigger navigation
+                    // Save and trigger navigation
                     Button(action: {
                         saveProfile()
                     }) {
@@ -50,26 +50,19 @@ struct GetProfileView: View {
                     }
                     .padding(.top, 10)
 
-                    Button(action: {
-                        goToQuestion1 = false
-                    }) {
-                        Text("Go Back to Sign Up")
-                            .font(.custom("Alexandria", size: 16))
-                            .foregroundColor(.blue)
-                            .padding(.top, 10)
-                    }
+                    
 
                     Spacer()
                 }
                 .padding(.horizontal, 20)
             }
 
-            // ✅ Forward navigation to QuestionaireView with environment
+            // Forward navigation to QuestionaireView with environment
             .navigationDestination(isPresented: $goToQuestion1) {
                 QuestionaireView().environmentObject(storeData)
             }
 
-            // ✅ Al ert
+            
             .alert("All fields are required.", isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             }

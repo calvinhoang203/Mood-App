@@ -59,7 +59,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AD09CD2E2DAA4CBE00C57591 /* Exceptions for "Mood-App" folder in "Mood-App" target */ = {
+		AD8243C62DACB4200087BFF9 /* Exceptions for "Mood-App" folder in "Mood-App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -72,7 +72,7 @@
 		AD09CB9F2DA8E16700C57591 /* Mood-App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AD09CD2E2DAA4CBE00C57591 /* Exceptions for "Mood-App" folder in "Mood-App" target */,
+				AD8243C62DACB4200087BFF9 /* Exceptions for "Mood-App" folder in "Mood-App" target */,
 			);
 			path = "Mood-App";
 			sourceTree = "<group>";
@@ -497,7 +497,8 @@
 				DEVELOPMENT_TEAM = VB6N5HD2Q5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = "Mood-App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Moo'd";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -527,7 +528,8 @@
 				DEVELOPMENT_TEAM = VB6N5HD2Q5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = "Mood-App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Moo'd";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
