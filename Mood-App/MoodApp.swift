@@ -1,6 +1,6 @@
 //
-//  Mental_HealthApp.swift
-//  Mental Health
+//  MoodApp.swift
+//  MoodApp
 //
 //
 //
@@ -13,7 +13,7 @@ struct MoodApp: App {
     @State private var showSplash = true
     @StateObject var storeData = StoreData()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-
+    @StateObject private var petCustomization = PetCustomization()
 
     var body: some Scene {
         WindowGroup {
@@ -28,7 +28,7 @@ struct MoodApp: App {
                 NavigationStack {
                     LoginView()
                 }
-                .environmentObject(storeData)
+                .environmentObject(petCustomization)
             }
         }
     }

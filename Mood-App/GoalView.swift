@@ -2,8 +2,6 @@
 //  GoalView.swift
 //  Mood-App
 //
-//
-//
 
 import SwiftUI
 
@@ -81,7 +79,7 @@ struct GoalView: View {
                         }
                     }
 
-                    // Next Button
+                    // ✅ Image-based Next Button
                     Button(action: {
                         if selectedOption == nil {
                             showAlert = true
@@ -94,12 +92,10 @@ struct GoalView: View {
                             }
                         }
                     }) {
-                        Text("Next")
-                            .font(.custom("Alexandria", size: 16))
-                            .foregroundColor(.white)
+                        Image("NextButton")
+                            .resizable()
+                            .scaledToFit()
                             .frame(width: 160, height: 50)
-                            .background(Color(hex: "#8F81DC"))
-                            .cornerRadius(10)
                             .shadow(radius: 4)
                     }
                     .alert("Please choose an option before continuing.", isPresented: $showAlert) {
@@ -122,7 +118,8 @@ struct GoalView: View {
                 .padding()
             }
             .navigationDestination(isPresented: $isCompleted) {
-                // Dashboard()
+                // You can link to Dashboard() or any next view
+                Text("Goal setup complete!")
             }
         }
     }
