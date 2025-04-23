@@ -195,7 +195,7 @@ struct QuestionaireView: View {
                     }
                 }
                 .navigationDestination(isPresented: $isFinished) {
-                    ProfileView()
+                    HomeView()
                         .environmentObject(storeData)
                 }
                 .alert("Please choose an answer before continuing.", isPresented: $showAlert) {

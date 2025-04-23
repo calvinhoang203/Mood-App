@@ -2,9 +2,6 @@
 //  SurveyQuestionaireView.swift
 //  Mood-App
 //
-//
-//
-
 
 import SwiftUI
 
@@ -24,16 +21,95 @@ struct SurveyQuestionaireView: View {
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
-            question: "What is your current stress level?",
+            question: "How would you describe your mood today in one word?",
             options: [
-                ("Very High", "STRESS DUE TO ACADEMIC PRESSURE", 3),
-                ("Moderate", "STRESS DUE TO ACADEMIC PRESSURE", 2),
-                ("Low", "LOW ENERGY / MOTIVATION", 1),
-                ("No Stress", "LOW ENERGY / MOTIVATION", 0)
+                ("Joyful", "", 0),
+                ("Stressed", "", 0),
+                ("Tired", "", 0),
+                ("Content", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "How are you feeling overall today?",
+            options: [
+                ("Great 😄", "", 0),
+                ("Okay 🙂", "", 0),
+                ("Meh 😐", "", 0),
+                ("Not so good 😞", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "Which emotion best matches your current mood?",
+            options: [
+                ("Calm 😌", "", 0),
+                ("Anxious 😬", "", 0),
+                ("Sad 😢", "", 0),
+                ("Energized ⚡", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "Did something specific affect your mood today?",
+            options: [
+                ("Yes, something positive", "", 0),
+                ("Yes, something negative", "", 0),
+                ("A mix of both", "", 0),
+                ("Not really, it just is what it is", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "How well did you sleep last night?",
+            options: [
+                ("Very well", "", 0),
+                ("Okay, not great", "", 0),
+                ("Not much at all", "", 0),
+                ("I don’t remember", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "Did you eat a balanced meal today?",
+            options: [
+                ("Yes, I ate well", "", 0),
+                ("I ate, but not very balanced", "", 0),
+                ("Not yet, but I plan to", "", 0),
+                ("No, not really", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "How socially connected do you feel today?",
+            options: [
+                ("Very connected", "", 0),
+                ("Somewhat connected", "", 0),
+                ("A bit isolated", "", 0),
+                ("Very disconnected", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "Did you do something for yourself today (self-care, hobby, rest)?",
+            options: [
+                ("Yes, definitely", "", 0),
+                ("A little bit", "", 0),
+                ("Not yet, but I plan to", "", 0),
+                ("No, not at all", "", 0)
+            ],
+            allowsMultipleSelection: false
+        ),
+        SurveyQuestionData(
+            question: "What’s your focus or intention for tomorrow?",
+            options: [
+                ("Take care of myself 💆‍♀️", "", 0),
+                ("Get things done 💼", "", 0),
+                ("Rest and recharge 🌿", "", 0),
+                ("Connect with others 💬", "", 0)
             ],
             allowsMultipleSelection: false
         )
-        // ✅ Add more questions later
     ]
 
     var progress: CGFloat {
@@ -126,7 +202,7 @@ struct SurveyQuestionaireView: View {
                 }
             }
             .navigationDestination(isPresented: $isFinished) {
-                ProfileView()
+                HomeView()
                     .environmentObject(storeData)
             }
             .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
@@ -154,12 +230,7 @@ struct SurveyQuestionaireView: View {
             return
         }
 
-        for selected in selectedOptions {
-            if let match = questions[currentIndex].options.first(where: { $0.text == selected }) {
-                storeData.addPoints(for: match.category, points: match.points)
-            }
-        }
-
+        // Placeholder for potential point system in future
         selectedOptions.removeAll()
 
         if currentIndex < questions.count - 1 {

@@ -79,7 +79,7 @@ struct LoginView: View {
                 GetProfileView()
             }
             .navigationDestination(isPresented: $goToProfile) {
-                ProfileView()
+                HomeView()
             }
         }
         .navigationBarBackButtonHidden(true)

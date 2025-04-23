@@ -83,7 +83,7 @@ struct LoginWithEmailView: View {
 
                         
                         NavigationLink(
-                            destination: ProfileView(),
+                            destination: HomeView(),
                             tag: AuthNavigation.profile,
                             selection: $navSelection
                         ) {
