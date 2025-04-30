@@ -37,7 +37,7 @@ struct PetView: View {
     @State private var showAlert = false
 
     // Unlock cost
-    private let unlockCost = 50
+    private let unlockCost = 0
 
     // Assets for each tab
     private let colorDisplays = [

@@ -111,99 +111,105 @@ struct QuestionaireView: View {
     }
 
     var body: some View {
-            NavigationStack {
-                ZStack {
-                    Color("lavenderColor").ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color("lavenderColor").ignoresSafeArea()
 
-                    if showLoading {
-                        LoadingView()
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                                    isFinished = true
-                                }
+                if showLoading {
+                    LoadingView()
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                isFinished = true
                             }
-                    } else {
-                        VStack(spacing: 20) {
-                            Spacer()
+                        }
+                } else {
+                    VStack(spacing: 20) {
+                        // ——— Removed the leading Spacer() ———
 
-                            Text("Let’s get to know you better.")
-                                .font(.custom("Alexandria", size: 24))
+                        Text("Let’s get to know you better.")
+                            .font(.custom("Alexandria", size: 24))
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+
+                        Text("Answer a couple questions to get started.")
+                            .font(.custom("Alexandria", size: 16))
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+
+                        Image("QuestionIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+
+                        VStack(spacing: 5) {
+                            Text(questions[currentIndex].question)
+                                .font(.custom("Alexandria", size: 18))
+                                .bold()
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
 
-                            Text("Answer a couple questions to get started.")
-                                .font(.custom("Alexandria", size: 16))
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.center)
+                            Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
+                                .font(.custom("Alexandria", size: 14))
+                                .foregroundColor(.gray)
+                        }
 
-                            Image("QuestionIcon")
+                        ForEach(questions[currentIndex].options, id: \.text) { option in
+                            Button(action: { toggleSelection(for: option.text) }) {
+                                Text(option.text)
+                                    .font(.custom("Alexandria", size: 16))
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(selectedOptions.contains(option.text) ? Color.purple : Color.clear, lineWidth: 2)
+                                    )
+                            }
+                        }
+
+                        Button(action: handleNext) {
+                            Image("NextButton")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 150, height: 150)
-
-                            VStack(spacing: 5) {
-                                Text(questions[currentIndex].question)
-                                    .font(.custom("Alexandria", size: 18))
-                                    .bold()
-                                    .foregroundColor(.black)
-                                    .multilineTextAlignment(.center)
-
-                                Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
-                                    .font(.custom("Alexandria", size: 14))
-                                    .foregroundColor(.gray)
-                            }
-
-                            ForEach(questions[currentIndex].options, id: \ .text) { option in
-                                Button(action: {
-                                    toggleSelection(for: option.text)
-                                }) {
-                                    Text(option.text)
-                                        .font(.custom("Alexandria", size: 16))
-                                        .foregroundColor(.black)
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.white)
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(selectedOptions.contains(option.text) ? Color.purple : Color.clear, lineWidth: 2)
-                                        )
-                                }
-                            }
-
-                            Button(action: handleNext) {
-                                Image("NextButton")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 160, height: 50)
-                                    .shadow(radius: 4)
-                            }
-
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .frame(width: 319, height: 14)
-                                    .foregroundColor(Color(hex: "#C3B9D1"))
-
-                                Capsule()
-                                    .frame(width: 319 * progress, height: 14)
-                                    .foregroundColor(Color(hex: "#8F81DC"))
-                            }
-                            .cornerRadius(20)
-                            .padding(.top, 5)
+                                .frame(width: 160, height: 50)
+                                .shadow(radius: 4)
                         }
-                        .padding()
+
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .frame(width: 319, height: 14)
+                                .foregroundColor(Color(hex: "#C3B9D1"))
+
+                            Capsule()
+                                .frame(width: 319 * progress, height: 14)
+                                .foregroundColor(Color(hex: "#8F81DC"))
+                        }
+                        .cornerRadius(20)
+                        .padding(.top, 5)
+
+                        // ——— Add a trailing Spacer() to push everything up ———
+                        Spacer()
                     }
+                    // ——— Make the VStack fill its parent and align to the top ———
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    // ——— Tweak the top padding to your liking ———
+                    .padding(.top, 40)
+                    .padding(.horizontal, 16)
                 }
-                .navigationDestination(isPresented: $isFinished) {
-                    HomeView()
-                        .environmentObject(storeData)
-                }
-                .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
-                }
-                .navigationBarBackButtonHidden(true)
             }
+            .navigationDestination(isPresented: $isFinished) {
+                HomeView()
+                    .environmentObject(storeData)
+            }
+            .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
+                Button("OK", role: .cancel) {}
+            }
+            .navigationBarBackButtonHidden(true)
         }
+    }
+
 
     func toggleSelection(for option: String) {
         if questions[currentIndex].allowsMultipleSelection {

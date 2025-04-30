@@ -20,20 +20,26 @@ struct HomeView: View {
   @State private var userProfile: UserProfile?
   @State private var isLoadingProfile = false
 
+    @State private var editIconX: CGFloat = 0.51
+  @State private var editIconY: CGFloat = 0.65
+
+  @State private var topIconPadding: CGFloat = 70
+  @State private var trailingIconPadding: CGFloat = 0
+
   // MARK: – Configurable Constants
 
   /// Height of the top “hero” image
   private let headerImageHeight: CGFloat = 360
 
   /// Overall cow width/height
-  private let cowSize:           CGFloat = 400   // ← bump this to grow/shrink cow
+  private let cowSize:           CGFloat = 750
 
   /// Size of the edit-pencil button
-  private let editButtonSize:    CGFloat = 28
+  private let editButtonSize:    CGFloat = 21
+
 
   /// How much to shift *all* content down under the cow
-  /// ↑ ↑ ↑  Tweak this when you change `cowSize`  ↑ ↑ ↑
-  private let contentExtraOffsetY: CGFloat = 140
+  private let contentExtraOffsetY: CGFloat = 160
 
   /// Deep-purple accent color
   private let accentColor       = Color("d3cpurple")
@@ -48,12 +54,12 @@ struct HomeView: View {
 
   /// Move the cow **left/right** (negative = left, positive = right)
   private var cowOffsetX: CGFloat {
-    150   // ← push positive to slide cow farther right
+    160
   }
 
   /// Move the cow **up/down** (hero bottom is y==0)
   private var cowOffsetY: CGFloat {
-    headerImageHeight - (cowSize / 2)
+      headerImageHeight - (cowSize / 3.0)
   }
 
   /// Pencil offset from the cow’s bottom-right corner
@@ -62,63 +68,80 @@ struct HomeView: View {
     // ↑ tweak “-16” to slide pencil closer/further into cow’s corner
   }
   private var editOffsetY: CGFloat {
-    (cowSize / 2) - (editButtonSize / 2) - 16
+    (cowSize / 2) - (editButtonSize / 2) - 15
   }
 
   var body: some View {
     NavigationStack {
       ZStack {
-        // ─── 1) Full-screen background image ───
+        // Full-screen background image
         Image("homepageview")
           .resizable()
           .scaledToFill()
           .ignoresSafeArea()
 
-        // ─── 2) Scrolling content ───
+        // Scrolling content
         ScrollView(showsIndicators: false) {
           VStack(spacing: 24) {
             // ─ Cow + pencil overlaps the hero area
-            ZStack(alignment: .topTrailing) {
-              Color.clear.frame(height: headerImageHeight)
-
+            ZStack {
+              HStack(spacing: 6) {
+                NavigationLink(destination: SavedPageView()) {
+                  Image("Bookmark Icon")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                }
+                NavigationLink(destination: NotificationView()) {
+                  Image("Notification Icon")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                }
+              }
+              .padding(.top, topIconPadding)
+              .padding(.trailing, trailingIconPadding)
+            .frame(width: 360, alignment: .topTrailing)
+            }
+            .overlay(
               cowView
                 .offset(x: cowOffsetX,
                         y: cowOffsetY)
-            }
+            )
 
-            // ─ Remaining content ─
-            VStack(spacing: 24) {
-              // 3) Greeting
-              Text("Welcome back, \(userProfile?.name ?? "")")
-                .font(.system(size: 28, weight: .semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
+            // Remaining content
+            VStack {
+              VStack(spacing: 24) {
+                // Greeting
+                Text("Welcome back, \(userProfile?.name ?? "")")
+                  .font(.system(size: 26, weight: .semibold))
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .padding(.horizontal, 16)
+
+                // Quote
+                VStack(spacing: 8) {
+                  Text("“Worrying does not take away tomorrow’s troubles. It takes away today’s peace.”")
+                    .italic()
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(Color("cowdarkpurple"))
+                  Text("– Randy Armstrong")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(radius: 4)
                 .padding(.horizontal, 16)
 
-              // 4) Quote
-              VStack(spacing: 8) {
-                Text("“Worrying does not take away tomorrow’s troubles. It takes away today’s peace.”")
-                  .italic()
-                  .multilineTextAlignment(.center)
-                  .foregroundColor(Color("cowdarkpurple"))
-                Text("– Randy Armstrong")
-                  .font(.caption)
-                  .foregroundColor(.secondary)
+                // Dashboard
+                dashboardSection
+
+                // Placeholders
+                placeholderSection
               }
-              .padding()
-              .background(Color.white)
-              .cornerRadius(12)
-              .shadow(radius: 4)
-              .padding(.horizontal, 16)
-
-              // 5) Dashboard
-              dashboardSection
-
-              // 6) Placeholders
-              placeholderSection
+              .padding(.top, contentExtraOffsetY)
             }
           }
           // pull content up *half* the cow, then drop everything by contentExtraOffsetY
-          .padding(.top, -cowSize / 2 + contentExtraOffsetY)
           .padding(.bottom, navBarHeight + 16)
         }
         .ignoresSafeArea(edges: .top)
@@ -131,6 +154,7 @@ struct HomeView: View {
         }
       }
     }
+    .navigationBarBackButtonHidden(true)
   }
 
   // MARK: – Cow + Edit View
@@ -151,17 +175,20 @@ struct HomeView: View {
         .resizable().scaledToFit()
         .frame(width: cowSize, height: cowSize)
 
-      NavigationLink(destination: PetView()) {
-        Image("Edit Icon")
-          .resizable()
-          .frame(width: editButtonSize, height: editButtonSize)
-          .padding(6)
-          .background(Color.white.opacity(0.9))
-          .clipShape(Circle())
-          .shadow(radius: 2)
+      ZStack {
+        GeometryReader { geometry in
+          NavigationLink(destination: PetView()) {
+            Image("Edit Icon")
+              .resizable()
+              .frame(width: editButtonSize, height: editButtonSize)
+              .padding(editButtonSize / 4)
+              .background(Color.white.opacity(0.9))
+              .clipShape(Circle())
+              .shadow(radius: 2)
+          }
+          .position(x: geometry.size.width * editIconX, y: geometry.size.height * editIconY)
+        }
       }
-      .offset(x: editOffsetX,
-              y: editOffsetY)
     }
   }
 
@@ -170,7 +197,6 @@ struct HomeView: View {
   private var dashboardSection: some View {
     VStack(spacing: 12) {
       Text("Dashboard")
-        .font(.system(size: 22, weight: .bold))
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
 
@@ -228,11 +254,11 @@ struct HomeView: View {
   private var placeholderSection: some View {
     VStack(spacing: 20) {
       SectionHeader(title: "Activity",    fontSize: 22)
-      placeholderBox
+        placeholderBox
       SectionHeader(title: "Resources",   fontSize: 22)
-      placeholderBox
+        placeholderBox
       SectionHeader(title: "Your Top Moo’ds", fontSize: 22)
-      placeholderBox
+        placeholderBox
     }
     .padding(.horizontal, 16)
   }
