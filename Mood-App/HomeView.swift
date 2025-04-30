@@ -4,29 +4,21 @@
 //
 
 import SwiftUI
-import FirebaseAuth
-import FirebaseFirestore
-
-struct UserProfile: Codable {
-    let firebase_uid: String
-    let email: String
-    let name: String
-}
 
 struct HomeView: View {
   @EnvironmentObject private var storeData       : StoreData
   @EnvironmentObject private var petCustomization: PetCustomization
 
-  @State private var userProfile: UserProfile?
-  @State private var isLoadingProfile = false
-
-    @State private var editIconX: CGFloat = 0.51
+  @State private var editIconX: CGFloat = 0.51
   @State private var editIconY: CGFloat = 0.65
 
   @State private var topIconPadding: CGFloat = 70
   @State private var trailingIconPadding: CGFloat = 0
 
   // MARK: – Configurable Constants
+
+  /// Kick-off bonus points for every new user
+  private let welcomeBonus     = 50
 
   /// Height of the top “hero” image
   private let headerImageHeight: CGFloat = 360
@@ -36,7 +28,6 @@ struct HomeView: View {
 
   /// Size of the edit-pencil button
   private let editButtonSize:    CGFloat = 21
-
 
   /// How much to shift *all* content down under the cow
   private let contentExtraOffsetY: CGFloat = 160
@@ -59,13 +50,12 @@ struct HomeView: View {
 
   /// Move the cow **up/down** (hero bottom is y==0)
   private var cowOffsetY: CGFloat {
-      headerImageHeight - (cowSize / 3.0)
+    headerImageHeight - (cowSize / 3.0)
   }
 
   /// Pencil offset from the cow’s bottom-right corner
   private var editOffsetX: CGFloat {
     (cowSize / 2) - (editButtonSize / 2) - 40
-    // ↑ tweak “-16” to slide pencil closer/further into cow’s corner
   }
   private var editOffsetY: CGFloat {
     (cowSize / 2) - (editButtonSize / 2) - 15
@@ -99,7 +89,7 @@ struct HomeView: View {
               }
               .padding(.top, topIconPadding)
               .padding(.trailing, trailingIconPadding)
-            .frame(width: 360, alignment: .topTrailing)
+              .frame(width: 360, alignment: .topTrailing)
             }
             .overlay(
               cowView
@@ -111,7 +101,7 @@ struct HomeView: View {
             VStack {
               VStack(spacing: 24) {
                 // Greeting
-                Text("Welcome back, \(userProfile?.name ?? "")")
+                Text("Welcome back, \(storeData.firstName)")
                   .font(.system(size: 26, weight: .semibold))
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .padding(.horizontal, 16)
@@ -141,13 +131,14 @@ struct HomeView: View {
               .padding(.top, contentExtraOffsetY)
             }
           }
-          // pull content up *half* the cow, then drop everything by contentExtraOffsetY
           .padding(.bottom, navBarHeight + 16)
         }
         .ignoresSafeArea(edges: .top)
-        .onAppear(perform: loadProfile)
+        .onAppear {
+          storeData.loadUserDataFromFirestore()
+        }
 
-        // ─── 7) Fixed bottom bar ───
+        // ─── Fixed bottom bar ───
         VStack {
           Spacer()
           bottomTabBar
@@ -186,7 +177,8 @@ struct HomeView: View {
               .clipShape(Circle())
               .shadow(radius: 2)
           }
-          .position(x: geometry.size.width * editIconX, y: geometry.size.height * editIconY)
+          .position(x: geometry.size.width * editIconX,
+                    y: geometry.size.height * editIconY)
         }
       }
     }
@@ -206,12 +198,15 @@ struct HomeView: View {
           Circle()
             .stroke(Color.gray.opacity(0.3), lineWidth: 12)
             .frame(width: 100, height: 100)
-          let total = storeData.scores.values.reduce(0, +)
+
+          let total = storeData.scores.values.reduce(0, +) + welcomeBonus
+
           Circle()
             .trim(from: 0, to: CGFloat(total) / CGFloat(goalPoints))
             .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
             .rotationEffect(.degrees(-90))
             .frame(width: 100, height: 100)
+
           VStack {
             Text("\(total)")
               .font(.title3.bold())
@@ -221,7 +216,9 @@ struct HomeView: View {
         }
 
         // centered text
-        let remaining = max(goalPoints - storeData.scores.values.reduce(0,+), 0)
+        let total = storeData.scores.values.reduce(0, +) + welcomeBonus
+        let remaining = max(goalPoints - total, 0)
+
         (
           Text("You are ")
           + Text("\(remaining)")
@@ -275,10 +272,10 @@ struct HomeView: View {
   private var bottomTabBar: some View {
     HStack {
       Spacer(); navButton("Home Button",     HomeView());     Spacer()
-      navButton("Resource Button", ResourcesView()); Spacer()
-      navButton("Set Goal Button", SetGoalView());   Spacer()
-      navButton("Analytics Button", AnalyticsPageView()); Spacer()
-      navButton("Setting Button",  SettingView());   Spacer()
+      Spacer(); navButton("Resource Button", ResourcesView()); Spacer()
+      Spacer(); navButton("Set Goal Button", SetGoalView());   Spacer()
+      Spacer(); navButton("Analytics Button", AnalyticsPageView()); Spacer()
+      Spacer(); navButton("Setting Button",  SettingView());   Spacer()
     }
     .frame(height: navBarHeight)
     .background(Color.white.opacity(0.9))
@@ -291,31 +288,6 @@ struct HomeView: View {
         .aspectRatio(contentMode: .fit)
         .frame(width: 36, height: 36)
     }
-  }
-
-  // MARK: – Firestore Load
-
-  private func loadProfile() {
-    guard !isLoadingProfile,
-          userProfile == nil,
-          let uid = Auth.auth().currentUser?.uid
-    else { return }
-    isLoadingProfile = true
-
-    Firestore.firestore()
-      .collection("users")
-      .document(uid)
-      .getDocument { snap, err in
-        defer { isLoadingProfile = false }
-        guard err == nil,
-              let data = snap?.data(),
-              let name = data["name"] as? String,
-              let email = data["email"] as? String
-        else { return }
-        userProfile = UserProfile(firebase_uid: uid,
-                                  email: email,
-                                  name: name)
-      }
   }
 }
 

@@ -172,7 +172,7 @@ struct AnalyticsPageView: View {
                                         .offset(lockOffsets[i])
                                 }
                             }
-                            Text(storeData.badgeTitles[safe: i] ?? "")
+//                            Text(storeData.badgeTitles[safe: i] ?? "")
                                 .font(.footnote)
                         }
                     }
@@ -199,8 +199,8 @@ struct AnalyticsPageView: View {
 
                 VStack(spacing: 8) {
                     Spacer()
-                    DonutChart(data: storeData.weeklyMoodData)
-                        .frame(width: 150, height: 150)
+//                    DonutChart(data: storeData.weeklyMoodData)
+//                        .frame(width: 150, height: 150)
 
                     Text(storeData.weekRangeText.uppercased())
                         .font(.caption)
@@ -247,71 +247,71 @@ struct AnalyticsPageView: View {
 
 // MARK: – DonutChart Support
 
-struct DonutSegment: Shape {
-    var startAngle: Angle, endAngle: Angle
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let r = min(rect.width, rect.height) / 2
-        let c = CGPoint(x: rect.midX, y: rect.midY)
-        p.addArc(center: c,
-                 radius: r,
-                 startAngle: startAngle - .degrees(90),
-                 endAngle:   endAngle   - .degrees(90),
-                 clockwise: false)
-        return p.strokedPath(.init(lineWidth: r * 0.4, lineCap: .butt))
-    }
-}
+//struct DonutSegment: Shape {
+//    var startAngle: Angle, endAngle: Angle
+//    func path(in rect: CGRect) -> Path {
+//        var p = Path()
+//        let r = min(rect.width, rect.height) / 2
+//        let c = CGPoint(x: rect.midX, y: rect.midY)
+//        p.addArc(center: c,
+//                 radius: r,
+//                 startAngle: startAngle - .degrees(90),
+//                 endAngle:   endAngle   - .degrees(90),
+//                 clockwise: false)
+//        return p.strokedPath(.init(lineWidth: r * 0.4, lineCap: .butt))
+//    }
+//}
 
-struct DonutChart: View {
-    let data: [String: Double]
-    private var total: Double { data.values.reduce(0, +) }
-    private var segments: [(Color, Angle, Angle, String)] {
-        var res: [(Color,Angle,Angle,String)] = []
-        var start = Angle.degrees(0)
-        for (cat, val) in data {
-            let end = start + .degrees((val / total) * 360)
-            let col: Color = {
-                switch cat {
-                case "Happiness": return Color(hex: "#FFCE9A")
-                case "Sadness":    return Color(hex: "#4A90E2")
-                case "Anxiety":    return Color(hex: "#B8E7A6")
-                default:           return .gray
-                }
-            }()
-            res.append((col, start, end, cat))
-            start = end
-        }
-        return res
-    }
+//struct DonutChart: View {
+//    let data: [String: Double]
+//    private var total: Double { data.values.reduce(0, +) }
+//    private var segments: [(Color, Angle, Angle, String)] {
+//        var res: [(Color,Angle,Angle,String)] = []
+//        var start = Angle.degrees(0)
+//        for (cat, val) in data {
+//            let end = start + .degrees((val / total) * 360)
+////            let col: Color = {
+////                switch cat {
+////                case "Happiness": return Color(hex: "#FFCE9A")
+////                case "Sadness":    return Color(hex: "#4A90E2")
+////                case "Anxiety":    return Color(hex: "#B8E7A6")
+////                default:           return .gray
+////                }
+////            }()
+////            res.append((col, start, end, cat))
+//            start = end
+//        }
+//        return res
+//    }
 
-    var body: some View {
-        ZStack {
-            ForEach(0..<segments.count, id: \.self) { i in
-                DonutSegment(startAngle: segments[i].1,
-                             endAngle:   segments[i].2)
-                    .fill(segments[i].0)
-            }
-            ForEach(segments, id: \.3) { seg in
-                let mid = (seg.1 + seg.2) / 2
-                let rad = 75 * 0.75
-                let x = cos(mid.radians) * rad + 75
-                let y = sin(mid.radians) * rad + 75
-                Text(seg.3)
-                    .font(.caption2)
-                    .position(x: x, y: y)
-            }
-        }
-    }
-}
+//    var body: some View {
+//        ZStack {
+//            ForEach(0..<segments.count, id: \.self) { i in
+//                DonutSegment(startAngle: segments[i].1,
+//                             endAngle:   segments[i].2)
+//                    .fill(segments[i].0)
+//            }
+//            ForEach(segments, id: \.3) { seg in
+//                let mid = (seg.1 + seg.2) / 2
+//                let rad = 75 * 0.75
+//                let x = cos(mid.radians) * rad + 75
+//                let y = sin(mid.radians) * rad + 75
+//                Text(seg.3)
+//                    .font(.caption2)
+//                    .position(x: x, y: y)
+//            }
+//        }
+//    }
+//}
 
 
 // MARK: – Safe Array Indexing
 
-extension Collection {
-    subscript(safe i: Index) -> Element? {
-        indices.contains(i) ? self[i] : nil
-    }
-}
+//extension Collection {
+//    subscript(safe i: Index) -> Element? {
+//        indices.contains(i) ? self[i] : nil
+//    }
+//}
 
 
 // MARK: – Preview
