@@ -24,8 +24,6 @@ class SavedItems: ObservableObject {
         self.addedResources = Self.loadFromUserDefaults(key: "addedResources") ?? []
     }
 
-    // MARK: - Save / Load
-
     private func saveToUserDefaults<T: Codable>(_ value: T, key: String) {
         if let encoded = try? JSONEncoder().encode(value) {
             UserDefaults.standard.set(encoded, forKey: key)
@@ -39,8 +37,6 @@ class SavedItems: ObservableObject {
         }
         return decoded
     }
-
-    // MARK: - Toggle Favorites
 
     func toggleActivity(_ activity: Activity) {
         if let index = savedActivities.firstIndex(of: activity) {
@@ -66,7 +62,6 @@ class SavedItems: ObservableObject {
         savedResources.contains(resource)
     }
 
-    // MARK: - Add to Planner
 
     func addActivityToPlanner(_ activity: Activity) {
         if !addedActivities.contains(activity) {
