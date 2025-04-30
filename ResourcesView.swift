@@ -21,7 +21,6 @@ struct ResourcesView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
                 
-                // Header
                 HStack {
                     Text("Discover ways to cope.")
                         .font(.title2)
@@ -36,7 +35,6 @@ struct ResourcesView: View {
                 }
                 .padding(.horizontal)
 
-                // Search Bar
                 TextField("Search...", text: $searchText)
                     .padding(10)
                     .background(Color(.systemGray6))
@@ -46,7 +44,6 @@ struct ResourcesView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 25) {
 
-                        // Activities Section
                         Text("Activities For You")
                             .font(.headline)
                             .padding(.horizontal)
@@ -60,7 +57,7 @@ struct ResourcesView: View {
                             .padding(.horizontal)
                         }
 
-                        // Resources Section
+                     
                         Text("Resources for You")
                             .font(.headline)
                             .padding(.horizontal)
@@ -77,7 +74,7 @@ struct ResourcesView: View {
                     .padding(.top, 10)
                 }
 
-                homebar() // Optional: your custom bottom tab
+                homebar() 
             }
             .background(Color("lightd3cpurple").ignoresSafeArea())
             .navigationDestination(isPresented: $navigateToSaved) {
@@ -88,7 +85,6 @@ struct ResourcesView: View {
     }
 }
 
-// MARK: - ActivityCard
 
 struct ActivityCard: View {
     let activity: Activity
@@ -142,8 +138,8 @@ struct ActivityCard: View {
                     Image(systemName: savedItems.isActivitySaved(activity) ? "heart.fill" : "heart")
                         .foregroundColor(.blue)
                 }
-                .disabled(savedItems.isActivitySaved(activity)) // disables after liking
-                .opacity(savedItems.isActivitySaved(activity) ? 0.6 : 1.0) // optional: visual feedback
+                .disabled(savedItems.isActivitySaved(activity)) 
+                .opacity(savedItems.isActivitySaved(activity) ? 0.6 : 1.0) 
 
             }
         }
@@ -155,7 +151,6 @@ struct ActivityCard: View {
     }
 }
 
-// MARK: - ResourceCard
 
 struct ResourceCard: View {
     let resource: Resource
@@ -209,8 +204,8 @@ struct ResourceCard: View {
                     Image(systemName: savedItems.isResourceSaved(resource) ? "bookmark.fill" : "bookmark")
                         .foregroundColor(.blue)
                 }
-                .disabled(savedItems.isResourceSaved(resource)) // disables after saving
-                .opacity(savedItems.isResourceSaved(resource) ? 0.6 : 1.0) // optional: visual feedback
+                .disabled(savedItems.isResourceSaved(resource)) 
+                .opacity(savedItems.isResourceSaved(resource) ? 0.6 : 1.0) 
             }
         }
         .padding()
