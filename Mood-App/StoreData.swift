@@ -114,8 +114,59 @@ class StoreData: ObservableObject {
         }
     }
 
-    
+    // ── Analytics Page Properties ──────────────────────────────────────
 
+    @Published var currentStreak: Int = 0
+    @Published var badgeTitles: [String] = [
+      "Bike Barn Boss", "Tercero Trekker", "Happy Heifer", "Fourth Badge"
+    ]
+    @Published var weeklyMoodData: [String: Double] = [
+      "Happiness": 0, "Sadness": 0, "Anxiety": 0
+    ]
+
+    /// NEW: track lock/unlock state for each badge
+    @Published var unlockedBadges: [Bool] = [false, false, false, false]
+
+    /// Call this when a badge is earned
+    func unlockBadge(at index: Int) {
+      guard badgeTitles.indices.contains(index) else { return }
+      unlockedBadges[index] = true
+    }
+
+    /// Displays “Week of Month Day”
+    var weekRangeText: String {
+      let start = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
+      let df = DateFormatter()
+      df.dateFormat = "MMMM d"
+      return "Week of \(df.string(from: start))"
+    }
+
+    /// Fetches `currentStreak` and `weeklyMoodData` from Firestore
+    func fetchAnalyticsData() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users' info").document(uid)
+
+        userRef.getDocument { snapshot, error in
+            if let error = error {
+                print("❌ Error fetching analytics data: \(error.localizedDescription)")
+                return
+            }
+            guard let data = snapshot?.data() else { return }
+
+            // Firestore fields must match these keys
+            self.currentStreak = data["currentStreak"] as? Int ?? 0
+            if let moodMap = data["weeklyMoodData"] as? [String: Double] {
+                self.weeklyMoodData = moodMap
+            }
+        }
+    }
+
+    /// A demo instance pre‐loaded with example data for SwiftUI previews
+    static let demo: StoreData = {
+        let sd = StoreData()
+        sd.currentStreak = 5
+        sd.weeklyMoodData = ["Happiness": 4, "Sadness": 1, "Anxiety": 2]
+        return sd
+    }()
 }
-
-

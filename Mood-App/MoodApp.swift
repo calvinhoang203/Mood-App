@@ -12,8 +12,8 @@ import Firebase
 struct MoodApp: App {
     @State private var showSplash = true
     @StateObject var storeData = StoreData()
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var petCustomization = PetCustomization()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
@@ -28,6 +28,8 @@ struct MoodApp: App {
                 NavigationStack {
                     LoginView()
                 }
+                // inject *both* here
+                .environmentObject(storeData)
                 .environmentObject(petCustomization)
             }
         }

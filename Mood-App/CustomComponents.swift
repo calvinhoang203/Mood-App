@@ -11,7 +11,10 @@ struct customTextField: View {
     @Binding var text: String
 
     var body: some View {
-        TextField(title, text: $text)
+        TextField("", text: $text)
+          .placeholder(when: text.isEmpty) {
+            Text(title).foregroundColor(.gray)
+          }
             .padding()
             .frame(height: 50)
             .background(Color.white)
@@ -27,42 +30,42 @@ struct customTextField: View {
 }
 
 struct customSecureField: View {
-    var title: String
-    @Binding var text: String
-    @State private var isPasswordVisible: Bool = false
+  var title: String
+  @Binding var text: String
+  @State private var isPasswordVisible = false
 
-    var body: some View {
-        ZStack(alignment: .trailing) {
-            Group {
-                if isPasswordVisible {
-                    TextField(title, text: $text)
-                        .textContentType(.password)
-                } else {
-                    SecureField(title, text: $text)
-                        .textContentType(.password)
-                }
-            }
-            .padding()
-            .frame(height: 50)
-            .background(Color.white)
-            .cornerRadius(10)
-            .foregroundColor(.black)
-            .accentColor(.black) // Caret color
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color(white: 0.4), lineWidth: 1) // Darker border
-            )
-
-            Button(action: {
-                isPasswordVisible.toggle()
-            }) {
-                Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                    .foregroundColor(Color(white: 0.4)) // Darker gray eye icon
-                    .padding(.trailing, 12)
-            }
+  var body: some View {
+    ZStack(alignment: .trailing) {
+      Group {
+        if isPasswordVisible {
+          TextField("", text: $text)
+            .textContentType(.password)
+        } else {
+          SecureField("", text: $text)
+            .textContentType(.password)
         }
+      }
+      .placeholder(when: text.isEmpty) {
+        Text(title)
+          .foregroundColor(.gray)        // or .black.opacity(0.6)
+      }
+      .padding()
+      .frame(height: 50)
+      .background(Color.white)
+      .cornerRadius(10)
+      .accentColor(.black)
+
+      Button {
+        isPasswordVisible.toggle()
+      } label: {
+        Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+          .foregroundColor(.gray)       // darker eye icon
+          .padding(.trailing, 12)
+      }
     }
+  }
 }
+
 
 struct customButton: View {
     var title: String
