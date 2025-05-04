@@ -9,83 +9,64 @@ struct HomeView: View {
   @EnvironmentObject private var storeData       : StoreData
   @EnvironmentObject private var petCustomization: PetCustomization
 
-  @State private var editIconX: CGFloat = 0.51
-  @State private var editIconY: CGFloat = 0.65
+  // MARK: – Navigation State
+  @State private var showSetGoal       = false
+  @State private var showResource      = false
+  @State private var showAnalyticsNav  = false
+  @State private var showSettingNav    = false
+  @State private var showHomeNav       = false
+  @State private var showPet           = false
 
-  @State private var topIconPadding: CGFloat = 70
+  // MARK: – Layout State
+  @State private var editIconX: CGFloat         = 0.51
+  @State private var editIconY: CGFloat         = 0.65
+  @State private var topIconPadding: CGFloat    = 70
   @State private var trailingIconPadding: CGFloat = 0
 
   // MARK: – Configurable Constants
-
-  /// Kick-off bonus points for every new user
   private let welcomeBonus     = 50
-
-  /// Height of the top “hero” image
   private let headerImageHeight: CGFloat = 360
-
-  /// Overall cow width/height
   private let cowSize:           CGFloat = 750
-
-  /// Size of the edit-pencil button
   private let editButtonSize:    CGFloat = 21
-
-  /// How much to shift *all* content down under the cow
   private let contentExtraOffsetY: CGFloat = 160
-
-  /// Deep-purple accent color
   private let accentColor       = Color("d3cpurple")
-
-  /// Your target point total
   private let goalPoints        = 300
-
-  /// Bottom tab-bar height
-  private let navBarHeight:      CGFloat = 64
+  private let navBarHeight: CGFloat      = 64
 
   // MARK: – Cow Position Helpers
-
-  /// Move the cow **left/right** (negative = left, positive = right)
-  private var cowOffsetX: CGFloat {
-    160
-  }
-
-  /// Move the cow **up/down** (hero bottom is y==0)
-  private var cowOffsetY: CGFloat {
-    headerImageHeight - (cowSize / 3.0)
-  }
-
-  /// Pencil offset from the cow’s bottom-right corner
-  private var editOffsetX: CGFloat {
-    (cowSize / 2) - (editButtonSize / 2) - 40
-  }
-  private var editOffsetY: CGFloat {
-    (cowSize / 2) - (editButtonSize / 2) - 15
-  }
+  private var cowOffsetX: CGFloat { 160 }
+  private var cowOffsetY: CGFloat { headerImageHeight - (cowSize / 3.0) }
+  private var editOffsetX: CGFloat { (cowSize / 2) - (editButtonSize / 2) - 40 }
+  private var editOffsetY: CGFloat { (cowSize / 2) - (editButtonSize / 2) - 15 }
 
   var body: some View {
     NavigationStack {
       ZStack {
-        // Full-screen background image
+        // Full-screen background
         Image("homepageview")
           .resizable()
           .scaledToFill()
           .ignoresSafeArea()
 
-        // Scrolling content
+        // Scrollable content
         ScrollView(showsIndicators: false) {
           VStack(spacing: 24) {
-            // ─ Cow + pencil overlaps the hero area
+            // ─ Cow + top icons
             ZStack {
               HStack(spacing: 6) {
-                NavigationLink(destination: SavedPageView()) {
-                  Image("Bookmark Icon")
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                }
-                NavigationLink(destination: NotificationView()) {
-                  Image("Notification Icon")
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                }
+                // Bookmark icon
+                  NavigationLink(destination: SavedPageView()) {
+                     Image("Bookmark Icon")
+                       .resizable()
+                       .frame(width: 40, height: 40)
+                   }
+
+                // Notification icon
+                  NavigationLink(destination: NotificationView()) {
+                     Image("Notification Icon")
+                       .resizable()
+                       .frame(width: 40, height: 40)
+                   }
               }
               .padding(.top, topIconPadding)
               .padding(.trailing, trailingIconPadding)
@@ -93,82 +74,81 @@ struct HomeView: View {
             }
             .overlay(
               cowView
-                .offset(x: cowOffsetX,
-                        y: cowOffsetY)
+                .offset(x: cowOffsetX, y: cowOffsetY)
             )
 
-            // Remaining content
-            VStack {
-              VStack(spacing: 24) {
-                // Greeting
-                Text("Welcome back, \(storeData.firstName)")
-                  .font(.system(size: 26, weight: .semibold))
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                  .padding(.horizontal, 16)
-
-                // Quote
-                VStack(spacing: 8) {
-                  Text("“Worrying does not take away tomorrow’s troubles. It takes away today’s peace.”")
-                    .italic()
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(Color("cowdarkpurple"))
-                  Text("– Randy Armstrong")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(12)
-                .shadow(radius: 4)
+            // ─ Remaining content
+            VStack(spacing: 24) {
+              Text("Welcome back, \(storeData.firstName)")
+                .font(.system(size: 26, weight: .semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
 
-                // Dashboard
-                dashboardSection
-
-                // Placeholders
-                placeholderSection
-              }
-              .padding(.top, contentExtraOffsetY)
+              quoteView
+              dashboardSection
+              placeholderSection
             }
+            .padding(.top, contentExtraOffsetY)
           }
           .padding(.bottom, navBarHeight + 16)
         }
         .ignoresSafeArea(edges: .top)
-        .onAppear {
-          storeData.loadUserDataFromFirestore()
-        }
+        .onAppear { storeData.loadUserDataFromFirestore() }
 
-        // ─── Fixed bottom bar ───
+        // ─── Fixed bottom tab bar ───
         VStack {
           Spacer()
           bottomTabBar
         }
       }
     }
+    // MARK: – All programmatic destinations registered on the stack:
+    .navigationDestination(isPresented: $showSetGoal) {
+      SetGoalView()
+    }
+    .navigationDestination(isPresented: $showResource) {
+      ResourcesView()
+    }
+    .navigationDestination(isPresented: $showAnalyticsNav) {
+      AnalyticsPageView()
+    }
+    .navigationDestination(isPresented: $showSettingNav) {
+      SettingView()
+    }
+    .navigationDestination(isPresented: $showHomeNav) {
+      HomeView()
+    }
+    .navigationDestination(isPresented: $showPet) {
+      PetView()
+    }
     .navigationBarBackButtonHidden(true)
   }
 
   // MARK: – Cow + Edit View
-
   private var cowView: some View {
-    ZStack {
-      Image("OUTLINE")
-        .resizable().scaledToFit()
-        .frame(width: cowSize, height: cowSize)
-
-      petCustomization.colorcow
-        .resizable().scaledToFit()
-        .frame(width: cowSize, height: cowSize)
-      petCustomization.topImage
-        .resizable().scaledToFit()
-        .frame(width: cowSize, height: cowSize)
-      petCustomization.extraImage
-        .resizable().scaledToFit()
-        .frame(width: cowSize, height: cowSize)
-
       ZStack {
+        // 1) Cow backgrounds — ignore all taps here
+        Group {
+          Image("OUTLINE")
+            .resizable().scaledToFit()
+            .frame(width: cowSize, height: cowSize)
+          petCustomization.colorcow
+            .resizable().scaledToFit()
+            .frame(width: cowSize, height: cowSize)
+          petCustomization.topImage
+            .resizable().scaledToFit()
+            .frame(width: cowSize, height: cowSize)
+          petCustomization.extraImage
+            .resizable().scaledToFit()
+            .frame(width: cowSize, height: cowSize)
+        }
+        .allowsHitTesting(false)
+  
+        // 2) Only this edit‐button will catch taps now
         GeometryReader { geometry in
-          NavigationLink(destination: PetView()) {
+          Button {
+            withAnimation(.none) { showPet = true }
+          } label: {
             Image("Edit Icon")
               .resizable()
               .frame(width: editButtonSize, height: editButtonSize)
@@ -177,58 +157,43 @@ struct HomeView: View {
               .clipShape(Circle())
               .shadow(radius: 2)
           }
-          .position(x: geometry.size.width * editIconX,
-                    y: geometry.size.height * editIconY)
+          .position(
+            x: geometry.size.width * editIconX,
+            y: geometry.size.height * editIconY
+          )
         }
       }
+  }
+
+  // MARK: – Quote View
+  private var quoteView: some View {
+    VStack(spacing: 8) {
+      Text("“Worrying does not take away tomorrow’s troubles. It takes away today’s peace.”")
+        .italic()
+        .multilineTextAlignment(.center)
+        .foregroundColor(Color("cowdarkpurple"))
+      Text("– Randy Armstrong")
+        .font(.caption)
+        .foregroundColor(.secondary)
     }
+    .padding()
+    .background(Color.white)
+    .cornerRadius(12)
+    .shadow(radius: 4)
+    .padding(.horizontal, 16)
   }
 
   // MARK: – Dashboard Section
-
   private var dashboardSection: some View {
     VStack(spacing: 12) {
       Text("Dashboard")
+        .font(.system(size: 24, weight: .semibold))
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
 
       HStack {
-        // ring
-        ZStack {
-          Circle()
-            .stroke(Color.gray.opacity(0.3), lineWidth: 12)
-            .frame(width: 100, height: 100)
-
-          let total = storeData.scores.values.reduce(0, +) + welcomeBonus
-
-          Circle()
-            .trim(from: 0, to: CGFloat(total) / CGFloat(goalPoints))
-            .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-            .rotationEffect(.degrees(-90))
-            .frame(width: 100, height: 100)
-
-          VStack {
-            Text("\(total)")
-              .font(.title3.bold())
-            Text("pts")
-              .font(.caption)
-          }
-        }
-
-        // centered text
-        let total = storeData.scores.values.reduce(0, +) + welcomeBonus
-        let remaining = max(goalPoints - total, 0)
-
-        (
-          Text("You are ")
-          + Text("\(remaining)")
-              .foregroundColor(accentColor)
-              .fontWeight(.bold)
-          + Text(" points away from your goal.")
-        )
-        .font(.subheadline)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .multilineTextAlignment(.center)
+        ringGauge
+        remainingPointsText
       }
       .padding()
       .background(Color.white)
@@ -236,7 +201,9 @@ struct HomeView: View {
       .shadow(radius: 4)
       .padding(.horizontal, 16)
 
-      NavigationLink(destination: SetGoalView()) {
+      Button {
+        withAnimation(.none) { showSetGoal = true }
+      } label: {
         Image("Set New Goal Button")
           .resizable()
           .scaledToFit()
@@ -247,12 +214,11 @@ struct HomeView: View {
   }
 
   // MARK: – Placeholders
-
   private var placeholderSection: some View {
     VStack(spacing: 20) {
-      SectionHeader(title: "Activity",    fontSize: 22)
+      SectionHeader(title: "Activity", fontSize: 22)
         placeholderBox
-      SectionHeader(title: "Resources",   fontSize: 22)
+      SectionHeader(title: "Resources", fontSize: 22)
         placeholderBox
       SectionHeader(title: "Your Top Moo’ds", fontSize: 22)
         placeholderBox
@@ -268,36 +234,90 @@ struct HomeView: View {
   }
 
   // MARK: – Bottom Tab Bar
-
   private var bottomTabBar: some View {
     HStack {
-      Spacer(); navButton("Home Button",     HomeView());     Spacer()
-      Spacer(); navButton("Resource Button", ResourcesView()); Spacer()
-      Spacer(); navButton("Set Goal Button", SetGoalView());   Spacer()
-      Spacer(); navButton("Analytics Button", AnalyticsPageView()); Spacer()
-      Spacer(); navButton("Setting Button",  SettingView());   Spacer()
+      Spacer()
+      Button { withAnimation(.none) { showHomeNav = true } } label: {
+        Image("Home Button")
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 36, height: 36)
+      }
+      Spacer()
+      Button { withAnimation(.none) { showResource = true } } label: {
+        Image("Resource Button")
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 36, height: 36)
+      }
+      Spacer()
+      Button { withAnimation(.none) { showSetGoal = true } } label: {
+        Image("Set Goal Button")
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 36, height: 36)
+      }
+      Spacer()
+      Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+        Image("Analytics Button")
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 36, height: 36)
+      }
+      Spacer()
+      Button { withAnimation(.none) { showSettingNav = true } } label: {
+        Image("Setting Button")
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 36, height: 36)
+      }
+      Spacer()
     }
     .frame(height: navBarHeight)
     .background(Color.white.opacity(0.9))
   }
 
-  private func navButton<Dest: View>(_ image: String, _ dest: Dest) -> some View {
-    NavigationLink(destination: dest) {
-      Image(image)
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 36, height: 36)
+  // MARK: – Supplementary Views
+  private var ringGauge: some View {
+    ZStack {
+      Circle()
+        .stroke(Color.gray.opacity(0.3), lineWidth: 12)
+        .frame(width: 100, height: 100)
+      let total = storeData.scores.values.reduce(0, +) + welcomeBonus
+      Circle()
+        .trim(from: 0, to: CGFloat(total) / CGFloat(goalPoints))
+        .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
+        .rotationEffect(.degrees(-90))
+        .frame(width: 100, height: 100)
+      VStack {
+        Text("\(total)")
+          .font(.title3.bold())
+        Text("pts")
+          .font(.caption)
+      }
     }
+  }
+
+  private var remainingPointsText: some View {
+    let total     = storeData.scores.values.reduce(0, +) + welcomeBonus
+    let remaining = max(goalPoints - total, 0)
+    return (
+      Text("You are ")
+      + Text("\(remaining)")
+          .foregroundColor(accentColor)
+          .fontWeight(.bold)
+      + Text(" points away from your goal.")
+    )
+    .font(.subheadline)
+    .frame(maxWidth: .infinity, alignment: .center)
+    .multilineTextAlignment(.center)
   }
 }
 
+// MARK: – Section Header
 private struct SectionHeader: View {
   let title: String
   let fontSize: CGFloat
-  init(title: String, fontSize: CGFloat = 20) {
-    self.title = title
-    self.fontSize = fontSize
-  }
   var body: some View {
     HStack {
       Text(title)
