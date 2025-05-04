@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct Activity: Identifiable, Codable, Hashable {
     var id: String { name } // makes id deterministic
