@@ -14,6 +14,14 @@ class StoreData: ObservableObject {
         "STRESS DUE TO ACADEMIC PRESSURE": 0,
         "LOW ENERGY / MOTIVATION": 0
     ]
+    
+    // ─── Points system ───
+    @Published var welcomeBonus: Int = 50
+    @Published var goalPoints:   Int = 300
+
+    var totalPoints: Int {
+        scores.values.reduce(0, +) + welcomeBonus
+    }
 
     // User profile info
     @Published var firstName: String = ""
