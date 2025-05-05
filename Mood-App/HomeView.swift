@@ -1,37 +1,30 @@
-//
-//  HomeView.swift
-//  MoodApp
-//
-
 import SwiftUI
 
 struct HomeView: View {
-  @EnvironmentObject private var storeData       : StoreData
+  @EnvironmentObject private var storeData: StoreData
   @EnvironmentObject private var petCustomization: PetCustomization
 
   // MARK: – Navigation State
-  @State private var showSetGoal       = false
-  @State private var showResource      = false
-  @State private var showAnalyticsNav  = false
-  @State private var showSettingNav    = false
-  @State private var showHomeNav       = false
-  @State private var showPet           = false
+  @State private var showSetGoal = false
+  @State private var showResource = false
+  @State private var showAnalyticsNav = false
+  @State private var showSettingNav = false
+  @State private var showHomeNav = false
+  @State private var showPet = false
 
   // MARK: – Layout State
-  @State private var editIconX: CGFloat         = 0.51
-  @State private var editIconY: CGFloat         = 0.65
-  @State private var topIconPadding: CGFloat    = 70
+  @State private var editIconX: CGFloat = 0.51
+  @State private var editIconY: CGFloat = 0.65
+  @State private var topIconPadding: CGFloat = 70
   @State private var trailingIconPadding: CGFloat = 0
 
   // MARK: – Configurable Constants
-  private let welcomeBonus     = 50
   private let headerImageHeight: CGFloat = 360
-  private let cowSize:           CGFloat = 750
-  private let editButtonSize:    CGFloat = 21
+  private let cowSize: CGFloat = 750
+  private let editButtonSize: CGFloat = 21
   private let contentExtraOffsetY: CGFloat = 160
-  private let accentColor       = Color("d3cpurple")
-  private let goalPoints        = 300
-  private let navBarHeight: CGFloat      = 64
+  private let accentColor = Color("d3cpurple")
+  private let navBarHeight: CGFloat = 64
 
   // MARK: – Cow Position Helpers
   private var cowOffsetX: CGFloat { 160 }
@@ -93,7 +86,10 @@ struct HomeView: View {
           .padding(.bottom, navBarHeight + 16)
         }
         .ignoresSafeArea(edges: .top)
-        .onAppear { storeData.loadUserDataFromFirestore() }
+        .onAppear {
+            storeData.loadUserDataFromFirestore()
+            petCustomization.loadCustomizations()
+        }
 
         // ─── Fixed bottom tab bar ───
         VStack {
@@ -127,24 +123,31 @@ struct HomeView: View {
   // MARK: – Cow + Edit View
   private var cowView: some View {
       ZStack {
-        // 1) Cow backgrounds — ignore all taps here
+        // 1) Cow layers - start with outline, then color, then accessories
         Group {
-          Image("OUTLINE")
-            .resizable().scaledToFit()
-            .frame(width: cowSize, height: cowSize)
+          // Layer 1: Base outline - always displayed
           petCustomization.colorcow
             .resizable().scaledToFit()
             .frame(width: cowSize, height: cowSize)
+          
+          // Layer 2: Color overlay
+          petCustomization.outlineImage
+            .resizable().scaledToFit()
+            .frame(width: cowSize, height: cowSize)
+          
+          // Layer 3: Top accessory
           petCustomization.topImage
             .resizable().scaledToFit()
             .frame(width: cowSize, height: cowSize)
+          
+          // Layer 4: Extra accessory
           petCustomization.extraImage
             .resizable().scaledToFit()
             .frame(width: cowSize, height: cowSize)
         }
         .allowsHitTesting(false)
   
-        // 2) Only this edit‐button will catch taps now
+        // 2) Edit button - this is the interactive element
         GeometryReader { geometry in
           Button {
             withAnimation(.none) { showPet = true }
@@ -168,7 +171,7 @@ struct HomeView: View {
   // MARK: – Quote View
   private var quoteView: some View {
     VStack(spacing: 8) {
-      Text("“Worrying does not take away tomorrow’s troubles. It takes away today’s peace.”")
+      Text("Worrying does not take away tomorrow's troubles. It takes away today's peace.")
         .italic()
         .multilineTextAlignment(.center)
         .foregroundColor(Color("cowdarkpurple"))
@@ -220,7 +223,7 @@ struct HomeView: View {
         placeholderBox
       SectionHeader(title: "Resources", fontSize: 22)
         placeholderBox
-      SectionHeader(title: "Your Top Moo’ds", fontSize: 22)
+      SectionHeader(title: "Your Top Moo'ds", fontSize: 22)
         placeholderBox
     }
     .padding(.horizontal, 16)
@@ -283,9 +286,9 @@ struct HomeView: View {
       Circle()
         .stroke(Color.gray.opacity(0.3), lineWidth: 12)
         .frame(width: 100, height: 100)
-      let total = storeData.scores.values.reduce(0, +) + welcomeBonus
+        let total = storeData.totalPoints
       Circle()
-        .trim(from: 0, to: CGFloat(total) / CGFloat(goalPoints))
+        .trim(from: 0, to: CGFloat(total) / CGFloat(storeData.goalPoints))
         .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
         .rotationEffect(.degrees(-90))
         .frame(width: 100, height: 100)
@@ -299,8 +302,8 @@ struct HomeView: View {
   }
 
   private var remainingPointsText: some View {
-    let total     = storeData.scores.values.reduce(0, +) + welcomeBonus
-    let remaining = max(goalPoints - total, 0)
+    let total = storeData.totalPoints
+    let remaining = max(storeData.goalPoints - total, 0)
     return (
       Text("You are ")
       + Text("\(remaining)")
