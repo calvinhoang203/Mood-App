@@ -11,19 +11,26 @@ import FirebaseFirestore
 
 struct AnalyticsPageView: View {
     @EnvironmentObject var storeData: StoreData
-
+    @State private var showHomeNav      = false
+    @State private var showResource     = false
+    @State private var showSetGoal      = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
+    
     /// Midnight Purple (#463F6D) for the streak text
     private let streakTextColor = Color("cowdarkpurple")
     /// Days required for a full streak bar
     private let maxStreakDays = 7
     /// Bottom tab-bar height
-    private let navBarHeight: CGFloat = 64
+    private let navBarHeight: CGFloat = 50
 
     /// 0…1 fraction of streak progress
     private var streakFraction: CGFloat {
         guard maxStreakDays > 0 else { return 0 }
         return min(CGFloat(storeData.currentStreak) / CGFloat(maxStreakDays), 1)
     }
+    
+    
 
     /// Per‐badge lock offsets in case you need to tweak
     private let lockOffsets: [CGSize] = [.zero, .zero, .zero, .zero]
@@ -46,7 +53,6 @@ struct AnalyticsPageView: View {
                         Spacer(minLength: 32)
                     }
                     .padding(.vertical, 16)
-                    // leave space at bottom for the tab bar
                     .padding(.bottom, navBarHeight)
                 }
 
@@ -57,8 +63,14 @@ struct AnalyticsPageView: View {
                 }
             }
             .onAppear { storeData.fetchAnalyticsData() }
-            .navigationBarBackButtonHidden(true)
+            
         }
+        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+        .navigationDestination(isPresented: $showResource)     { ResourcesView() }
+        .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
+        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+        .navigationBarBackButtonHidden(true)
     }
 
     // MARK: – Top Nav
@@ -219,19 +231,44 @@ struct AnalyticsPageView: View {
     private var bottomTabBar: some View {
         HStack {
             Spacer()
-            navButton("Home Button", HomeView())
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
             Spacer()
-            navButton("Resource Button", ResourcesView())
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
             Spacer()
-            navButton("Set Goal Button", SetGoalView())
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
             Spacer()
-            navButton("Analytics Button", AnalyticsPageView())
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
             Spacer()
-            navButton("Setting Button", SettingView())
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
+        .background(Color.white)
     }
 
     private func navButton<Dest: View>(_ image: String, _ dest: Dest) -> some View {

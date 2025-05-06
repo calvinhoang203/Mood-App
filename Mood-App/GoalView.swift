@@ -11,6 +11,13 @@ struct GoalView: View {
     @State private var showAlert = false
     @State private var isCompleted = false
 
+    @State private var showHomeNav      = false
+    @State private var showResourceNav  = false
+    @State private var showSetGoalNav   = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
+    
+    
     let steps: [GoalStep] = [
         GoalStep(
             title: "Set a tangible goal for yourself.",
@@ -26,6 +33,9 @@ struct GoalView: View {
         CGFloat(currentStep + 1) / CGFloat(steps.count)
     }
 
+    private let navBarHeight: CGFloat = 50
+    
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -35,7 +45,7 @@ struct GoalView: View {
                     // Top Title
                     HStack {
                         Text("Goal Setting")
-                            .font(.custom("Alexandria", size: 20))
+                            .font(.custom("Alexandria", size: 30))
                             .foregroundColor(.black)
                             .padding(.leading)
                         Spacer()
@@ -114,14 +124,67 @@ struct GoalView: View {
                     }
                     .cornerRadius(20)
                     .padding(.top, 5)
+                    .padding(.bottom, navBarHeight)
                 }
                 .padding()
+                VStack {
+                    Spacer()
+                    bottomTabBar
+                }
             }
             .navigationDestination(isPresented: $isCompleted) {
                 // You can link to Dashboard() or any next view
                 Text("Goal setup complete!")
             }
         }
+        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
+        .navigationDestination(isPresented: $showSetGoalNav)   { SetGoalView() }
+        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+        .navigationBarBackButtonHidden(true)
+    }
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResourceNav = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoalNav = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white.opacity(0.9))
     }
 }
 

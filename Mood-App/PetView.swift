@@ -17,6 +17,13 @@ struct PetView: View {
     /// Controls display of "Not enough points" alert
     @State private var showAlert = false
     
+    // MARK: – Navigation State  ← INSERTED
+    @State private var showHomeNav      = false
+    @State private var showResource     = false
+    @State private var showSetGoal      = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
+    
     // MARK: — UI Configuration
     /// Tab titles
     private let tabs = ["Colors", "Tops", "Extras"]
@@ -66,145 +73,158 @@ struct PetView: View {
     ]
     
     var body: some View {
-        ZStack {
-            // Background color
-            Color("lightd3cpurple")
-                .ignoresSafeArea()
-            
-            GeometryReader { geometry in
-                VStack {
-                    Spacer()
-                    
-                    // ─── Cow Display ─────────────────────────────────────────────
-                    ZStack {
-                        let width = geometry.size.width
-                        let height = geometry.size.height
-                        let posX = width / 1.57
-                        let posY = height * 0.125
+        NavigationStack {
+            ZStack {
+                // Background color
+                Color("lightd3cpurple")
+                    .ignoresSafeArea()
+                
+                GeometryReader { geometry in
+                    VStack {
+                        Spacer()
                         
-                        // Shadow ellipse behind the cow
-                        Ellipse()
-                            .fill(Color("lightd3cpurple"))
-                            .frame(width: 175, height: 75)
-                            .shadow(color: .gray, radius: 10, x: 5, y: 5)
-                            .position(x: posX * 0.8, y: posY * 2)
-                        
-                        // Layer 1: Outline - Always display the OUTLINE image first
-                        petCustomization.colorcow
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: width, height: height)
-                            .position(x: posX, y: posY)
-                        
-                        // Layer 2: Color overlay - This should be the selected color
-                        petCustomization.outlineImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: width, height: height)
-                            .position(x: posX, y: posY)
-                        
-                        // Layer 3: Top accessory
-                        petCustomization.topImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: width, height: height)
-                            .position(x: posX, y: posY)
-                        
-                        // Layer 4: Extra accessory
-                        petCustomization.extraImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: width, height: height)
-                            .position(x: posX, y: posY)
-                    }
-                    
-                    // ─── Tab Selector ──────────────────────────────────────────────
-                    HStack(spacing: 12) {
-                        ForEach(tabs, id: \.self) { tab in
-                            Button(action: {
-                                selectedTab = tab
-                            }) {
-                                Text(tab)
-                                    .font(.custom("Jua", size: 15))
-                                    .fontWeight(selectedTab == tab ? .bold : .regular)
-                                    .foregroundColor(selectedTab == tab ? .white : .gray)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 12)
-                                    .background(
-                                        selectedTab == tab
-                                        ? Color.purple
-                                        : Color.gray.opacity(0.2)
-                                    )
-                                    .cornerRadius(10)
-                            }
+                        // ─── Cow Display ─────────────────────────────────────────────
+                        ZStack {
+                            let width = geometry.size.width
+                            let height = geometry.size.height
+                            let posX = width / 1.57
+                            let posY = height * 0.125
+                            
+                            // Shadow ellipse behind the cow
+                            Ellipse()
+                                .fill(Color("lightd3cpurple"))
+                                .frame(width: 175, height: 75)
+                                .shadow(color: .gray, radius: 10, x: 5, y: 5)
+                                .position(x: posX * 0.8, y: posY * 2)
+                            
+                            // Layer 1: Outline - Always display the OUTLINE image first
+                            petCustomization.colorcow
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: width, height: height)
+                                .position(x: posX, y: posY)
+                            
+                            // Layer 2: Color overlay - This should be the selected color
+                            petCustomization.outlineImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: width, height: height)
+                                .position(x: posX, y: posY)
+                            
+                            // Layer 3: Top accessory
+                            petCustomization.topImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: width, height: height)
+                                .position(x: posX, y: posY)
+                            
+                            // Layer 4: Extra accessory
+                            petCustomization.extraImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: width, height: height)
+                                .position(x: posX, y: posY)
                         }
-                    }
-                    .padding(.vertical)
-                    
-                    // ─── Customization Grid ────────────────────────────────────────
-                    ScrollView {
-                        if selectedTab == "Colors" {
-                            itemGrid(
-                                display: colorOptions,
-                                items: colorImages,
-                                names: colorNames,
-                                geometry: geometry
-                            ) { index in
-                                let name = colorImages[index]
-                                if unlockedItems.contains(name) {
-                                    petCustomization.colorName = name
-                                    petCustomization.saveCustomizations()
+                        
+                        // ─── Tab Selector ──────────────────────────────────────────────
+                        HStack(spacing: 12) {
+                            ForEach(tabs, id: \.self) { tab in
+                                Button(action: {
+                                    selectedTab = tab
+                                }) {
+                                    Text(tab)
+                                        .font(.custom("Jua", size: 15))
+                                        .fontWeight(selectedTab == tab ? .bold : .regular)
+                                        .foregroundColor(selectedTab == tab ? .white : .gray)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 12)
+                                        .background(
+                                            selectedTab == tab
+                                            ? Color.purple
+                                            : Color.gray.opacity(0.2)
+                                        )
+                                        .cornerRadius(10)
                                 }
                             }
                         }
-                        else if selectedTab == "Tops" {
-                            itemGrid(
-                                display: topImages,
-                                items: topImages,
-                                names: topNames,
-                                geometry: geometry
-                            ) { index in
-                                let name = topImages[index]
-                                if unlockedItems.contains(name) {
-                                    petCustomization.topName = name
-                                    petCustomization.saveCustomizations()
+                        .padding(.vertical)
+                        
+                        // ─── Customization Grid ────────────────────────────────────────
+                        ScrollView {
+                            if selectedTab == "Colors" {
+                                itemGrid(
+                                    display: colorOptions,
+                                    items: colorImages,
+                                    names: colorNames,
+                                    geometry: geometry
+                                ) { index in
+                                    let name = colorImages[index]
+                                    if unlockedItems.contains(name) {
+                                        petCustomization.colorName = name
+                                        petCustomization.saveCustomizations()
+                                    }
+                                }
+                            }
+                            else if selectedTab == "Tops" {
+                                itemGrid(
+                                    display: topImages,
+                                    items: topImages,
+                                    names: topNames,
+                                    geometry: geometry
+                                ) { index in
+                                    let name = topImages[index]
+                                    if unlockedItems.contains(name) {
+                                        petCustomization.topName = name
+                                        petCustomization.saveCustomizations()
+                                    }
+                                }
+                            }
+                            else {
+                                itemGrid(
+                                    display: extraDisplayImages,
+                                    items: extraImages,
+                                    names: extraNames,
+                                    geometry: geometry
+                                ) { index in
+                                    let name = extraImages[index]
+                                    if unlockedItems.contains(name) {
+                                        petCustomization.extraName = name
+                                        petCustomization.saveCustomizations()
+                                    }
                                 }
                             }
                         }
-                        else {
-                            itemGrid(
-                                display: extraDisplayImages,
-                                items: extraImages,
-                                names: extraNames,
-                                geometry: geometry
-                            ) { index in
-                                let name = extraImages[index]
-                                if unlockedItems.contains(name) {
-                                    petCustomization.extraName = name
-                                    petCustomization.saveCustomizations()
-                                }
-                            }
-                        }
+                        .padding()
+                        .frame(maxHeight: .infinity, alignment: .bottom)
                     }
-                    .padding()
-                    .frame(maxHeight: .infinity, alignment: .bottom)
                 }
             }
-        }
-        // Alert when user lacks points to unlock an item
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("Not Enough Points"),
-                message: Text("You need more points to unlock this item."),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .onAppear {
-            // Load saved customizations when view appears
-            petCustomization.loadCustomizations()
+            VStack {
+                
+                bottomTabBar
+            }
+            
+            // Alert when user lacks points to unlock an item
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Not Enough Points"),
+                    message: Text("You need more points to unlock this item."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .onAppear {
+                // Load saved customizations when view appears
+                petCustomization.loadCustomizations()
+            }
+            // MARK: – Programmatic destinations  ← INSERTED
+            .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+            .navigationDestination(isPresented: $showResource)     { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+            .navigationBarBackButtonHidden(true)
         }
     }
-    
     // ─── Grid Builder ────────────────────────────────────────────────────────
     /// Creates a 3-column grid of thumbnails with lock/unlock buttons.
     private func itemGrid(
@@ -286,6 +306,44 @@ struct PetView: View {
             // Not enough points
             showAlert = true
         }
+    }
+    // ─── Bottom Tab Bar ─────────────────────────────────────────  ← INSERTED
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: 64)
+        .background(Color.white)
     }
 }
 

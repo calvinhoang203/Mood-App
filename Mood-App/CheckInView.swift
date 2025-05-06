@@ -1,29 +1,32 @@
 //
-//  SetGoalView.swift
+//  CheckInView.swift
 //  Mood-App
 //
-//  Created by Hieu Hoang on 4/22/25.
+//  Created by Hieu Hoang on 5/6/25.
 //
 
 import SwiftUI
 
-struct SetGoalView: View {
-    // ── Navigation State ─────────────────────────────────────────────
-    @State private var showGoalFlow     = false
-    @State private var showCheckInFlow  = false
-    @State private var showHomeNav      = false
-    @State private var showResourceNav  = false
-    @State private var showSetGoalNav   = false
-    @State private var showAnalyticsNav = false
-    @State private var showSettingNav   = false
+struct CheckInView: View {
+    // MARK: – Shared Data
+    @EnvironmentObject var storeData: StoreData
 
-    // ── Layout Constants ─────────────────────────────────────────────
-    private let navBarHeight: CGFloat = 50
-    private let topPadding: CGFloat   = 80
-    private let iconSize: CGFloat     = 60
-    private let buttonHeight: CGFloat = 44
-    private let columnSpacing: CGFloat = 40
-    private let rowSpacing: CGFloat    = 16
+    // MARK: – Navigation State
+    @State private var showSurveyFlow    = false
+    @State private var showJournalFlow   = false
+    @State private var showHomeNav       = false
+    @State private var showResourceNav   = false
+    @State private var showSetGoalNav    = false
+    @State private var showAnalyticsNav  = false
+    @State private var showSettingNav    = false
+
+    // MARK: – Layout Constants
+    private let navBarHeight: CGFloat    = 50
+    private let topPadding: CGFloat      = 80
+    private let iconSize: CGFloat        = 60
+    private let buttonHeight: CGFloat    = 44
+    private let columnSpacing: CGFloat   = 40
+    private let rowSpacing: CGFloat      = 16
     private let descriptionWidth: CGFloat = 120
 
     var body: some View {
@@ -32,128 +35,146 @@ struct SetGoalView: View {
                 Color("lavenderColor")
                     .ignoresSafeArea()
 
-                // ── Content ────────────────────────────────────
+                // ── Main Content ─────────────────────────────
                 VStack(spacing: 32) {
-                    // push everything down a bit
                     Spacer().frame(height: topPadding)
 
-                    // Greeting
-                    Text("Hey! How’s it going?")
+                    // Title
+                    Text("Let’s check your moo’d.")
                         .font(.system(size: 24, weight: .semibold))
 
-                    // Cow illustration
+                    // Cow Illustration
                     Image("QuestionIcon")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 150, height: 150)
 
                     // Prompt
-                    Text("What would you like to do?")
+                    Text("How do you want to check in?")
                         .font(.system(size: 20, weight: .medium))
 
-                    // Two columns: Set Goal / Check In
+                    // Two Options
                     HStack(spacing: columnSpacing) {
-                        // ── Set Goal Column ────────────────────
+                        // ── Survey Column ─────────────────
                         VStack(spacing: rowSpacing) {
-                            Image("Set Goal Icon")
+                            Image("Survey Icon")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: iconSize, height: iconSize)
 
                             Button {
-                                showGoalFlow = true
+                                showSurveyFlow = true
                             } label: {
-                                Image("Set Goal Button 1")
+                                Image("Survey Button")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(height: buttonHeight)
                             }
 
-                            Text("Keep track of your progress by earning wellness points.")
+                            Text("Answer a couple questions about your current mood.")
                                 .font(.caption)
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .frame(width: descriptionWidth)
+
+                            Text("About 2–5 minutes")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
                         }
 
-                        // ── Check In Column ────────────────────
+                        // ── Journal Column ─────────────────
                         VStack(spacing: rowSpacing) {
-                            Image("Check In Icon")
+                            Image("Journal Icon")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: iconSize, height: iconSize)
 
                             Button {
-                                showCheckInFlow = true
+                                showJournalFlow = true
                             } label: {
-                                Image("Check In Button")
+                                Image("Journal Button")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(height: buttonHeight)
                             }
 
-                            Text("Check in with how you’re currently feeling.")
+                            Text("Write about how you’re currently feeling in a journal.")
                                 .font(.caption)
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .frame(width: descriptionWidth)
+
+                            Text("About 5–10 minutes")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
                         }
                     }
 
-                    Spacer() // push content up out of tab-bar
+                    Spacer()
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, navBarHeight)
 
-                // ── Bottom Tab Bar ────────────────────────────
+                // ── Bottom Tab Bar ───────────────────────────────
                 VStack {
                     Spacer()
                     bottomTabBar
                 }
             }
             // ── Destinations ──────────────────────────────────
-            .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
-            .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
-            .navigationDestination(isPresented: $showHomeNav)     { HomeView() }
-            .navigationDestination(isPresented: $showResourceNav) { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoalNav)  { SetGoalView() }
-            .navigationDestination(isPresented: $showAnalyticsNav){ AnalyticsPageView() }
-            .navigationDestination(isPresented: $showSettingNav)  { SettingView() }
+            .navigationDestination(isPresented: $showSurveyFlow) {
+                SurveyQuestionaireView()
+                    .environmentObject(storeData)
+            }
+            .navigationDestination(isPresented: $showJournalFlow) {
+                JournalView()
+                    .environmentObject(storeData)
+            }
+            .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+            .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoalNav)   { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
     }
 
-    // ── Bottom Tab Bar ─────────────────────────────────────────────
+    // MARK: – Bottom Tab Bar
     private var bottomTabBar: some View {
         HStack {
             Spacer()
             Button { showHomeNav = true } label: {
                 Image("Home Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { showResourceNav = true } label: {
                 Image("Resource Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { showSetGoalNav = true } label: {
                 Image("Set Goal Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { showAnalyticsNav = true } label: {
                 Image("Analytics Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { showSettingNav = true } label: {
                 Image("Setting Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
@@ -163,8 +184,9 @@ struct SetGoalView: View {
     }
 }
 
-struct SetGoalView_Previews: PreviewProvider {
+struct CheckInView_Previews: PreviewProvider {
     static var previews: some View {
-        SetGoalView()
+        CheckInView()
+            .environmentObject(StoreData())
     }
 }

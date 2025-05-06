@@ -277,7 +277,7 @@ struct HomeView: View {
       Spacer()
     }
     .frame(height: navBarHeight)
-    .background(Color.white.opacity(0.9))
+    .background(Color.white)
   }
 
   // MARK: – Supplementary Views

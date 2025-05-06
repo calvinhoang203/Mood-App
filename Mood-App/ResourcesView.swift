@@ -5,6 +5,12 @@ struct ResourcesView: View {
     @StateObject private var savedItems = SavedItems()
     @State private var navigateToSaved = false
 
+    @State private var showHomeNav      = false
+    @State private var showResourceNav  = false
+    @State private var showSetGoal      = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
+    
     let activities: [Activity] = [
         Activity(name: "Go On A Walk", imageName: "figure.walk", description: "Check out the arboretum or just head around campus!"),
         Activity(name: "Listen to Music", imageName: "music.note", description: "Find a calming playlist and unwind."),
@@ -76,13 +82,61 @@ struct ResourcesView: View {
 
             }
             .background(Color("lightd3cpurple").ignoresSafeArea())
+            VStack {
+                bottomTabBar
+            }
             .navigationDestination(isPresented: $navigateToSaved) {
                 ResourcesPersonalView()
                     .environmentObject(savedItems)
             }
         }
+        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
+        .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
+        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+        .navigationBarBackButtonHidden(true)
+    }
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResourceNav = true } } label: {
+                Image("Resource Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: 64)
+        .background(Color.white)
     }
 }
+
+
 
 
 struct ActivityCard: View {
@@ -213,6 +267,7 @@ struct ResourceCard: View {
         .cornerRadius(12)
         .shadow(radius: 2)
     }
+    
 }
 
 #Preview {

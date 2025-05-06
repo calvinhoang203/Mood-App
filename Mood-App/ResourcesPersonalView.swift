@@ -180,3 +180,4 @@ struct ResourcesPersonalView: View {
         .background(Color("lightd3cpurple").ignoresSafeArea())
     }
 }
+

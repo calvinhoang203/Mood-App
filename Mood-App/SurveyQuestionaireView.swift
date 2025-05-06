@@ -20,6 +20,14 @@ struct SurveyQuestionaireView: View {
     @State private var isFinished = false
     @State private var showLoading = false
 
+    
+    @State private var showHomeNav      = false
+    @State private var showResourceNav  = false
+    @State private var showSetGoalNav   = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
+    
+    
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
             question: "How would you describe your mood today in one word?",
@@ -118,6 +126,8 @@ struct SurveyQuestionaireView: View {
         return CGFloat(currentIndex + 1) / CGFloat(questions.count)
     }
 
+    private let navBarHeight: CGFloat = 50
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -200,6 +210,12 @@ struct SurveyQuestionaireView: View {
                         .padding(.top, 5)
                     }
                     .padding()
+                    .padding(.bottom, navBarHeight)
+
+                }
+                VStack {
+                    Spacer()
+                    bottomTabBar
                 }
             }
             .navigationDestination(isPresented: $isFinished) {
@@ -209,10 +225,54 @@ struct SurveyQuestionaireView: View {
             .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {}
             }
-            .navigationBarBackButtonHidden(true)
+            
         }
+        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
+        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
+        .navigationDestination(isPresented: $showSetGoalNav)   { GoalView() }
+        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+        .navigationBarBackButtonHidden(true)
     }
 
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { showHomeNav = true } label: {
+                Image("Home Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { showResourceNav = true } label: {
+                Image("Resource Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { showSetGoalNav = true } label: {
+                Image("Set Goal Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { showAnalyticsNav = true } label: {
+                Image("Analytics Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { showSettingNav = true } label: {
+                Image("Setting Button")
+                  .resizable().aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white.opacity(0.9))
+    }
+    
     func toggleSelection(for option: String) {
         if questions[currentIndex].allowsMultipleSelection {
             if selectedOptions.contains(option) {
