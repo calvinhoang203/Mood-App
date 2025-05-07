@@ -4,78 +4,132 @@ struct ResourcesView: View {
     @State private var searchText: String = ""
     @StateObject private var savedItems = SavedItems()
     @State private var navigateToSaved = false
+    @FocusState private var isSearchFocused: Bool
 
-    let activities: [Activity] = [
-        Activity(name: "Go On A Walk", imageName: "figure.walk", description: "Check out the arboretum or just head around campus!"),
-        Activity(name: "Listen to Music", imageName: "music.note", description: "Find a calming playlist and unwind."),
-        Activity(name: "Try Meditation", imageName: "brain.head.profile", description: "Breathe deeply and try a guided meditation.")
+    //Defined lists containing all activities/resources of type "Activity" or "Resource"
+    
+    let allActivities: [Activity] = [
+        Activity(name: "Go On A Walk", imageName: "resourcewalk", description: "Check out the arboretum or just head around campus!"),
+        Activity(name: "Listen to Music", imageName: "resourcemusic", description: "Find a calming playlist and unwind."),
+        Activity(name: "Try Meditation", imageName: "resourcemed", description: "Breathe deeply and try a guided meditation.")
     ]
 
-    let resources: [Resource] = [
+    let allResources: [Resource] = [
         Resource(name: "SHCS", imageName: "cross.case.fill", description: "Check out Student Health and Counseling Services!"),
         Resource(name: "CAPS", imageName: "heart.text.clipboard", description: "Counseling and Psychological Services for support."),
         Resource(name: "Wellness Coaching", imageName: "heart.text.square.fill", description: "Meet with a coach to improve well-being.")
     ]
+    
+   //SearchBar: If empty: return all activities and resources, Else: Return Activities and Resources filtered by Search (not case-sensitive)
+    
+    var filteredActivities: [Activity] {
+        if searchText.isEmpty {
+            return allActivities
+        } else {
+            return allActivities.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+
+    var filteredResources: [Resource] {
+        if searchText.isEmpty {
+            return allResources
+        } else {
+            return allResources.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
+            ZStack {
+                Color.clear
                 
-                HStack {
-                    Text("Discover ways to cope.")
-                        .font(.title2)
-                        .bold()
-                    Spacer()
-                    Button {
-                        navigateToSaved = true
-                    } label: {
-                        Image(systemName: "bookmark.fill")
+                // Title and Bookmark
+                
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header
+                    HStack {
+                        Text("Discover ways to cope.")
+                            .font(.custom("Alexandria-Regular", size: 22))
+                            .bold()
+                            .padding(.top, 15)
+                        Spacer()
+                        Button {
+                            navigateToSaved = true
+                        } label: {
+                            Image(systemName: "bookmark.fill")
+                        }
+                        Image(systemName: "bell.fill")
                     }
-                    Image(systemName: "bell.fill")
-                }
-                .padding(.horizontal)
-
-                TextField("Search...", text: $searchText)
-                    .padding(10)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
                     .padding(.horizontal)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 25) {
+                    // Search Bar: isSearchFocused stops blinker if clicked off searchbar
+                    
+                    TextField("Search...", text: $searchText)
+                        .padding(10)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        .focused($isSearchFocused)
 
-                        Text("Activities For You")
-                            .font(.headline)
-                            .padding(.horizontal)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 25) {
+                            // Activities Section: Displaying Activities based on Filter
+                            Text("Activities List")
+                                .font(.custom("Alexandria-Regular", size: 17))
+                                .padding(.horizontal)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(activities) { activity in
-                                    ActivityCard(activity: activity, savedItems: savedItems)
+                            if filteredActivities.isEmpty {
+                                Text("No matching activities found.")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 20) { //Works by using Identifiable
+                                        ForEach(filteredActivities) { activity in
+                                            ActivityCard(activity: activity, savedItems: savedItems)
+                                        }
+                                    }
+                                    .padding(.horizontal)
                                 }
                             }
-                            .padding(.horizontal)
-                        }
 
-                     
-                        Text("Resources for You")
-                            .font(.headline)
-                            .padding(.horizontal)
+                            // Resources Section: Displaying Resources based on Filter
+                            Text("Resources List")
+                                .font(.custom("Alexandria-Regular", size: 17))
+                                .padding(.horizontal)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(resources) { resource in
-                                    ResourceCard(resource: resource, savedItems: savedItems)
+                            if filteredResources.isEmpty {
+                                Text("No matching resources found.")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 20) {
+                                        ForEach(filteredResources) { resource in
+                                            ResourceCard(resource: resource, savedItems: savedItems)
+                                        }
+                                    }
+                                    .padding(.horizontal)
                                 }
                             }
-                            .padding(.horizontal)
                         }
+                        .padding(.top, 10)
                     }
-                    .padding(.top, 10)
-                }
 
-                homebar() 
+                    homebar()
+                }
+                .onTapGesture {
+                    isSearchFocused = false
+                }
             }
+            .navigationBarBackButtonHidden(true) // Hides back button
+            .gesture(DragGesture()) 
             .background(Color("lightd3cpurple").ignoresSafeArea())
             .navigationDestination(isPresented: $navigateToSaved) {
                 ResourcesPersonalView()
@@ -85,6 +139,7 @@ struct ResourcesView: View {
     }
 }
 
+// MARK: - ActivityCard
 
 struct ActivityCard: View {
     let activity: Activity
@@ -92,55 +147,54 @@ struct ActivityCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            //Activity Card includes: Image, Title, Description, "Rectangular Frame - Background Overlay"
             ZStack {
+                Image(activity.imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 100)
+                    .clipped()
+                    .cornerRadius(10)
+
                 Rectangle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color.black.opacity(0.2))
                     .frame(height: 100)
                     .cornerRadius(10)
-                Image(systemName: activity.imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 50)
-                    .foregroundColor(.purple)
             }
 
             Text(activity.name)
-                .font(.subheadline)
+                .font(.custom("Alexandria-Regular", size: 15))
                 .bold()
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(activity.description)
-                .font(.caption)
+                .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
                 .fixedSize(horizontal: false, vertical: true)
-
+                .lineLimit(nil)
+            /* If Activity Added button clicked, toggle between both colors and texts
+              toggles save state from functions in SavedItems */
             HStack {
                 Button(action: {
-                    savedItems.addActivityToPlanner(activity)
+                    savedItems.toggleAddedActivity(activity)
                 }) {
                     Text(savedItems.isActivityAdded(activity) ? "Activity Added" : "Add Activity +")
-                        .font(.caption)
+                        .font(.custom("Alexandria-Regular", size: 12))
                         .padding(6)
                         .background(savedItems.isActivityAdded(activity) ? Color.green : Color.purple)
                         .foregroundColor(.white)
                         .cornerRadius(6)
                 }
-                .disabled(savedItems.isActivityAdded(activity))
-
 
                 Spacer()
-
+                /* If Heart is clicked, toggle between both filled heart and heart
+                  toggles save state from functions in SavedItems */
                 Button(action: {
-                    if !savedItems.isActivitySaved(activity) {
-                        savedItems.toggleActivity(activity)
-                    }
+                    savedItems.toggleActivity(activity)
                 }) {
                     Image(systemName: savedItems.isActivitySaved(activity) ? "heart.fill" : "heart")
                         .foregroundColor(.blue)
                 }
-                .disabled(savedItems.isActivitySaved(activity)) 
-                .opacity(savedItems.isActivitySaved(activity) ? 0.6 : 1.0) 
-
             }
         }
         .padding()
@@ -151,6 +205,7 @@ struct ActivityCard: View {
     }
 }
 
+// MARK: - ResourceCard
 
 struct ResourceCard: View {
     let resource: Resource
@@ -171,41 +226,36 @@ struct ResourceCard: View {
             }
 
             Text(resource.name)
-                .font(.subheadline)
+                .font(.custom("Alexandria-Regular", size: 15))
                 .bold()
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(resource.description)
-                .font(.caption)
+                .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
                 .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(nil)
 
             HStack {
                 Button(action: {
-                    savedItems.addResourceToPlanner(resource)
+                    savedItems.toggleAddedResource(resource)
                 }) {
                     Text(savedItems.isResourceAdded(resource) ? "Resource Added" : "Explore Resource")
-                        .font(.caption)
+                        .font(.custom("Alexandria-Regular", size: 12))
                         .padding(6)
                         .background(savedItems.isResourceAdded(resource) ? Color.green : Color.purple)
                         .foregroundColor(.white)
                         .cornerRadius(6)
                 }
-                .disabled(savedItems.isResourceAdded(resource))
-
 
                 Spacer()
 
                 Button(action: {
-                    if !savedItems.isResourceSaved(resource) {
-                        savedItems.toggleResource(resource)
-                    }
+                    savedItems.toggleResource(resource)
                 }) {
                     Image(systemName: savedItems.isResourceSaved(resource) ? "bookmark.fill" : "bookmark")
                         .foregroundColor(.blue)
                 }
-                .disabled(savedItems.isResourceSaved(resource)) 
-                .opacity(savedItems.isResourceSaved(resource) ? 0.6 : 1.0) 
             }
         }
         .padding()
