@@ -28,7 +28,6 @@ struct MoodApp: App {
                 NavigationStack {
                     LoginView()
                 }
-                // inject *both* here
                 .environmentObject(storeData)
                 .environmentObject(petCustomization)
             }

@@ -80,7 +80,15 @@ struct PetView: View {
                     .ignoresSafeArea()
                 
                 GeometryReader { geometry in
-                    VStack {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Your Avatar")
+                                .font(.custom("Alexandria-Regular", size: 30))
+                                .font(.headline)
+                                .padding(.leading, 30)
+                                .padding(.top, 15)
+                            Spacer()
+                        }
                         Spacer()
                         
                         // ─── Cow Display ─────────────────────────────────────────────
@@ -89,42 +97,48 @@ struct PetView: View {
                             let height = geometry.size.height
                             let posX = width / 1.57
                             let posY = height * 0.125
-                            
+
                             // Shadow ellipse behind the cow
                             Ellipse()
-                                .fill(Color("lightd3cpurple"))
-                                .frame(width: 175, height: 75)
-                                .shadow(color: .gray, radius: 10, x: 5, y: 5)
+                                .fill(Color("d3cpurple"))
+                                .frame(width: 200, height: 50)
+                                .cornerRadius(10)
+                                .shadow(color: .gray, radius: 9, x: 5, y: 5)
                                 .position(x: posX * 0.8, y: posY * 2)
-                            
-                            // Layer 1: Outline - Always display the OUTLINE image first
+
+                            // Base color layer
                             petCustomization.colorcow
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: width, height: height)
                                 .position(x: posX, y: posY)
-                            
-                            // Layer 2: Color overlay - This should be the selected color
+
+                            // Outline layer
                             petCustomization.outlineImage
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: width, height: height)
                                 .position(x: posX, y: posY)
-                            
-                            // Layer 3: Top accessory
-                            petCustomization.topImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: width, height: height)
-                                .position(x: posX, y: posY)
-                            
-                            // Layer 4: Extra accessory
-                            petCustomization.extraImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: width, height: height)
-                                .position(x: posX, y: posY)
+
+                            // Top accessory (only if set)
+                            if !petCustomization.topName.isEmpty {
+                                petCustomization.topImage
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: width, height: height)
+                                    .position(x: posX, y: posY)
+                            }
+
+                            // Extra accessory (only if set)
+                            if !petCustomization.extraName.isEmpty {
+                                petCustomization.extraImage
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: width, height: height)
+                                    .position(x: posX, y: posY)
+                            }
                         }
+
                         
                         // ─── Tab Selector ──────────────────────────────────────────────
                         HStack(spacing: 12) {
@@ -133,17 +147,12 @@ struct PetView: View {
                                     selectedTab = tab
                                 }) {
                                     Text(tab)
-                                        .font(.custom("Jua", size: 15))
                                         .fontWeight(selectedTab == tab ? .bold : .regular)
                                         .foregroundColor(selectedTab == tab ? .white : .gray)
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(
-                                            selectedTab == tab
-                                            ? Color.purple
-                                            : Color.gray.opacity(0.2)
-                                        )
+                                        .padding()
+                                        .background(selectedTab == tab ? Color("d3cpurple") : Color.gray.opacity(0.2))
                                         .cornerRadius(10)
+                                        .font(.custom("Alexandria-Regular", size: 15))
                                 }
                             }
                         }
@@ -160,8 +169,7 @@ struct PetView: View {
                                 ) { index in
                                     let name = colorImages[index]
                                     if unlockedItems.contains(name) {
-                                        petCustomization.colorName = name
-                                        petCustomization.saveCustomizations()
+                                        petCustomization.updateColor(name)
                                     }
                                 }
                             }
@@ -174,8 +182,7 @@ struct PetView: View {
                                 ) { index in
                                     let name = topImages[index]
                                     if unlockedItems.contains(name) {
-                                        petCustomization.topName = name
-                                        petCustomization.saveCustomizations()
+                                        petCustomization.updateTop(name)
                                     }
                                 }
                             }
@@ -188,8 +195,7 @@ struct PetView: View {
                                 ) { index in
                                     let name = extraImages[index]
                                     if unlockedItems.contains(name) {
-                                        petCustomization.extraName = name
-                                        petCustomization.saveCustomizations()
+                                        petCustomization.updateExtra(name)
                                     }
                                 }
                             }
@@ -214,7 +220,7 @@ struct PetView: View {
             }
             .onAppear {
                 // Load saved customizations when view appears
-                petCustomization.loadCustomizations()
+
             }
             // MARK: – Programmatic destinations  ← INSERTED
             .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
