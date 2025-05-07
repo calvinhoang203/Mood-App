@@ -11,7 +11,10 @@ struct HomeView: View {
   @State private var showSettingNav = false
   @State private var showHomeNav = false
   @State private var showPet = false
-
+  @State private var showCheckIn     = false
+    
+    
+    
   // MARK: – Layout State
   @State private var editIconX: CGFloat = 0.51
   @State private var editIconY: CGFloat = 0.65
@@ -78,6 +81,17 @@ struct HomeView: View {
                 .padding(.horizontal, 16)
 
               quoteView
+                
+              Button {
+                showCheckIn = true
+              } label: {
+                Image("Start A Check In Button")
+                  .resizable()
+                  .scaledToFit()
+                  .frame(height: 50)
+              }
+              .padding(.horizontal, 32)
+                
               dashboardSection
               placeholderSection
             }
@@ -88,7 +102,6 @@ struct HomeView: View {
         .ignoresSafeArea(edges: .top)
         .onAppear {
             storeData.loadUserDataFromFirestore()
-            petCustomization.loadCustomizations()
         }
 
         // ─── Fixed bottom tab bar ───
@@ -117,56 +130,65 @@ struct HomeView: View {
     .navigationDestination(isPresented: $showPet) {
       PetView()
     }
+    .navigationDestination(isPresented: $showCheckIn) {
+      SurveyQuestionaireView()
+      .environmentObject(storeData)
+    }
     .navigationBarBackButtonHidden(true)
   }
 
-  // MARK: – Cow + Edit View
-  private var cowView: some View {
-      ZStack {
-        // 1) Cow layers - start with outline, then color, then accessories
-        Group {
-          // Layer 1: Base outline - always displayed
-          petCustomization.colorcow
-            .resizable().scaledToFit()
-            .frame(width: cowSize, height: cowSize)
-          
-          // Layer 2: Color overlay
-          petCustomization.outlineImage
-            .resizable().scaledToFit()
-            .frame(width: cowSize, height: cowSize)
-          
-          // Layer 3: Top accessory
-          petCustomization.topImage
-            .resizable().scaledToFit()
-            .frame(width: cowSize, height: cowSize)
-          
-          // Layer 4: Extra accessory
-          petCustomization.extraImage
-            .resizable().scaledToFit()
-            .frame(width: cowSize, height: cowSize)
-        }
-        .allowsHitTesting(false)
-  
-        // 2) Edit button - this is the interactive element
-        GeometryReader { geometry in
-          Button {
-            withAnimation(.none) { showPet = true }
-          } label: {
-            Image("Edit Icon")
+    // MARK: – Cow + Edit View
+    private var cowView: some View {
+        ZStack {
+            // 1) Base color layer
+            petCustomization.colorcow
               .resizable()
-              .frame(width: editButtonSize, height: editButtonSize)
-              .padding(editButtonSize / 4)
-              .background(Color.white.opacity(0.9))
-              .clipShape(Circle())
-              .shadow(radius: 2)
-          }
-          .position(
-            x: geometry.size.width * editIconX,
-            y: geometry.size.height * editIconY
-          )
+              .scaledToFit()
+              .frame(width: cowSize, height: cowSize)
+
+            // 2) Outline
+            petCustomization.outlineImage
+              .resizable()
+              .scaledToFit()
+              .frame(width: cowSize, height: cowSize)
+
+            // 3) Top accessory (only if selected)
+            if !petCustomization.topName.isEmpty {
+                petCustomization.topImage
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: cowSize, height: cowSize)
+            }
+
+            // 4) Extra accessory (only if selected)
+            if !petCustomization.extraName.isEmpty {
+                petCustomization.extraImage
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: cowSize, height: cowSize)
+            }
+
+            // 5) Edit button
+            GeometryReader { geometry in
+                Button {
+                    withAnimation(.none) { showPet = true }
+                } label: {
+                    Image("Edit Icon")
+                      .resizable()
+                      .frame(width: editButtonSize, height: editButtonSize)
+                      .padding(editButtonSize / 4)
+                      .background(Color.white.opacity(0.9))
+                      .clipShape(Circle())
+                      .shadow(radius: 2)
+                }
+                .position(
+                    x: geometry.size.width * editIconX,
+                    y: geometry.size.height * editIconY
+                )
+            }
         }
-      }
-  }
+    }
+
 
   // MARK: – Quote View
   private var quoteView: some View {

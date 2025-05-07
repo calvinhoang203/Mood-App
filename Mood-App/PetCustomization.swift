@@ -15,6 +15,9 @@ class PetCustomization: ObservableObject {
     @Published var topName: String = ""
     @Published var extraName: String = ""
     
+    
+    private var listener: ListenerRegistration?
+    
     // 3) composed views
     /// Color layer – if no colorName chosen yet, show your defaultcow asset
     var colorcow: Image {
@@ -33,48 +36,69 @@ class PetCustomization: ObservableObject {
     }
     
     init() {
-        loadCustomizations()
+        // Whenever a user signs in/out, start or stop listening
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            guard let self = self else { return }
+            self.listener?.remove()
+            if let uid = user?.uid {
+                self.startListening(uid: uid)
+            }
+        }
     }
-    
-    // Load user's saved customizations from Firestore
-    func loadCustomizations() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        Firestore.firestore()
+
+    private func startListening(uid: String) {
+        listener = Firestore.firestore()
             .collection("Users' info")
             .document(uid)
-            .getDocument { snap, _ in
-                guard let data = snap?.data() else { return }
-                
-                // Only update on main thread to avoid UI issues
+            .addSnapshotListener { [weak self] snapshot, _ in
+                guard
+                  let self = self,
+                  let data = snapshot?.data()
+                else { return }
+
                 DispatchQueue.main.async {
                     self.colorName = data["cow.color"] as? String ?? ""
-                    self.topName = data["cow.top"] as? String ?? ""
+                    self.topName   = data["cow.top"]   as? String ?? ""
                     self.extraName = data["cow.extra"] as? String ?? ""
-                    
-                    // Debug output to verify loading
-                    print("✅ Loaded customizations: color=\(self.colorName), top=\(self.topName), extra=\(self.extraName)")
+                    print("🐮 Cow updated: color=\(self.colorName) top=\(self.topName) extra=\(self.extraName)")
                 }
             }
     }
+
     
-    // Save user's customizations to Firestore
-    func saveCustomizations() {
+    
+    
+    // MARK: — Single‐field updaters
+
+    func updateColor(_ name: String) {
+        colorName = name
+        updateField("cow.color", value: name)
+    }
+
+    func updateTop(_ name: String) {
+        topName = name
+        updateField("cow.top", value: name)
+    }
+
+    func updateExtra(_ name: String) {
+        extraName = name
+        updateField("cow.extra", value: name)
+    }
+
+    private func updateField(_ key: String, value: Any) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        let upd: [String:Any] = [
-            "cow.color": colorName,
-            "cow.top": topName,
-            "cow.extra": extraName
-        ]
-        
         Firestore.firestore()
-            .collection("Users' info")
-            .document(uid)
-            .updateData(upd) { error in
-                if let error = error {
-                    print("❌ Error saving customizations: \(error.localizedDescription)")
-                } else {
-                    print("✅ Saved customizations: color=\(self.colorName), top=\(self.topName), extra=\(self.extraName)")
-                }
-            }
+          .collection("Users’ info")
+          .document(uid)
+          .updateData([key: value]) { error in
+              if let e = error {
+                  print("❌ Failed updating \(key): \(e)")
+              }
+          }
+    }
+    
+
+    deinit {
+        listener?.remove()
     }
 }
