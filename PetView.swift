@@ -10,7 +10,7 @@ struct PetView: View {
     let tabs = ["Colors", "Tops", "Extras"]
 
     let colorOptions: [String] = ["displayblue", "displaydarkpurple", "displaygreen", "displaylightgreen", "displaypeach", "displaypink", "displaypurple", "displayred", "displayyellow"]
-    let colorImages: [String] = ["bluecow", "goldencow", "darkgreencow", "lightgreencow", "peachcow", "pinkcow", "purplecow", "redcow", "yellowcow"]
+    let colorImages: [String] = ["bluecow", "darkpurplecow", "darkgreencow", "lightgreencow", "peachcow", "pinkcow", "purplecow", "redcow", "yellowcow"]
     let colorNames: [String] = ["Red", "Blue", "Dark Green", "Green", "Peach", "Purple", "Pink", "Dark Peach", "Default"]
 
     let topImages: [String] = ["tophat", "hoodie", "bowtie"]
@@ -21,10 +21,9 @@ struct PetView: View {
     let extraDisplayImages = ["earingview", "glassesview", "hatview", "necklaceview", "videogameview", "basketballview", "bowview", "bobaview", "pantsview", "maskview", "airpodsview"]
 
     var body: some View {
-
         ZStack {
             Color("lightd3cpurple").ignoresSafeArea()
-            
+
             GeometryReader { geometry in
                 VStack(spacing: 12) {
                     HStack {
@@ -35,15 +34,13 @@ struct PetView: View {
                             .padding(.top, 15)
                         Spacer()
                     }
-                    
-                    // Cow + Ellipse Display
+
                     ZStack {
-                        
                         let imageWidth = geometry.size.width * 1.25
                         let imageHeight = geometry.size.height * 1.25
                         let position_x = geometry.size.width / 1.5
                         let position_y = geometry.size.height * 0.25
-                        
+
                         Ellipse()
                             .fill(Color("elipsecolor"))
                             .frame(width: 200, height: 50)
@@ -76,7 +73,6 @@ struct PetView: View {
                             .position(x: position_x, y: position_y * 0.20)
                     }
 
-                    // Tab Selection (Colors / Tops / Extras)
                     VStack {
                         HStack {
                             ForEach(tabs, id: \.self) { tab in
@@ -92,23 +88,21 @@ struct PetView: View {
                             }
                         }
 
-                        // Option Grid
                         ScrollView {
                             if selectedTab == "Colors" {
                                 itemGrid(display: colorOptions, items: colorImages, names: colorNames, geometry: geometry) { index in
-                                    petCustomization.defaultcow = Image(colorImages[index])
+                                    petCustomization.defaultCowName = colorImages[index]
                                 }
                             } else if selectedTab == "Tops" {
                                 itemGrid(display: topImages, items: topImages, names: topNames, geometry: geometry) { index in
-                                    petCustomization.topImage = Image(topImages[index])
+                                    petCustomization.topImageName = topImages[index]
                                 }
                             } else if selectedTab == "Extras" {
                                 itemGrid(display: extraDisplayImages, items: extraImages, names: extraNames, geometry: geometry) { index in
-                                    petCustomization.extraImage = Image(extraImages[index])
+                                    petCustomization.extraImageName = extraImages[index]
                                 }
                             }
                             Spacer(minLength: 100)
-
                         }
                         .padding(.horizontal)
                     }
@@ -116,7 +110,6 @@ struct PetView: View {
                 }
             }
 
-            // Home Bar
             VStack {
                 homebar()
                     .frame(maxWidth: .infinity)
@@ -135,17 +128,12 @@ struct PetView: View {
             ForEach(items.indices, id: \.self) { index in
                 VStack(spacing: 6) {
                     ZStack {
-                        // Ellipse base
                         Ellipse()
                             .fill(Color.gray.opacity(0.4))
                             .frame(width: geometry.size.width * 0.20, height: geometry.size.width * 0.05)
                             .offset(y: geometry.size.width * 0.065)
                             .shadow(color: .black.opacity(0.2), radius: 5, x: 2, y: 2)
 
-                            
-
-
-                        // Item image (overlapping top)
                         Image(display[index])
                             .resizable()
                             .scaledToFit()
@@ -159,11 +147,11 @@ struct PetView: View {
                             .padding(.top, 15)
                     }
 
-                    // Unlock button
                     Button(unlockedItems.contains(items[index]) ? "UNLOCKED" : "LOCKED") {
                         unlockItem(items[index])
                     }
-                    .font(.custom("Alexandria-Regular", size: 14))                    .padding(5)
+                    .font(.custom("Alexandria-Regular", size: 14))
+                    .padding(5)
                     .background(unlockedItems.contains(items[index]) ? Color.green : Color.red)
                     .foregroundColor(.white)
                     .cornerRadius(5)
