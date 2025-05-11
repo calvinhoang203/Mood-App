@@ -34,7 +34,7 @@ struct LoginView: View {
                         .scaledToFit()
                         .frame(width: 150, height: 150)
 
-                    Text("Hey! Welcome to Moo’d.")
+                    Text("Hey! Welcome to Moo'd.")
                         .font(.custom("Alexandria", size: 24))
                         .foregroundColor(.black)
 
@@ -133,12 +133,8 @@ struct LoginView: View {
                     let hasFirst = (data["firstName"] as? String)?.isEmpty == false
                     let hasLast = (data["lastName"] as? String)?.isEmpty == false
                     let hasPhone = (data["phoneNumber"] as? String)?.isEmpty == false
-                    let scores = data["scores"] as? [String: Any] ?? [:]
-                    let hasValidScores = scores.keys.count == 4 && scores.values.allSatisfy {
-                        if let val = $0 as? Int { return val >= 0 } else { return false }
-                    }
 
-                    if hasFirst && hasLast && hasPhone && hasValidScores {
+                    if hasFirst && hasLast && hasPhone {
                         print("✅ Profile complete. Going to ProfileView.")
                         goToProfile = true
                     } else {
