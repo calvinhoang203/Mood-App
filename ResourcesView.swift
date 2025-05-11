@@ -62,9 +62,16 @@ struct ResourcesView: View {
                         Button {
                             navigateToSaved = true
                         } label: {
-                            Image(systemName: "bookmark.fill")
+                            Image("bookmark")
+                               .resizable()
+                               .frame(width: 30, height: 35)
+                               .padding(.top, 15)
                         }
-                        Image(systemName: "bell.fill")
+                        Image("notification")
+                            .resizable()
+                            .frame(width: 30, height: 35)
+                            .padding(.top, 15)
+
                     }
                     .padding(.horizontal)
 
