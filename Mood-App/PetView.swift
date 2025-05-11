@@ -205,6 +205,11 @@ struct PetView: View {
                     }
                 }
             }
+            
+            .onAppear {
+                petCustomization.fetchInitialCustomizations()
+            }
+            
             VStack {
                 
                 bottomTabBar
@@ -218,10 +223,7 @@ struct PetView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
-            .onAppear {
-                // Load saved customizations when view appears
-
-            }
+            
             // MARK: – Programmatic destinations  ← INSERTED
             .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
             .navigationDestination(isPresented: $showResource)     { ResourcesView() }
@@ -232,7 +234,7 @@ struct PetView: View {
         }
     }
     // ─── Grid Builder ────────────────────────────────────────────────────────
-    /// Creates a 3-column grid of thumbnails with lock/unlock buttons.
+    // Creates a 3-column grid of thumbnails with lock/unlock buttons.
     private func itemGrid(
         display: [String],
         items: [String],

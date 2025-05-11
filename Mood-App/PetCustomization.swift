@@ -50,28 +50,41 @@ class PetCustomization: ObservableObject {
         listener = Firestore.firestore()
             .collection("Users' info")
             .document(uid)
-            .addSnapshotListener { [weak self] snapshot, _ in
-                guard
-                  let self = self,
-                  let data = snapshot?.data()
-                else { return }
-
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self, let snap = snapshot else { return }
+                // ignore the “local-write” snapshot so we only update once the server has confirmed
+                if snap.metadata.hasPendingWrites { return }
+                let data = snap.data() ?? [:]
                 DispatchQueue.main.async {
                     self.colorName = data["cow.color"] as? String ?? ""
                     self.topName   = data["cow.top"]   as? String ?? ""
                     self.extraName = data["cow.extra"] as? String ?? ""
-                    print("🐮 Cow updated: color=\(self.colorName) top=\(self.topName) extra=\(self.extraName)")
                 }
             }
     }
 
     
-    
+    // Call this when you want to force–fetch the three cow fields one time.
+    func fetchInitialCustomizations() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let docRef = Firestore.firestore()
+          .collection("Users' info")
+          .document(uid)
+
+        docRef.getDocument { [weak self] snapshot, _ in
+            guard let data = snapshot?.data(), let self = self else { return }
+            DispatchQueue.main.async {
+                self.colorName = data["cow.color"] as? String ?? ""
+                self.topName   = data["cow.top"]   as? String ?? ""
+                self.extraName = data["cow.extra"] as? String ?? ""
+            }
+        }
+    }
     
     // MARK: — Single‐field updaters
 
     func updateColor(_ name: String) {
-        colorName = name
+        self.colorName = name
         updateField("cow.color", value: name)
     }
 
@@ -88,7 +101,7 @@ class PetCustomization: ObservableObject {
     private func updateField(_ key: String, value: Any) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         Firestore.firestore()
-          .collection("Users’ info")
+          .collection("Users' info")
           .document(uid)
           .updateData([key: value]) { error in
               if let e = error {
