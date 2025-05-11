@@ -71,6 +71,7 @@ struct HomeView: View {
             .overlay(
               cowView
                 .offset(x: cowOffsetX, y: cowOffsetY)
+                
             )
 
             // ─ Remaining content
@@ -102,6 +103,7 @@ struct HomeView: View {
         .ignoresSafeArea(edges: .top)
         .onAppear {
             storeData.loadUserDataFromFirestore()
+            petCustomization.fetchInitialCustomizations()
         }
 
         // ─── Fixed bottom tab bar ───
@@ -140,33 +142,37 @@ struct HomeView: View {
     // MARK: – Cow + Edit View
     private var cowView: some View {
         ZStack {
-            // 1) Base color layer
-            petCustomization.colorcow
-              .resizable()
-              .scaledToFit()
-              .frame(width: cowSize, height: cowSize)
-
-            // 2) Outline
-            petCustomization.outlineImage
-              .resizable()
-              .scaledToFit()
-              .frame(width: cowSize, height: cowSize)
-
-            // 3) Top accessory (only if selected)
-            if !petCustomization.topName.isEmpty {
-                petCustomization.topImage
-                  .resizable()
-                  .scaledToFit()
-                  .frame(width: cowSize, height: cowSize)
+            Group{
+                // 1) Base color layer
+                petCustomization.colorcow
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
+                
+                // 2) Outline
+                petCustomization.outlineImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
+                
+                // 3) Top accessory (only if selected)
+                if !petCustomization.topName.isEmpty {
+                    petCustomization.topImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: cowSize, height: cowSize)
+                }
+                
+                // 4) Extra accessory (only if selected)
+                if !petCustomization.extraName.isEmpty {
+                    petCustomization.extraImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: cowSize, height: cowSize)
+                }
             }
-
-            // 4) Extra accessory (only if selected)
-            if !petCustomization.extraName.isEmpty {
-                petCustomization.extraImage
-                  .resizable()
-                  .scaledToFit()
-                  .frame(width: cowSize, height: cowSize)
-            }
+            
+            .allowsHitTesting(false)
 
             // 5) Edit button
             GeometryReader { geometry in
