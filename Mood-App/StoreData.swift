@@ -16,11 +16,13 @@ class StoreData: ObservableObject {
     ]
     
     // ─── Points system ───
-    @Published var welcomeBonus: Int = 50
+    @Published var welcomeBonus: Int = 100
     @Published var goalPoints:   Int = 300
 
     var totalPoints: Int {
-        scores.values.reduce(0, +) + welcomeBonus
+        let spent = scores["spentUnlocks"] ?? 0
+        let earned = scores.filter { $0.key != "spentUnlocks" }.map { $0.value }.reduce(0, +)
+        return earned + welcomeBonus - spent
     }
 
     // User profile info
@@ -41,6 +43,11 @@ class StoreData: ObservableObject {
 
         let db = Firestore.firestore()
         let documentID = currentUser.uid
+
+        // Ensure spentUnlocks is always present
+        if scores["spentUnlocks"] == nil {
+            scores["spentUnlocks"] = 0
+        }
 
         let userRef = db.collection("Users' info").document(documentID)
 
@@ -111,7 +118,12 @@ class StoreData: ObservableObject {
             self.email = data["email"] as? String ?? ""
 
             if let scoresData = data["scores"] as? [String: Int] {
-                self.scores = scoresData
+                // Always ensure spentUnlocks is present
+                var fixedScores = scoresData
+                if fixedScores["spentUnlocks"] == nil {
+                    fixedScores["spentUnlocks"] = 0
+                }
+                self.scores = fixedScores
             }
 
             if let notificationData = data["notifications"] as? [String: Bool] {
@@ -141,7 +153,7 @@ class StoreData: ObservableObject {
       unlockedBadges[index] = true
     }
 
-    /// Displays “Week of Month Day”
+    /// Displays "Week of Month Day"
     var weekRangeText: String {
       let start = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
       let df = DateFormatter()
@@ -177,4 +189,10 @@ class StoreData: ObservableObject {
         sd.weeklyMoodData = ["Happiness": 4, "Sadness": 1, "Anxiety": 2]
         return sd
     }()
+
+    func deductPoints(_ points: Int) {
+        // Deduct from a special key so totalPoints reflects deduction
+        scores["spentUnlocks", default: 0] += points
+        saveToFirestore()
+    }
 }

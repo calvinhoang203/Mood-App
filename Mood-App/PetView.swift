@@ -9,13 +9,9 @@ struct PetView: View {
     // MARK: — View State
     /// Currently selected tab: "Colors", "Tops", or "Extras"
     @State private var selectedTab = "Colors"
-    /// Which items the user has unlocked (persisted in UserDefaults)
-    @State private var unlockedItems = Set(
-        UserDefaults.standard.stringArray(forKey: "unlockedItems")
-        ?? ["defaultcow"]
-    )
     /// Controls display of "Not enough points" alert
     @State private var showAlert = false
+    @State private var alertMessage = ""
     
     // MARK: – Navigation State  ← INSERTED
     @State private var showHomeNav      = false
@@ -27,6 +23,10 @@ struct PetView: View {
     // MARK: — UI Configuration
     /// Tab titles
     private let tabs = ["Colors", "Tops", "Extras"]
+    // Item costs
+    private let colorCost = 50
+    private let topCost = 50
+    private let extraCost = 50
     
     // ─── Colors Data ─────────────────────────────────────────────────────────
     /// Image names for thumbnails
@@ -81,6 +81,18 @@ struct PetView: View {
                 
                 GeometryReader { geometry in
                     VStack(spacing: 12) {
+                        // Points Display
+                        HStack {
+                            Text("Points: \(storeData.totalPoints)")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                                .background(Color("d3cpurple"))
+                                .cornerRadius(8)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                         HStack {
                             Text("Your Avatar")
                                 .font(.custom("Alexandria-Regular", size: 30))
@@ -168,7 +180,7 @@ struct PetView: View {
                                     geometry: geometry
                                 ) { index in
                                     let name = colorImages[index]
-                                    if unlockedItems.contains(name) {
+                                    if petCustomization.unlockedItems.contains(name) {
                                         petCustomization.updateColor(name)
                                     }
                                 }
@@ -181,7 +193,7 @@ struct PetView: View {
                                     geometry: geometry
                                 ) { index in
                                     let name = topImages[index]
-                                    if unlockedItems.contains(name) {
+                                    if petCustomization.unlockedItems.contains(name) {
                                         petCustomization.updateTop(name)
                                     }
                                 }
@@ -194,7 +206,7 @@ struct PetView: View {
                                     geometry: geometry
                                 ) { index in
                                     let name = extraImages[index]
-                                    if unlockedItems.contains(name) {
+                                    if petCustomization.unlockedItems.contains(name) {
                                         petCustomization.updateExtra(name)
                                     }
                                 }
@@ -209,6 +221,11 @@ struct PetView: View {
             .onAppear {
                 petCustomization.fetchInitialCustomizations()
             }
+            .onChange(of: showHomeNav) { _ in petCustomization.fetchInitialCustomizations() }
+            .onChange(of: showResource) { _ in petCustomization.fetchInitialCustomizations() }
+            .onChange(of: showSetGoal) { _ in petCustomization.fetchInitialCustomizations() }
+            .onChange(of: showAnalyticsNav) { _ in petCustomization.fetchInitialCustomizations() }
+            .onChange(of: showSettingNav) { _ in petCustomization.fetchInitialCustomizations() }
             
             VStack {
                 
@@ -219,7 +236,7 @@ struct PetView: View {
             .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("Not Enough Points"),
-                    message: Text("You need more points to unlock this item."),
+                    message: Text(alertMessage),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -232,6 +249,10 @@ struct PetView: View {
             .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
+        .onDisappear {
+            // Force reload from Firestore when leaving PetView
+            petCustomization.fetchInitialCustomizations()
+        }
     }
     // ─── Grid Builder ────────────────────────────────────────────────────────
     // Creates a 3-column grid of thumbnails with lock/unlock buttons.
@@ -242,7 +263,12 @@ struct PetView: View {
         geometry: GeometryProxy,
         action: @escaping (Int) -> Void
     ) -> some View {
-        LazyVGrid(
+        // Determine cost for this category
+        let cost: Int =
+            items == colorImages ? colorCost :
+            items == topImages ? topCost :
+            items == extraImages ? extraCost : 50
+        return LazyVGrid(
             columns: Array(repeating: .init(.flexible(), spacing: 10), count: 3),
             spacing: 15
         ) {
@@ -258,7 +284,7 @@ struct PetView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .onTapGesture {
-                            if unlockedItems.contains(items[index]) {
+                            if petCustomization.unlockedItems.contains(items[index]) {
                                 action(index)
                             }
                         }
@@ -270,18 +296,28 @@ struct PetView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     
+                    // Cost label
+                    Text("\(cost) pts")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    
                     // Lock/Unlock button
                     Button {
-                        if !unlockedItems.contains(items[index]) {
-                            unlockItem(items[index])
+                        if !petCustomization.unlockedItems.contains(items[index]) {
+                            petCustomization.unlockItem(items[index], storeData: storeData) { success in
+                                if !success {
+                                    alertMessage = "You need \(cost) points to unlock this item."
+                                    showAlert = true
+                                }
+                            }
                         }
                     } label: {
-                        Text(unlockedItems.contains(items[index]) ? "Unlocked" : "Locked")
+                        Text(petCustomization.unlockedItems.contains(items[index]) ? "Unlocked" : "Locked")
                             .font(.custom("Jua", size: 14))
                             .padding(5)
                             .frame(maxWidth: .infinity)
                             .background(
-                                unlockedItems.contains(items[index])
+                                petCustomization.unlockedItems.contains(items[index])
                                 ? Color.green
                                 : Color.red
                             )
@@ -293,28 +329,6 @@ struct PetView: View {
         }
     }
     
-    // ─── Unlock Logic & Persistence ────────────────────────────────────────
-    /// Save the unlockedItems set to UserDefaults
-    private func saveUnlockedItems() {
-        UserDefaults.standard.set(
-            Array(unlockedItems),
-            forKey: "unlockedItems"
-        )
-    }
-    
-    /// Attempt to unlock an item by spending points
-    private func unlockItem(_ item: String) {
-        let cost = 50
-        if storeData.totalPoints >= cost {
-            // Deduct cost and add to unlocked set
-            storeData.scores["spentUnlocks", default: 0] += cost
-            unlockedItems.insert(item)
-            saveUnlockedItems()
-        } else {
-            // Not enough points
-            showAlert = true
-        }
-    }
     // ─── Bottom Tab Bar ─────────────────────────────────────────  ← INSERTED
     private var bottomTabBar: some View {
         HStack {

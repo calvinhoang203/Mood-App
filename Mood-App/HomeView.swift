@@ -78,7 +78,7 @@ struct HomeView: View {
             VStack(spacing: 24) {
               Text("Welcome back, \(storeData.firstName)")
                 .font(.system(size: 26, weight: .semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity,     alignment: .leading)
                 .padding(.horizontal, 16)
 
               quoteView
