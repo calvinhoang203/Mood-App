@@ -72,6 +72,27 @@ struct PetView: View {
         "Mask", "AirPods"
     ]
     
+    // Add these @State variables at the top of PetView (inside the struct, before body):
+    @State private var cowColorWidth: CGFloat = 800
+    @State private var cowColorHeight: CGFloat = 800
+    @State private var cowColorX: CGFloat = 270
+    @State private var cowColorY: CGFloat = 55
+
+    @State private var cowOutlineWidth: CGFloat = 800
+    @State private var cowOutlineHeight: CGFloat = 800
+    @State private var cowOutlineX: CGFloat = 270
+    @State private var cowOutlineY: CGFloat = 55
+
+    @State private var cowTopWidth: CGFloat = 350
+    @State private var cowTopHeight: CGFloat = 350
+    @State private var cowTopX: CGFloat = 200
+    @State private var cowTopY: CGFloat = 120
+
+    @State private var cowExtraWidth: CGFloat = 350
+    @State private var cowExtraHeight: CGFloat = 350
+    @State private var cowExtraX: CGFloat = 200
+    @State private var cowExtraY: CGFloat = 120
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -105,49 +126,43 @@ struct PetView: View {
                         
                         // ─── Cow Display ─────────────────────────────────────────────
                         ZStack {
-                            let width = geometry.size.width
-                            let height = geometry.size.height
-                            let posX = width / 1.57
-                            let posY = height * 0.125
+                            let posX = geometry.size.width / 1.57
+                            let posY = geometry.size.height * 0.125
 
                             // Shadow ellipse behind the cow
                             Ellipse()
                                 .fill(Color("d3cpurple"))
-                                .frame(width: 200, height: 50)
+                                .frame(width: 250, height: 70)
                                 .cornerRadius(10)
                                 .shadow(color: .gray, radius: 9, x: 5, y: 5)
                                 .position(x: posX * 0.8, y: posY * 2)
 
-                            // Base color layer
                             petCustomization.colorcow
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: width, height: height)
-                                .position(x: posX, y: posY)
+                                .frame(width: cowColorWidth, height: cowColorHeight)
+                                .position(x: cowColorX, y: cowColorY)
 
-                            // Outline layer
                             petCustomization.outlineImage
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: width, height: height)
-                                .position(x: posX, y: posY)
+                                .frame(width: cowOutlineWidth, height: cowOutlineHeight)
+                                .position(x: cowOutlineX, y: cowOutlineY)
 
-                            // Top accessory (only if set)
                             if !petCustomization.topName.isEmpty {
                                 petCustomization.topImage
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: width, height: height)
-                                    .position(x: posX, y: posY)
+                                    .frame(width: cowColorWidth, height: cowColorHeight)
+                                    .position(x: cowColorX, y: cowColorY)
                             }
 
-                            // Extra accessory (only if set)
                             if !petCustomization.extraName.isEmpty {
                                 petCustomization.extraImage
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: width, height: height)
-                                    .position(x: posX, y: posY)
+                                    .frame(width: cowColorWidth, height: cowColorHeight)
+                                    .position(x: cowColorX, y: cowColorY)
                             }
                         }
 
@@ -273,34 +288,37 @@ struct PetView: View {
             spacing: 15
         ) {
             ForEach(items.indices, id: \.self) { index in
-                VStack {
-                    // Thumbnail image
-                    Image(display[index])
-                        .resizable()
-                        .scaledToFit()
-                        .frame(
-                            width: geometry.size.width * 0.25,
-                            height: geometry.size.width * 0.25
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .onTapGesture {
-                            if petCustomization.unlockedItems.contains(items[index]) {
-                                action(index)
+                VStack(spacing: 6) {
+                    ZStack {
+                        // Ellipse base under each item
+                        Ellipse()
+                            .fill(Color.gray.opacity(0.4))
+                            .frame(width: geometry.size.width * 0.20, height: geometry.size.width * 0.05)
+                            .offset(y: geometry.size.width * 0.065)
+                            .shadow(color: .black.opacity(0.2), radius: 5, x: 2, y: 2)
+                        // Item image
+                        Image(display[index])
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width * 0.15, height: geometry.size.width * 0.15)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onTapGesture {
+                                if petCustomization.unlockedItems.contains(items[index]) {
+                                    action(index)
+                                }
                             }
-                        }
-                    
+                            .padding(.top, 15)
+                    }
                     // Item name
                     Text(names[index])
                         .font(.caption)
                         .foregroundColor(.black)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
-                    
                     // Cost label
                     Text("\(cost) pts")
                         .font(.caption2)
                         .foregroundColor(.gray)
-                    
                     // Lock/Unlock button
                     Button {
                         if !petCustomization.unlockedItems.contains(items[index]) {
