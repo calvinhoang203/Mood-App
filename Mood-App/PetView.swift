@@ -69,7 +69,6 @@ struct PetView: View {
     @State private var cowColorWidth: CGFloat = 800
     @State private var cowColorHeight: CGFloat = 800
 
-
     @State private var cowColorX: CGFloat = 290
     @State private var cowColorY: CGFloat = 80
 

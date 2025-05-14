@@ -16,23 +16,9 @@ class StoreData: ObservableObject {
     ]
     
     // ─── Points system ───
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
     @Published var welcomeBonus: Int = 1000
-=======
-    @Published var welcomeBonus: Int = 500
->>>>>>> Stashed changes
-=======
-    @Published var welcomeBonus: Int = 500
->>>>>>> Stashed changes
-=======
-    @Published var welcomeBonus: Int = 500
->>>>>>> Stashed changes
-=======
-    @Published var welcomeBonus: Int = 500
->>>>>>> Stashed changes
+
     @Published var goalPoints:   Int = 300
 
     var totalPoints: Int {

@@ -303,7 +303,7 @@ private struct SectionHeader: View {
 struct HomeView_Previews: PreviewProvider {
   static var previews: some View {
     let demo = StoreData()
-    demo.scores = ["demo": 217]
+    demo.scores = ["demo": 500]
     return HomeView()
       .environmentObject(demo)
       .environmentObject(PetCustomization())

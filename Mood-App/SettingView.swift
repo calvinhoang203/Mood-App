@@ -39,12 +39,12 @@ struct SettingView: View {
     // Cow Layer Layouts (match PetView)
     private let cowColorWidth: CGFloat = 800
     private let cowColorHeight: CGFloat = 800
-    private let cowColorX: CGFloat = 270
-    private let cowColorY: CGFloat = 30
+    private let cowColorX: CGFloat = 290
+    private let cowColorY: CGFloat = 80
     private let cowOutlineWidth: CGFloat = 800
     private let cowOutlineHeight: CGFloat = 800
-    private let cowOutlineX: CGFloat = 270
-    private let cowOutlineY: CGFloat = 30
+    private let cowOutlineX: CGFloat = 290
+    private let cowOutlineY: CGFloat = 80
     
     var body: some View {
         NavigationStack {

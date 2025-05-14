@@ -58,9 +58,22 @@
 		AD09CBB72DA8E16900C57591 /* Mood-AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mood-AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ADC56F1E2DD463840067585F /* Exceptions for "Mood-App" folder in "Mood-App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AD09CB9C2DA8E16700C57591 /* Mood-App */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AD09CB9F2DA8E16700C57591 /* Mood-App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ADC56F1E2DD463840067585F /* Exceptions for "Mood-App" folder in "Mood-App" target */,
+			);
 			path = "Mood-App";
 			sourceTree = "<group>";
 		};
