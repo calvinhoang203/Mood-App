@@ -75,13 +75,13 @@ struct PetView: View {
     // Add these @State variables at the top of PetView (inside the struct, before body):
     @State private var cowColorWidth: CGFloat = 800
     @State private var cowColorHeight: CGFloat = 800
-    @State private var cowColorX: CGFloat = 270
-    @State private var cowColorY: CGFloat = 55
+    @State private var cowColorX: CGFloat = 280
+    @State private var cowColorY: CGFloat = 70
 
     @State private var cowOutlineWidth: CGFloat = 800
     @State private var cowOutlineHeight: CGFloat = 800
-    @State private var cowOutlineX: CGFloat = 270
-    @State private var cowOutlineY: CGFloat = 55
+    @State private var cowOutlineX: CGFloat = 280
+    @State private var cowOutlineY: CGFloat = 70
 
     @State private var cowTopWidth: CGFloat = 350
     @State private var cowTopHeight: CGFloat = 350
