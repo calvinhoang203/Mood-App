@@ -70,6 +70,7 @@ struct PetView: View {
     @State private var cowColorHeight: CGFloat = 800
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     @State private var cowColorX: CGFloat = 280
     @State private var cowColorY: CGFloat = 70
 
@@ -77,6 +78,15 @@ struct PetView: View {
     @State private var cowOutlineHeight: CGFloat = 800
     @State private var cowOutlineX: CGFloat = 280
     @State private var cowOutlineY: CGFloat = 70
+=======
+    @State private var cowColorX: CGFloat = 290
+    @State private var cowColorY: CGFloat = 80
+
+    @State private var cowOutlineWidth: CGFloat = 800
+    @State private var cowOutlineHeight: CGFloat = 800
+    @State private var cowOutlineX: CGFloat = 290
+    @State private var cowOutlineY: CGFloat = 80
+>>>>>>> Stashed changes
 =======
     @State private var cowColorX: CGFloat = 290
     @State private var cowColorY: CGFloat = 80
