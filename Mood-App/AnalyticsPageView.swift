@@ -15,6 +15,7 @@ struct AnalyticsPageView: View {
     @State private var showResource     = false
     @State private var showSetGoal      = false
     @State private var showAnalyticsNav = false
+    @State private var showPet          = false
     @State private var showSettingNav   = false
     
     /// Midnight Purple (#463F6D) for the streak text
@@ -22,7 +23,7 @@ struct AnalyticsPageView: View {
     /// Days required for a full streak bar
     private let maxStreakDays = 7
     /// Bottom tab-bar height
-    private let navBarHeight: CGFloat = 50
+    private let navBarHeight: CGFloat = 64
 
     /// 0…1 fraction of streak progress
     private var streakFraction: CGFloat {
@@ -55,21 +56,20 @@ struct AnalyticsPageView: View {
                     .padding(.vertical, 16)
                     .padding(.bottom, navBarHeight)
                 }
-
-                // ─── Fixed bottom tab bar ──────────────────────────────
                 VStack {
                     Spacer()
                     bottomTabBar
                 }
             }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .onAppear { storeData.fetchAnalyticsData() }
             
         }
-        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-        .navigationDestination(isPresented: $showResource)     { ResourcesView() }
-        .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
-        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
         .navigationBarBackButtonHidden(true)
     }
 
@@ -226,8 +226,6 @@ struct AnalyticsPageView: View {
         }
     }
 
-    // MARK: – Bottom Tab Bar
-
     private var bottomTabBar: some View {
         HStack {
             Spacer()
@@ -259,6 +257,13 @@ struct AnalyticsPageView: View {
                     .frame(width: 36, height: 36)
             }
             Spacer()
+            Button { withAnimation(.none) { showPet = true } } label: {
+                Image("Pet Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
             Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
                     .resizable()
@@ -269,15 +274,6 @@ struct AnalyticsPageView: View {
         }
         .frame(height: navBarHeight)
         .background(Color.white)
-    }
-
-    private func navButton<Dest: View>(_ image: String, _ dest: Dest) -> some View {
-        NavigationLink(destination: dest) {
-            Image(image)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 36, height: 36)
-        }
     }
 }
 

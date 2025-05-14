@@ -10,14 +10,13 @@ struct GoalView: View {
     @State private var selectedOption: String?
     @State private var showAlert = false
     @State private var isCompleted = false
-
-    @State private var showHomeNav      = false
-    @State private var showResourceNav  = false
-    @State private var showSetGoalNav   = false
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
-    @State private var showSettingNav   = false
-    
-    
+    @State private var showPet = false
+    @State private var showSettingNav = false
+
     let steps: [GoalStep] = [
         GoalStep(
             title: "Set a tangible goal for yourself.",
@@ -33,7 +32,7 @@ struct GoalView: View {
         CGFloat(currentStep + 1) / CGFloat(steps.count)
     }
 
-    private let navBarHeight: CGFloat = 50
+    private let navBarHeight: CGFloat = 64
     
     
     var body: some View {
@@ -59,7 +58,7 @@ struct GoalView: View {
 
                     // Motivational Text
                     VStack(spacing: 5) {
-                        Text("Let’s get on track!\nTime to set a goal for yourself.")
+                        Text("Let's get on track!\nTime to set a goal for yourself.")
                             .font(.custom("Alexandria", size: 18))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.black)
@@ -132,18 +131,16 @@ struct GoalView: View {
                     bottomTabBar
                 }
             }
-            .navigationDestination(isPresented: $isCompleted) {
-                // You can link to Dashboard() or any next view
-                Text("Goal setup complete!")
-            }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
-        .navigationDestination(isPresented: $showSetGoalNav)   { SetGoalView() }
-        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
-        .navigationBarBackButtonHidden(true)
     }
+
     private var bottomTabBar: some View {
         HStack {
             Spacer()
@@ -154,14 +151,14 @@ struct GoalView: View {
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { withAnimation(.none) { showResourceNav = true } } label: {
+            Button { withAnimation(.none) { showResource = true } } label: {
                 Image("Resource Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { withAnimation(.none) { showSetGoalNav = true } } label: {
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
                 Image("Set Goal Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -170,6 +167,13 @@ struct GoalView: View {
             Spacer()
             Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showPet = true } } label: {
+                Image("Pet Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
@@ -184,7 +188,7 @@ struct GoalView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
+        .background(Color.white)
     }
 }
 

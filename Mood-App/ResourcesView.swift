@@ -4,137 +4,214 @@ struct ResourcesView: View {
     @State private var searchText: String = ""
     @StateObject private var savedItems = SavedItems()
     @State private var navigateToSaved = false
-
-    @State private var showHomeNav      = false
-    @State private var showResourceNav  = false
-    @State private var showSetGoal      = false
+    @FocusState private var isSearchFocused: Bool
+    // Navigation state for all main screens
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
-    @State private var showSettingNav   = false
+    @State private var showPet = false
+    @State private var showSettingNav = false
+    private let navBarHeight: CGFloat = 64
+
+    //Defined lists containing all activities/resources of type "Activity" or "Resource"
     
-    let activities: [Activity] = [
-        Activity(name: "Go On A Walk", imageName: "figure.walk", description: "Check out the arboretum or just head around campus!"),
-        Activity(name: "Listen to Music", imageName: "music.note", description: "Find a calming playlist and unwind."),
-        Activity(name: "Try Meditation", imageName: "brain.head.profile", description: "Breathe deeply and try a guided meditation.")
+    let allActivities: [Activity] = [
+        Activity(name: "Go On A Walk", imageName: "resourcewalk", description: "Check out the arboretum or just head around campus!"),
+        Activity(name: "Listen to Music", imageName: "resourcemusic", description: "Find a calming playlist and unwind."),
+        Activity(name: "Try Meditation", imageName: "resourcemed", description: "Breathe deeply and try a guided meditation.")
     ]
 
-    let resources: [Resource] = [
+    let allResources: [Resource] = [
         Resource(name: "SHCS", imageName: "cross.case.fill", description: "Check out Student Health and Counseling Services!"),
         Resource(name: "CAPS", imageName: "heart.text.clipboard", description: "Counseling and Psychological Services for support."),
         Resource(name: "Wellness Coaching", imageName: "heart.text.square.fill", description: "Meet with a coach to improve well-being.")
     ]
+    
+   //SearchBar: If empty: return all activities and resources, Else: Return Activities and Resources filtered by Search (not case-sensitive)
+    
+    var filteredActivities: [Activity] {
+        if searchText.isEmpty {
+            return allActivities
+        } else {
+            return allActivities.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+
+    var filteredResources: [Resource] {
+        if searchText.isEmpty {
+            return allResources
+        } else {
+            return allResources.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
+            ZStack {
+                Color.clear
                 
-                HStack {
-                    Text("Discover ways to cope.")
-                        .font(.title2)
-                        .bold()
-                    Spacer()
-                    Button {
-                        navigateToSaved = true
-                    } label: {
-                        Image(systemName: "bookmark.fill")
-                    }
-                    Image(systemName: "bell.fill")
-                }
-                .padding(.horizontal)
+                // Title and Bookmark
+                
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header
+                    HStack {
+                        Text("Discover ways to cope.")
+                            .font(.custom("Alexandria-Regular", size: 22))
+                            .bold()
+                            .padding(.top, 15)
+                        Spacer()
+                        Button {
+                            navigateToSaved = true
+                        } label: {
+                            Image("Bookmark Icon")
+                               .resizable()
+                               .frame(width: 30, height: 35)
+                               .padding(.top, 15)
+                        }
+                        Image("Notification Icon")
+                            .resizable()
+                            .frame(width: 30, height: 35)
+                            .padding(.top, 15)
 
-                TextField("Search...", text: $searchText)
-                    .padding(10)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    }
                     .padding(.horizontal)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 25) {
+                    // Search Bar: isSearchFocused stops blinker if clicked off searchbar
+                    
+                    TextField("Search...", text: $searchText)
+                        .padding(10)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        .focused($isSearchFocused)
 
-                        Text("Activities For You")
-                            .font(.headline)
-                            .padding(.horizontal)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 25) {
+                            // Activities Section: Displaying Activities based on Filter
+                            Text("Activities List")
+                                .font(.custom("Alexandria-Regular", size: 17))
+                                .padding(.horizontal)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(activities) { activity in
-                                    ActivityCard(activity: activity, savedItems: savedItems)
+                            if filteredActivities.isEmpty {
+                                Text("No matching activities found.")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 20) { //Works by using Identifiable
+                                        ForEach(filteredActivities) { activity in
+                                            ActivityCard(activity: activity, savedItems: savedItems)
+                                        }
+                                    }
+                                    .padding(.horizontal)
                                 }
                             }
-                            .padding(.horizontal)
-                        }
 
-                     
-                        Text("Resources for You")
-                            .font(.headline)
-                            .padding(.horizontal)
+                            // Resources Section: Displaying Resources based on Filter
+                            Text("Resources List")
+                                .font(.custom("Alexandria-Regular", size: 17))
+                                .padding(.horizontal)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(resources) { resource in
-                                    ResourceCard(resource: resource, savedItems: savedItems)
+                            if filteredResources.isEmpty {
+                                Text("No matching resources found.")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 20) {
+                                        ForEach(filteredResources) { resource in
+                                            ResourceCard(resource: resource, savedItems: savedItems)
+                                        }
+                                    }
+                                    .padding(.horizontal)
                                 }
                             }
-                            .padding(.horizontal)
                         }
+                        .padding(.top, 10)
                     }
-                    .padding(.top, 10)
-                }
 
+                }
+                .onTapGesture {
+                    isSearchFocused = false
+                }
+                VStack {
+                    Spacer()
+                    bottomTabBar
+                }
             }
+            .navigationBarBackButtonHidden(true) // Hides back button
+            .gesture(DragGesture())
             .background(Color("lightd3cpurple").ignoresSafeArea())
-            VStack {
-                bottomTabBar
-            }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationDestination(isPresented: $navigateToSaved) {
                 ResourcesPersonalView()
                     .environmentObject(savedItems)
             }
         }
-        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
-        .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
-        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
-        .navigationBarBackButtonHidden(true)
     }
     private var bottomTabBar: some View {
         HStack {
             Spacer()
             Button { withAnimation(.none) { showHomeNav = true } } label: {
                 Image("Home Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { withAnimation(.none) { showResourceNav = true } } label: {
+            Button { withAnimation(.none) { showResource = true } } label: {
                 Image("Resource Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showSetGoal = true } } label: {
                 Image("Set Goal Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showPet = true } } label: {
+                Image("Pet Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
             }
             Spacer()
         }
-        .frame(height: 64)
+        .frame(height: navBarHeight)
         .background(Color.white)
     }
 }
+
 
 
 
@@ -146,26 +223,29 @@ struct ActivityCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack {
+                Image(activity.imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 100)
+                    .clipped()
+                    .cornerRadius(10)
+
                 Rectangle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color.black.opacity(0.2))
                     .frame(height: 100)
                     .cornerRadius(10)
-                Image(systemName: activity.imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 50)
-                    .foregroundColor(.purple)
             }
 
             Text(activity.name)
-                .font(.subheadline)
+                .font(.custom("Alexandria-Regular", size: 15))
                 .bold()
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(activity.description)
-                .font(.caption)
+                .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
                 .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(nil)
 
             HStack {
                 Button(action: {
@@ -224,14 +304,15 @@ struct ResourceCard: View {
             }
 
             Text(resource.name)
-                .font(.subheadline)
+                .font(.custom("Alexandria-Regular", size: 15))
                 .bold()
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(resource.description)
-                .font(.caption)
+                .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
                 .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(nil)
 
             HStack {
                 Button(action: {

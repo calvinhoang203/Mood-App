@@ -21,11 +21,12 @@ struct JournalView: View {
 
     // MARK: – Navigation State
     @State private var showCheckInFlow   = false
-    @State private var showHomeNav       = false
-    @State private var showResourceNav   = false
-    @State private var showSetGoalNav    = false
-    @State private var showAnalyticsNav  = false
-    @State private var showSettingNav    = false
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
+    @State private var showAnalyticsNav = false
+    @State private var showPet = false
+    @State private var showSettingNav = false
 
     // MARK: – Layout Constants
     private let navBarHeight: CGFloat  = 64
@@ -43,7 +44,7 @@ struct JournalView: View {
                         Spacer().frame(height: topPadding)
 
                         // — Title —
-                        Text("Write what you’re feeling. Include as much or as little detail as you’d like.")
+                        Text("Write what you're feeling. Include as much or as little detail as you'd like.")
                             .font(.system(size: 20, weight: .semibold))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 16)
@@ -129,25 +130,73 @@ struct JournalView: View {
                 .sheet(isPresented: $isShowingCamera) {
                     ImagePicker(image: $capturedImage, sourceType: .camera)
                 }
-
-                // — Bottom Tab Bar —
                 VStack {
                     Spacer()
                     bottomTabBar
                 }
             }
-            // MARK: – Navigation Destinations
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationDestination(isPresented: $showCheckInFlow) {
                 CheckInView()
                     .environmentObject(storeData)
             }
-            .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-            .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoalNav)   { SetGoalView() }
-            .navigationDestination(isPresented: $showAnalyticsNav){ AnalyticsPageView() }
-            .navigationDestination(isPresented: $showSettingNav)  { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
+    }
+
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showPet = true } } label: {
+                Image("Pet Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white)
     }
 
     // MARK: – Save Logic
@@ -157,50 +206,6 @@ struct JournalView: View {
         entries.append(trimmed)
         journalEntry = ""
         userEdited    = false
-    }
-
-    // MARK: – Bottom Tab Bar
-    private var bottomTabBar: some View {
-        HStack {
-            Spacer()
-            Button { showHomeNav = true } label: {
-                Image("Home Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showResourceNav = true } label: {
-                Image("Resource Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showSetGoalNav = true } label: {
-                Image("Set Goal Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showAnalyticsNav = true } label: {
-                Image("Analytics Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showSettingNav = true } label: {
-                Image("Setting Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-        }
-        .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
     }
 }
 
