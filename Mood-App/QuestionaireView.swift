@@ -127,12 +127,12 @@ struct QuestionaireView: View {
                         // ——— Removed the leading Spacer() ———
 
                         Text("Let’s get to know you better.")
-                            .font(.custom("Alexandria", size: 24))
+                            .font(.custom("Alexandria-Regular", size: 24))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
 
                         Text("Answer a couple questions to get started.")
-                            .font(.custom("Alexandria", size: 16))
+                            .font(.custom("Alexandria-Regular", size: 16))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
 
@@ -143,13 +143,13 @@ struct QuestionaireView: View {
 
                         VStack(spacing: 5) {
                             Text(questions[currentIndex].question)
-                                .font(.custom("Alexandria", size: 18))
+                                .font(.custom("Alexandria-Regular", size: 18))
                                 .bold()
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
 
                             Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
-                                .font(.custom("Alexandria", size: 14))
+                                .font(.custom("Alexandria-Regular", size: 14))
                                 .foregroundColor(.gray)
                         }
 
