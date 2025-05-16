@@ -250,7 +250,6 @@ struct PetView: View {
             .navigationDestination(isPresented: $showResource) { ResourcesView() }
             .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-            .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
@@ -362,13 +361,6 @@ struct PetView: View {
             Spacer()
             Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { withAnimation(.none) { showPet = true } } label: {
-                Image("Pet Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)

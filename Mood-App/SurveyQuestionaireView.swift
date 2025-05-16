@@ -20,6 +20,15 @@ struct SurveyQuestionaireView: View {
     @State private var isFinished = false
     @State private var showLoading = false
     @Environment(\.dismiss) private var dismiss
+    
+    // Navigation state for all main screens
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
+    @State private var showAnalyticsNav = false
+    @State private var showPet = false
+    @State private var showSettingNav = false
+    private let navBarHeight: CGFloat = 64
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
@@ -118,8 +127,6 @@ struct SurveyQuestionaireView: View {
         guard !questions.isEmpty else { return 0 }
         return CGFloat(currentIndex + 1) / CGFloat(questions.count)
     }
-
-    private let navBarHeight: CGFloat = 50
     
     var body: some View {
         NavigationStack {
@@ -206,7 +213,18 @@ struct SurveyQuestionaireView: View {
                     .padding(.bottom, navBarHeight)
 
                 }
+                
+                VStack {
+                    Spacer()
+                    bottomTabBar
+                }
             }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationDestination(isPresented: $isFinished) {
                 HomeView()
                     .environmentObject(storeData)
@@ -219,8 +237,8 @@ struct SurveyQuestionaireView: View {
                     dismiss()
                 }
             }
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationBarBackButtonHidden(true)
     }
 
     func toggleSelection(for option: String) {
@@ -256,6 +274,49 @@ struct SurveyQuestionaireView: View {
                 dismiss()
             }
         }
+    }
+    
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white)
     }
 }
 

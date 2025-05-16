@@ -11,9 +11,14 @@ struct SetGoalView: View {
     // ── Navigation State ─────────────────────────────────────────────
     @State private var showGoalFlow     = false
     @State private var showCheckInFlow  = false
+    @State private var showHomeNav      = false
+    @State private var showResource     = false
+    @State private var showSetGoal      = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav   = false
 
     // ── Layout Constants ─────────────────────────────────────────────
-    private let navBarHeight: CGFloat = 50
+    private let navBarHeight: CGFloat = 64
     private let topPadding: CGFloat   = 80
     private let iconSize: CGFloat     = 60
     private let buttonHeight: CGFloat = 44
@@ -22,86 +27,141 @@ struct SetGoalView: View {
     private let descriptionWidth: CGFloat = 120
 
     var body: some View {
-        ZStack {
-            Color("lavenderColor")
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color("lavenderColor")
+                    .ignoresSafeArea()
 
-            // ── Content ────────────────────────────────────
-            VStack(spacing: 32) {
-                // push everything down a bit
-                Spacer().frame(height: topPadding)
+                // ── Content ────────────────────────────────────
+                VStack(spacing: 32) {
+                    // push everything down a bit
+                    Spacer().frame(height: topPadding)
 
-                // Greeting
-                Text("Hey! How's it going?")
-                    .font(.system(size: 24, weight: .semibold))
+                    // Greeting
+                    Text("Hey! How's it going?")
+                        .font(.system(size: 24, weight: .semibold))
 
-                // Cow illustration
-                Image("QuestionIcon")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 150, height: 150)
+                    // Cow illustration
+                    Image("QuestionIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
 
-                // Prompt
-                Text("What would you like to do?")
-                    .font(.system(size: 20, weight: .medium))
+                    // Prompt
+                    Text("What would you like to do?")
+                        .font(.system(size: 20, weight: .medium))
 
-                // Two columns: Set Goal / Check In
-                HStack(spacing: columnSpacing) {
-                    // ── Set Goal Column ────────────────────
-                    VStack(spacing: rowSpacing) {
-                        Image("Set Goal Icon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: iconSize, height: iconSize)
-
-                        Button {
-                            showGoalFlow = true
-                        } label: {
-                            Image("Set Goal Button 1")
+                    // Two columns: Set Goal / Check In
+                    HStack(spacing: columnSpacing) {
+                        // ── Set Goal Column ────────────────────
+                        VStack(spacing: rowSpacing) {
+                            Image("Set Goal Icon")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: buttonHeight)
+                                .frame(width: iconSize, height: iconSize)
+
+                            Button {
+                                showGoalFlow = true
+                            } label: {
+                                Image("Set Goal Button 1")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: buttonHeight)
+                            }
+
+                            Text("Keep track of your progress by earning wellness points.")
+                                .font(.caption)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                                .frame(width: descriptionWidth)
                         }
 
-                        Text("Keep track of your progress by earning wellness points.")
-                            .font(.caption)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.center)
-                            .frame(width: descriptionWidth)
-                    }
-
-                    // ── Check In Column ────────────────────
-                    VStack(spacing: rowSpacing) {
-                        Image("Check In Icon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: iconSize, height: iconSize)
-
-                        Button {
-                            showCheckInFlow = true
-                        } label: {
-                            Image("Check In Button")
+                        // ── Check In Column ────────────────────
+                        VStack(spacing: rowSpacing) {
+                            Image("Check In Icon")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: buttonHeight)
-                        }
+                                .frame(width: iconSize, height: iconSize)
 
-                        Text("Check in with how you're currently feeling.")
-                            .font(.caption)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.center)
-                            .frame(width: descriptionWidth)
+                            Button {
+                                showCheckInFlow = true
+                            } label: {
+                                Image("Check In Button")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: buttonHeight)
+                            }
+
+                            Text("Check in with how you're currently feeling.")
+                                .font(.caption)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                                .frame(width: descriptionWidth)
+                        }
                     }
+
+                    Spacer() // push content up out of tab-bar
                 }
-
-                Spacer() // push content up out of tab-bar
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, navBarHeight)
+                
+                VStack {
+                    Spacer()
+                    bottomTabBar
+                }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, navBarHeight)
+            .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
+            .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
+            .navigationDestination(isPresented: $showHomeNav)     { HomeView() }
+            .navigationDestination(isPresented: $showResource)    { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal)     { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav){ AnalyticsPageView() }
+            .navigationDestination(isPresented: $showSettingNav)  { SettingView() }
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
-        .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
-        .navigationBarBackButtonHidden(true)
+    }
+    
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white)
     }
 }
 

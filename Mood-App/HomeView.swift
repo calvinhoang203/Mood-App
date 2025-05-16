@@ -4,14 +4,16 @@ import Combine
 struct HomeView: View {
   @EnvironmentObject private var storeData: StoreData
   @EnvironmentObject private var petCustomization: PetCustomization
-  @Environment(\.selectedTab) private var selectedTab
   @State private var tabSwitchTrigger = false
 
   // MARK: – Navigation State
   @State private var showPet = false
-  @State private var showCheckIn     = false
-    
-    
+  @State private var showCheckIn = false
+  @State private var showHomeNav = false
+  @State private var showResource = false
+  @State private var showSetGoal = false
+  @State private var showAnalyticsNav = false
+  @State private var showSettingNav = false
     
   // MARK: – Layout State
   @State private var editIconX: CGFloat = 0.51
@@ -82,9 +84,7 @@ struct HomeView: View {
               quoteView
                 
               Button {
-                if let selectedTab = selectedTab {
-                    withAnimation(.spring()) { selectedTab.wrappedValue = .setGoal }
-                }
+                showCheckIn = true
               } label: {
                 Image("Start A Check In Button")
                   .resizable()
@@ -105,19 +105,21 @@ struct HomeView: View {
             storeData.loadUserDataFromFirestore()
             petCustomization.fetchInitialCustomizations()
         }
+        
+        VStack {
+            Spacer()
+            bottomTabBar
+        }
       }
+      .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+      .navigationDestination(isPresented: $showResource) { ResourcesView() }
+      .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+      .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+      .navigationDestination(isPresented: $showPet) { PetView() }
+      .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+      .navigationDestination(isPresented: $showCheckIn) { SurveyQuestionaireView().environmentObject(storeData) }
+      .navigationBarBackButtonHidden(true)
     }
-    // MARK: – All programmatic destinations registered on the stack:
-    .fullScreenCover(isPresented: $showPet) {
-      PetView()
-        .environmentObject(storeData)
-        .environmentObject(petCustomization)
-    }
-    .fullScreenCover(isPresented: $showCheckIn) {
-      SurveyQuestionaireView()
-        .environmentObject(storeData)
-    }
-    .navigationBarBackButtonHidden(true)
   }
 
     // MARK: – Cow + Edit View
@@ -158,7 +160,7 @@ struct HomeView: View {
             // 5) Edit button
             GeometryReader { geometry in
                 Button {
-                    withAnimation(.spring()) { showPet = true }
+                    showPet = true
                 } label: {
                     Image("Edit Icon")
                       .resizable()
@@ -214,12 +216,7 @@ struct HomeView: View {
       .padding(.horizontal, 16)
 
       Button {
-        if let selectedTab = selectedTab {
-            withAnimation(.spring()) {
-                selectedTab.wrappedValue = .setGoal
-                tabSwitchTrigger.toggle()
-            }
-        }
+        showSetGoal = true
       } label: {
         Image("Set New Goal Button")
           .resizable()
@@ -284,6 +281,49 @@ struct HomeView: View {
     .font(.subheadline)
     .frame(maxWidth: .infinity, alignment: .center)
     .multilineTextAlignment(.center)
+  }
+  
+  private var bottomTabBar: some View {
+      HStack {
+          Spacer()
+          Button { withAnimation(.none) { showHomeNav = true } } label: {
+              Image("Home Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showResource = true } } label: {
+              Image("Resource Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showSetGoal = true } } label: {
+              Image("Set Goal Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+              Image("Analytics Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showSettingNav = true } } label: {
+              Image("Setting Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+      }
+      .frame(height: navBarHeight)
+      .background(Color.white)
   }
 }
 

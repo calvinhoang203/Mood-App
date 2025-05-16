@@ -16,7 +16,6 @@ import FirebaseAuth
 struct SettingView: View {
     @EnvironmentObject private var storeData: StoreData
     @EnvironmentObject private var petCustomization: PetCustomization
-    @Environment(\.selectedTab) private var selectedTab
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
     @State private var showPetView = false
     @State private var notificationsEnabled: Bool = false
@@ -226,13 +225,6 @@ struct SettingView: View {
             Spacer()
             Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { withAnimation(.none) { showPet = true } } label: {
-                Image("Pet Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)

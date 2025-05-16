@@ -28,7 +28,9 @@ struct MoodApp: App {
             } else if !isLoggedIn {
                 LoginRoot()
             } else {
-                TabNavigatorView()
+                HomeView()
+                    .environmentObject(storeData)
+                    .environmentObject(petCustomization)
             }
         }
     }
@@ -43,22 +45,5 @@ private struct LoginRoot: View {
         LoginView(isLoggedInBinding: $isLoggedIn)
             .environmentObject(storeData)
             .environmentObject(petCustomization)
-    }
-}
-
-// MARK: - MainTabRoot
-
-private struct MainTabRoot: View {
-    @State private var selectedTab: MainTab = .home
-    @StateObject var storeData = StoreData()
-    @StateObject private var petCustomization = PetCustomization()
-    var body: some View {
-        TabNavigator(selectedTab: $selectedTab) { tab in
-            tab.view
-                .environmentObject(storeData)
-                .environmentObject(petCustomization)
-        }
-        .environmentObject(storeData)
-        .environmentObject(petCustomization)
     }
 }

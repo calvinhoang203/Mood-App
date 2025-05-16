@@ -180,13 +180,6 @@ struct JournalView: View {
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { withAnimation(.none) { showPet = true } } label: {
-                Image("Pet Button")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
-            }
-            Spacer()
             Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
                     .resizable()
