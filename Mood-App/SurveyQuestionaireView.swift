@@ -156,7 +156,7 @@ struct SurveyQuestionaireView: View {
                             .multilineTextAlignment(.center)
 
                         Text("Answer a couple questions to get started.")
-                            .font(.custom("Alexandria", size: 16))
+                            .font(.custom("Alexandria-Regular", size: 16))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
 
@@ -167,13 +167,13 @@ struct SurveyQuestionaireView: View {
 
                         VStack(spacing: 5) {
                             Text(questions[currentIndex].question)
-                                .font(.custom("Alexandria", size: 18))
+                                .font(.custom("Alexandria-Regular", size: 18))
                                 .bold()
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
 
                             Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
-                                .font(.custom("Alexandria", size: 14))
+                                .font(.custom("Alexandria-Regular", size: 14))
                                 .foregroundColor(.gray)
                         }
 
@@ -182,7 +182,7 @@ struct SurveyQuestionaireView: View {
                                 toggleSelection(for: option.text)
                             }) {
                                 Text(option.text)
-                                    .font(.custom("Alexandria", size: 16))
+                                    .font(.custom("Alexandria-Regular", size: 16))
                                     .foregroundColor(.black)
                                     .padding()
                                     .frame(maxWidth: .infinity)
