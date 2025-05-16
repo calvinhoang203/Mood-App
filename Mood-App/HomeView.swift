@@ -1,5 +1,17 @@
 import SwiftUI
 import Combine
+import UIKit
+
+// Custom shape for rounded corners that is specific to HomeView
+struct HomeCornerShape: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
 
 struct HomeView: View {
   @EnvironmentObject private var storeData: StoreData
@@ -106,7 +118,7 @@ struct HomeView: View {
             petCustomization.fetchInitialCustomizations()
         }
         
-        VStack {
+        VStack(spacing: 0) {
             Spacer()
             bottomTabBar
         }
@@ -323,7 +335,14 @@ struct HomeView: View {
           Spacer()
       }
       .frame(height: navBarHeight)
-      .background(Color.white)
+      .padding(.top, 8)
+      .padding(.bottom, 8)
+      .background(
+          Color.white
+              .clipShape(HomeCornerShape(radius: 30, corners: [.topLeft, .topRight]))
+              .edgesIgnoringSafeArea(.bottom)
+              .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+      )
   }
 }
 

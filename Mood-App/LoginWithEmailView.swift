@@ -38,7 +38,7 @@ struct LoginWithEmailView: View {
                             .frame(width: 150, height: 150)
 
                         Text("Login with Email")
-                            .font(.custom("Alexandria", size: 24))
+                            .font(.custom("Alexandria-Regular", size: 24))
                             .foregroundColor(.black)
 
                         customTextField(title: "Email *", text: $email)
@@ -59,7 +59,7 @@ struct LoginWithEmailView: View {
                             sendPasswordReset()
                         }) {
                             Text("Forgot Password?")
-                                .font(.custom("Alexandria", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                                 .foregroundColor(.blue)
                         }
                         .padding(.top, 5)
@@ -68,7 +68,7 @@ struct LoginWithEmailView: View {
                             goToSignUp = true
                         }) {
                             Text("Don't have an account? Sign Up")
-                                .font(.custom("Alexandria", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                                 .foregroundColor(.blue)
                                 .padding(.top, 10)
                         }
@@ -77,7 +77,7 @@ struct LoginWithEmailView: View {
                             goToLogin = true
                         }) {
                             Text("Try another login method?")
-                                .font(.custom("Alexandria", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                                 .foregroundColor(.blue)
                                 .padding(.top, 10)
                         }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SetGoalView: View {
     // ── Navigation State ─────────────────────────────────────────────
@@ -28,96 +29,96 @@ struct SetGoalView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color("lavenderColor")
-                    .ignoresSafeArea()
+        ZStack {
+            Color("lavenderColor")
+                .ignoresSafeArea()
 
-                // ── Content ────────────────────────────────────
-                VStack(spacing: 32) {
-                    // push everything down a bit
-                    Spacer().frame(height: topPadding)
+            // ── Content ────────────────────────────────────
+            VStack(spacing: 32) {
+                // push everything down a bit
+                Spacer().frame(height: topPadding)
 
-                    // Greeting
-                    Text("Hey! How's it going?")
-                        .font(.system(size: 24, weight: .semibold))
+                // Greeting
+                Text("Hey! How's it going?")
+                    .font(.system(size: 24, weight: .semibold))
 
-                    // Cow illustration
-                    Image("QuestionIcon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
+                // Cow illustration
+                Image("QuestionIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
 
-                    // Prompt
-                    Text("What would you like to do?")
-                        .font(.system(size: 20, weight: .medium))
+                // Prompt
+                Text("What would you like to do?")
+                    .font(.system(size: 20, weight: .medium))
 
-                    // Two columns: Set Goal / Check In
-                    HStack(spacing: columnSpacing) {
-                        // ── Set Goal Column ────────────────────
-                        VStack(spacing: rowSpacing) {
-                            Image("Set Goal Icon")
+                // Two columns: Set Goal / Check In
+                HStack(spacing: columnSpacing) {
+                    // ── Set Goal Column ────────────────────
+                    VStack(spacing: rowSpacing) {
+                        Image("Set Goal Icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: iconSize, height: iconSize)
+
+                        Button {
+                            showGoalFlow = true
+                        } label: {
+                            Image("Set Goal Button 1")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: iconSize, height: iconSize)
-
-                            Button {
-                                showGoalFlow = true
-                            } label: {
-                                Image("Set Goal Button 1")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: buttonHeight)
-                            }
-
-                            Text("Keep track of your progress by earning wellness points.")
-                                .font(.caption)
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.center)
-                                .frame(width: descriptionWidth)
+                                .frame(height: buttonHeight)
                         }
 
-                        // ── Check In Column ────────────────────
-                        VStack(spacing: rowSpacing) {
-                            Image("Check In Icon")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: iconSize, height: iconSize)
-
-                            Button {
-                                showCheckInFlow = true
-                            } label: {
-                                Image("Check In Button")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: buttonHeight)
-                            }
-
-                            Text("Check in with how you're currently feeling.")
-                                .font(.caption)
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.center)
-                                .frame(width: descriptionWidth)
-                        }
+                        Text("Keep track of your progress by earning wellness points.")
+                            .font(.caption)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+                            .frame(width: descriptionWidth)
                     }
 
-                    Spacer() // push content up out of tab-bar
+                    // ── Check In Column ────────────────────
+                    VStack(spacing: rowSpacing) {
+                        Image("Check In Icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: iconSize, height: iconSize)
+
+                        Button {
+                            showCheckInFlow = true
+                        } label: {
+                            Image("Check In Button")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: buttonHeight)
+                        }
+
+                        Text("Check in with how you're currently feeling.")
+                            .font(.caption)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+                            .frame(width: descriptionWidth)
+                    }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, navBarHeight)
+
+                Spacer() // push content up out of tab-bar
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, navBarHeight)
                 
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
-            }
-            .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
-            .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
+        }
+        .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
+        .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
             .navigationDestination(isPresented: $showHomeNav)     { HomeView() }
             .navigationDestination(isPresented: $showResource)    { ResourcesView() }
             .navigationDestination(isPresented: $showSetGoal)     { SetGoalView() }
             .navigationDestination(isPresented: $showAnalyticsNav){ AnalyticsPageView() }
             .navigationDestination(isPresented: $showSettingNav)  { SettingView() }
-            .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true)
         }
     }
     
@@ -161,7 +162,13 @@ struct SetGoalView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

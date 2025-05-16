@@ -149,6 +149,29 @@ class PetCustomization: ObservableObject {
             }
     }
     
+    // Save all current customization selections to Firestore
+    func saveUserCustomizations() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        // Create the full cow data structure
+        let cowData: [String: Any] = [
+            "color": colorName.isEmpty ? defaultColorName : colorName,
+            "top": topName,
+            "extra": extraName
+        ]
+        
+        Firestore.firestore()
+            .collection("Users' info")
+            .document(uid)
+            .updateData(["cow": cowData]) { error in
+                if let e = error {
+                    print("❌ Failed saving customizations: \(e)")
+                } else {
+                    print("✅ Customizations saved successfully")
+                }
+            }
+    }
+    
     func unlockItem(_ item: String, storeData: StoreData, completion: ((Bool) -> Void)? = nil) {
         guard !unlockedItems.contains(item) else { completion?(true); return }
         if storeData.totalPoints >= unlockCost {

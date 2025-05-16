@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct PetView: View {
     // Shared customization data (from PetCustomization.swift)
@@ -235,7 +236,7 @@ struct PetView: View {
                         .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                 }
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -256,6 +257,8 @@ struct PetView: View {
         .onDisappear {
             // Force reload from Firestore when leaving PetView
             petCustomization.fetchInitialCustomizations()
+            // Also save current customizations to ensure they persist
+            petCustomization.saveUserCustomizations()
         }
     }
     // ─── Grid Builder ────────────────────────────────────────────────────────
@@ -294,6 +297,10 @@ struct PetView: View {
                             .onTapGesture {
                                 if petCustomization.unlockedItems.contains(items[index]) {
                                     action(index)
+                                    // Force save after selection to ensure it persists
+                                    if items == colorImages {
+                                        petCustomization.saveUserCustomizations()
+                                    }
                                 }
                             }
                             .padding(.top, 15)
@@ -375,7 +382,13 @@ struct PetView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

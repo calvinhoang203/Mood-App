@@ -43,7 +43,7 @@ private struct LoginRoot: View {
     @StateObject private var petCustomization = PetCustomization()
     var body: some View {
         LoginView(isLoggedInBinding: $isLoggedIn)
-            .environmentObject(storeData)
-            .environmentObject(petCustomization)
+        .environmentObject(storeData)
+        .environmentObject(petCustomization)
     }
 }

@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import UIKit
 
 struct AnalyticsPageView: View {
     @EnvironmentObject var storeData: StoreData
@@ -56,7 +57,7 @@ struct AnalyticsPageView: View {
                     .padding(.vertical, 16)
                     .padding(.bottom, navBarHeight)
                 }
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -266,7 +267,13 @@ struct AnalyticsPageView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

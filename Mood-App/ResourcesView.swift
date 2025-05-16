@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ResourcesView: View {
     @State private var searchText: String = ""
@@ -141,7 +142,7 @@ struct ResourcesView: View {
                 .onTapGesture {
                     isSearchFocused = false
                 }
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -201,13 +202,15 @@ struct ResourcesView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
-
-
-
-
 
 struct ActivityCard: View {
     let activity: Activity

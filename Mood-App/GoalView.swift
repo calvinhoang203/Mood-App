@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct GoalView: View {
     @State private var currentStep = 0
@@ -126,7 +127,7 @@ struct GoalView: View {
                     .padding(.bottom, navBarHeight)
                 }
                 .padding()
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -181,7 +182,13 @@ struct GoalView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 
