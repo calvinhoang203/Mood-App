@@ -15,13 +15,13 @@ struct CheckInView: View {
     @State private var showSurveyFlow    = false
     @State private var showJournalFlow   = false
     @State private var showHomeNav       = false
-    @State private var showResourceNav   = false
-    @State private var showSetGoalNav    = false
+    @State private var showResource      = false
+    @State private var showSetGoal       = false
     @State private var showAnalyticsNav  = false
     @State private var showSettingNav    = false
 
     // MARK: – Layout Constants
-    private let navBarHeight: CGFloat    = 50
+    private let navBarHeight: CGFloat    = 64
     private let topPadding: CGFloat      = 80
     private let iconSize: CGFloat        = 60
     private let buttonHeight: CGFloat    = 44
@@ -40,7 +40,7 @@ struct CheckInView: View {
                     Spacer().frame(height: topPadding)
 
                     // Title
-                    Text("Let’s check your moo’d.")
+                    Text("Let's check your moo'd.")
                         .font(.system(size: 24, weight: .semibold))
 
                     // Cow Illustration
@@ -98,7 +98,7 @@ struct CheckInView: View {
                                     .frame(height: buttonHeight)
                             }
 
-                            Text("Write about how you’re currently feeling in a journal.")
+                            Text("Write about how you're currently feeling in a journal.")
                                 .font(.caption)
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
@@ -131,8 +131,8 @@ struct CheckInView: View {
                     .environmentObject(storeData)
             }
             .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-            .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoalNav)   { SetGoalView() }
+            .navigationDestination(isPresented: $showResource)  { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal)   { SetGoalView() }
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
             .navigationBarBackButtonHidden(true)
@@ -143,35 +143,35 @@ struct CheckInView: View {
     private var bottomTabBar: some View {
         HStack {
             Spacer()
-            Button { showHomeNav = true } label: {
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
                 Image("Home Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showResourceNav = true } label: {
+            Button { withAnimation(.none) { showResource = true } } label: {
                 Image("Resource Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showSetGoalNav = true } label: {
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
                 Image("Set Goal Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showAnalyticsNav = true } label: {
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showSettingNav = true } label: {
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -180,7 +180,7 @@ struct CheckInView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
+        .background(Color.white)
     }
 }
 

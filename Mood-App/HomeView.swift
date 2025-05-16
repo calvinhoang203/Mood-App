@@ -1,19 +1,19 @@
 import SwiftUI
+import Combine
 
 struct HomeView: View {
   @EnvironmentObject private var storeData: StoreData
   @EnvironmentObject private var petCustomization: PetCustomization
+  @State private var tabSwitchTrigger = false
 
   // MARK: – Navigation State
-  @State private var showSetGoal = false
+  @State private var showPet = false
+  @State private var showCheckIn = false
+  @State private var showHomeNav = false
   @State private var showResource = false
+  @State private var showSetGoal = false
   @State private var showAnalyticsNav = false
   @State private var showSettingNav = false
-  @State private var showHomeNav = false
-  @State private var showPet = false
-  @State private var showCheckIn     = false
-    
-    
     
   // MARK: – Layout State
   @State private var editIconX: CGFloat = 0.51
@@ -105,38 +105,21 @@ struct HomeView: View {
             storeData.loadUserDataFromFirestore()
             petCustomization.fetchInitialCustomizations()
         }
-
-        // ─── Fixed bottom tab bar ───
+        
         VStack {
-          Spacer()
-          bottomTabBar
+            Spacer()
+            bottomTabBar
         }
       }
+      .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+      .navigationDestination(isPresented: $showResource) { ResourcesView() }
+      .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+      .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+      .navigationDestination(isPresented: $showPet) { PetView() }
+      .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+      .navigationDestination(isPresented: $showCheckIn) { SurveyQuestionaireView().environmentObject(storeData) }
+      .navigationBarBackButtonHidden(true)
     }
-    // MARK: – All programmatic destinations registered on the stack:
-    .navigationDestination(isPresented: $showSetGoal) {
-      SetGoalView()
-    }
-    .navigationDestination(isPresented: $showResource) {
-      ResourcesView()
-    }
-    .navigationDestination(isPresented: $showAnalyticsNav) {
-      AnalyticsPageView()
-    }
-    .navigationDestination(isPresented: $showSettingNav) {
-      SettingView()
-    }
-    .navigationDestination(isPresented: $showHomeNav) {
-      HomeView()
-    }
-    .navigationDestination(isPresented: $showPet) {
-      PetView()
-    }
-    .navigationDestination(isPresented: $showCheckIn) {
-      SurveyQuestionaireView()
-      .environmentObject(storeData)
-    }
-    .navigationBarBackButtonHidden(true)
   }
 
     // MARK: – Cow + Edit View
@@ -177,7 +160,7 @@ struct HomeView: View {
             // 5) Edit button
             GeometryReader { geometry in
                 Button {
-                    withAnimation(.none) { showPet = true }
+                    showPet = true
                 } label: {
                     Image("Edit Icon")
                       .resizable()
@@ -233,7 +216,7 @@ struct HomeView: View {
       .padding(.horizontal, 16)
 
       Button {
-        withAnimation(.none) { showSetGoal = true }
+        showSetGoal = true
       } label: {
         Image("Set New Goal Button")
           .resizable()
@@ -262,50 +245,6 @@ struct HomeView: View {
       .fill(Color.white.opacity(0.5))
       .frame(height: 120)
       .cornerRadius(10)
-  }
-
-  // MARK: – Bottom Tab Bar
-  private var bottomTabBar: some View {
-    HStack {
-      Spacer()
-      Button { withAnimation(.none) { showHomeNav = true } } label: {
-        Image("Home Button")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 36, height: 36)
-      }
-      Spacer()
-      Button { withAnimation(.none) { showResource = true } } label: {
-        Image("Resource Button")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 36, height: 36)
-      }
-      Spacer()
-      Button { withAnimation(.none) { showSetGoal = true } } label: {
-        Image("Set Goal Button")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 36, height: 36)
-      }
-      Spacer()
-      Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
-        Image("Analytics Button")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 36, height: 36)
-      }
-      Spacer()
-      Button { withAnimation(.none) { showSettingNav = true } } label: {
-        Image("Setting Button")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 36, height: 36)
-      }
-      Spacer()
-    }
-    .frame(height: navBarHeight)
-    .background(Color.white)
   }
 
   // MARK: – Supplementary Views
@@ -343,6 +282,49 @@ struct HomeView: View {
     .frame(maxWidth: .infinity, alignment: .center)
     .multilineTextAlignment(.center)
   }
+  
+  private var bottomTabBar: some View {
+      HStack {
+          Spacer()
+          Button { withAnimation(.none) { showHomeNav = true } } label: {
+              Image("Home Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showResource = true } } label: {
+              Image("Resource Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showSetGoal = true } } label: {
+              Image("Set Goal Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+              Image("Analytics Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+          Button { withAnimation(.none) { showSettingNav = true } } label: {
+              Image("Setting Button")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 36, height: 36)
+          }
+          Spacer()
+      }
+      .frame(height: navBarHeight)
+      .background(Color.white)
+  }
 }
 
 // MARK: – Section Header
@@ -361,7 +343,7 @@ private struct SectionHeader: View {
 struct HomeView_Previews: PreviewProvider {
   static var previews: some View {
     let demo = StoreData()
-    demo.scores = ["demo": 217]
+    demo.scores = ["demo": 500]
     return HomeView()
       .environmentObject(demo)
       .environmentObject(PetCustomization())

@@ -19,6 +19,7 @@ struct LoginView: View {
     @State private var isLoggedIn: Bool = false
     @State private var goToGetProfile = false
     @State private var goToProfile = false
+    @Binding var isLoggedInBinding: Bool
 
     var body: some View {
         NavigationStack {
@@ -58,7 +59,7 @@ struct LoginView: View {
                     }
                     .padding(.horizontal, 40)
 
-                    NavigationLink(destination: LoginWithEmailView()) {
+                    NavigationLink(destination: LoginWithEmailView(isLoggedInBinding: $isLoggedInBinding)) {
                         HStack {
                             Text("Continue with Email")
                                 .font(.custom("Alexandrida", size: 16))
@@ -137,6 +138,7 @@ struct LoginView: View {
                     if hasFirst && hasLast && hasPhone {
                         print("✅ Profile complete. Going to ProfileView.")
                         goToProfile = true
+                        isLoggedIn = true
                     } else {
                         print("⚠️ Incomplete info. Going to GetProfileView.")
                         goToGetProfile = true
@@ -292,7 +294,7 @@ struct LoginView: View {
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginView()
+        LoginView(isLoggedInBinding: .constant(false))
     }
 }
 

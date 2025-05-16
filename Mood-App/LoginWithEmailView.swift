@@ -20,6 +20,7 @@ struct LoginWithEmailView: View {
     @State private var goToSignUp = false
     @State private var goToLogin = false
     @State private var navSelection: AuthNavigation? = nil
+    @Binding var isLoggedInBinding: Bool
 
     var body: some View {
         NavigationStack {
@@ -98,10 +99,10 @@ struct LoginWithEmailView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .navigationDestination(isPresented: $goToSignUp) {
-                SignUpView()
+                SignUpView(isLoggedInBinding: $isLoggedInBinding)
             }
             .navigationDestination(isPresented: $goToLogin) {
-                LoginView()
+                LoginView(isLoggedInBinding: $isLoggedInBinding)
             }
             .alert("Notice", isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
@@ -187,7 +188,8 @@ struct LoginWithEmailView: View {
 }
 
 struct LoginWithEmailView_Previews: PreviewProvider {
+    @State static var isLoggedIn = false
     static var previews: some View {
-        LoginWithEmailView()
+        LoginWithEmailView(isLoggedInBinding: $isLoggedIn)
     }
 }

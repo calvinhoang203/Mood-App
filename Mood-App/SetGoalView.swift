@@ -12,13 +12,13 @@ struct SetGoalView: View {
     @State private var showGoalFlow     = false
     @State private var showCheckInFlow  = false
     @State private var showHomeNav      = false
-    @State private var showResourceNav  = false
-    @State private var showSetGoalNav   = false
+    @State private var showResource     = false
+    @State private var showSetGoal      = false
     @State private var showAnalyticsNav = false
     @State private var showSettingNav   = false
 
     // ── Layout Constants ─────────────────────────────────────────────
-    private let navBarHeight: CGFloat = 50
+    private let navBarHeight: CGFloat = 64
     private let topPadding: CGFloat   = 80
     private let iconSize: CGFloat     = 60
     private let buttonHeight: CGFloat = 44
@@ -38,7 +38,7 @@ struct SetGoalView: View {
                     Spacer().frame(height: topPadding)
 
                     // Greeting
-                    Text("Hey! How’s it going?")
+                    Text("Hey! How's it going?")
                         .font(.system(size: 24, weight: .semibold))
 
                     // Cow illustration
@@ -92,7 +92,7 @@ struct SetGoalView: View {
                                     .frame(height: buttonHeight)
                             }
 
-                            Text("Check in with how you’re currently feeling.")
+                            Text("Check in with how you're currently feeling.")
                                 .font(.caption)
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
@@ -104,62 +104,64 @@ struct SetGoalView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, navBarHeight)
-
-                // ── Bottom Tab Bar ────────────────────────────
+                
                 VStack {
                     Spacer()
                     bottomTabBar
                 }
             }
-            // ── Destinations ──────────────────────────────────
             .navigationDestination(isPresented: $showGoalFlow)    { GoalView() }
             .navigationDestination(isPresented: $showCheckInFlow) { CheckInView() }
             .navigationDestination(isPresented: $showHomeNav)     { HomeView() }
-            .navigationDestination(isPresented: $showResourceNav) { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoalNav)  { SetGoalView() }
+            .navigationDestination(isPresented: $showResource)    { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal)     { SetGoalView() }
             .navigationDestination(isPresented: $showAnalyticsNav){ AnalyticsPageView() }
             .navigationDestination(isPresented: $showSettingNav)  { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
     }
-
-    // ── Bottom Tab Bar ─────────────────────────────────────────────
+    
     private var bottomTabBar: some View {
         HStack {
             Spacer()
-            Button { showHomeNav = true } label: {
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
                 Image("Home Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showResourceNav = true } label: {
+            Button { withAnimation(.none) { showResource = true } } label: {
                 Image("Resource Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showSetGoalNav = true } label: {
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
                 Image("Set Goal Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showAnalyticsNav = true } label: {
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Button { showSettingNav = true } label: {
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
+        .background(Color.white)
     }
 }
 

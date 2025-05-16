@@ -19,15 +19,17 @@ struct SurveyQuestionaireView: View {
     @State private var showAlert = false
     @State private var isFinished = false
     @State private var showLoading = false
-
+    @Environment(\.dismiss) private var dismiss
     
-    @State private var showHomeNav      = false
-    @State private var showResourceNav  = false
-    @State private var showSetGoalNav   = false
+    // Navigation state for all main screens
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
-    @State private var showSettingNav   = false
-    
-    
+    @State private var showPet = false
+    @State private var showSettingNav = false
+    private let navBarHeight: CGFloat = 64
+
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
             question: "How would you describe your mood today in one word?",
@@ -75,7 +77,7 @@ struct SurveyQuestionaireView: View {
                 ("Very well", "", 0),
                 ("Okay, not great", "", 0),
                 ("Not much at all", "", 0),
-                ("I don’t remember", "", 0)
+                ("I don't remember", "", 0)
             ],
             allowsMultipleSelection: false
         ),
@@ -110,7 +112,7 @@ struct SurveyQuestionaireView: View {
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
-            question: "What’s your focus or intention for tomorrow?",
+            question: "What's your focus or intention for tomorrow?",
             options: [
                 ("Take care of myself 💆‍♀️", "", 0),
                 ("Get things done 💼", "", 0),
@@ -125,8 +127,6 @@ struct SurveyQuestionaireView: View {
         guard !questions.isEmpty else { return 0 }
         return CGFloat(currentIndex + 1) / CGFloat(questions.count)
     }
-
-    private let navBarHeight: CGFloat = 50
     
     var body: some View {
         NavigationStack {
@@ -144,7 +144,7 @@ struct SurveyQuestionaireView: View {
                     VStack(spacing: 20) {
                         Spacer()
 
-                        Text("Let’s get to know you better.")
+                        Text("Let's get to know you better.")
                             .font(.custom("Alexandria", size: 24))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
@@ -213,11 +213,18 @@ struct SurveyQuestionaireView: View {
                     .padding(.bottom, navBarHeight)
 
                 }
+                
                 VStack {
                     Spacer()
                     bottomTabBar
                 }
             }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationDestination(isPresented: $isFinished) {
                 HomeView()
                     .environmentObject(storeData)
@@ -225,54 +232,15 @@ struct SurveyQuestionaireView: View {
             .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {}
             }
-            
+            .onChange(of: showLoading) { oldValue, newValue in
+                if oldValue == true && newValue == false {
+                    dismiss()
+                }
+            }
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-        .navigationDestination(isPresented: $showResourceNav)  { ResourcesView() }
-        .navigationDestination(isPresented: $showSetGoalNav)   { GoalView() }
-        .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-        .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
-        .navigationBarBackButtonHidden(true)
     }
 
-    private var bottomTabBar: some View {
-        HStack {
-            Spacer()
-            Button { showHomeNav = true } label: {
-                Image("Home Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showResourceNav = true } label: {
-                Image("Resource Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showSetGoalNav = true } label: {
-                Image("Set Goal Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showAnalyticsNav = true } label: {
-                Image("Analytics Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-            }
-            Spacer()
-            Button { showSettingNav = true } label: {
-                Image("Setting Button")
-                  .resizable().aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-            }
-            Spacer()
-        }
-        .frame(height: navBarHeight)
-        .background(Color.white.opacity(0.9))
-    }
-    
     func toggleSelection(for option: String) {
         if questions[currentIndex].allowsMultipleSelection {
             if selectedOptions.contains(option) {
@@ -302,9 +270,53 @@ struct SurveyQuestionaireView: View {
             showLoading = true
             storeData.saveToFirestore()
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                isFinished = true
+                showLoading = false
+                dismiss()
             }
         }
+    }
+    
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .background(Color.white)
     }
 }
 

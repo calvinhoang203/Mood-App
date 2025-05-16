@@ -13,13 +13,6 @@ struct PetView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     
-    // MARK: – Navigation State  ← INSERTED
-    @State private var showHomeNav      = false
-    @State private var showResource     = false
-    @State private var showSetGoal      = false
-    @State private var showAnalyticsNav = false
-    @State private var showSettingNav   = false
-    
     // MARK: — UI Configuration
     /// Tab titles
     private let tabs = ["Colors", "Tops", "Extras"]
@@ -75,13 +68,15 @@ struct PetView: View {
     // Add these @State variables at the top of PetView (inside the struct, before body):
     @State private var cowColorWidth: CGFloat = 800
     @State private var cowColorHeight: CGFloat = 800
-    @State private var cowColorX: CGFloat = 270
-    @State private var cowColorY: CGFloat = 55
+
+    @State private var cowColorX: CGFloat = 290
+    @State private var cowColorY: CGFloat = 80
 
     @State private var cowOutlineWidth: CGFloat = 800
     @State private var cowOutlineHeight: CGFloat = 800
-    @State private var cowOutlineX: CGFloat = 270
-    @State private var cowOutlineY: CGFloat = 55
+    @State private var cowOutlineX: CGFloat = 290
+    @State private var cowOutlineY: CGFloat = 80
+
 
     @State private var cowTopWidth: CGFloat = 350
     @State private var cowTopHeight: CGFloat = 350
@@ -92,6 +87,15 @@ struct PetView: View {
     @State private var cowExtraHeight: CGFloat = 350
     @State private var cowExtraX: CGFloat = 200
     @State private var cowExtraY: CGFloat = 120
+    
+    // Navigation state for all main screens
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
+    @State private var showAnalyticsNav = false
+    @State private var showPet = false
+    @State private var showSettingNav = false
+    private let navBarHeight: CGFloat = 64
     
     var body: some View {
         NavigationStack {
@@ -231,37 +235,22 @@ struct PetView: View {
                         .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                 }
+                VStack {
+                    Spacer()
+                    bottomTabBar
+                }
             }
             
             .onAppear {
                 petCustomization.fetchInitialCustomizations()
             }
-            .onChange(of: showHomeNav) { _ in petCustomization.fetchInitialCustomizations() }
-            .onChange(of: showResource) { _ in petCustomization.fetchInitialCustomizations() }
-            .onChange(of: showSetGoal) { _ in petCustomization.fetchInitialCustomizations() }
-            .onChange(of: showAnalyticsNav) { _ in petCustomization.fetchInitialCustomizations() }
-            .onChange(of: showSettingNav) { _ in petCustomization.fetchInitialCustomizations() }
+            .onChange(of: showAlert) { _ in petCustomization.fetchInitialCustomizations() }
             
-            VStack {
-                
-                bottomTabBar
-            }
-            
-            // Alert when user lacks points to unlock an item
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Not Enough Points"),
-                    message: Text(alertMessage),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-            
-            // MARK: – Programmatic destinations  ← INSERTED
-            .navigationDestination(isPresented: $showHomeNav)      { HomeView() }
-            .navigationDestination(isPresented: $showResource)     { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoal)      { SetGoalView() }
+            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-            .navigationDestination(isPresented: $showSettingNav)   { SettingView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationBarBackButtonHidden(true)
         }
         .onDisappear {
@@ -346,43 +335,46 @@ struct PetView: View {
             }
         }
     }
-    
-    // ─── Bottom Tab Bar ─────────────────────────────────────────  ← INSERTED
     private var bottomTabBar: some View {
         HStack {
             Spacer()
             Button { withAnimation(.none) { showHomeNav = true } } label: {
                 Image("Home Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showResource = true } } label: {
                 Image("Resource Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showSetGoal = true } } label: {
                 Image("Set Goal Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
                 Image("Analytics Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
             Button { withAnimation(.none) { showSettingNav = true } } label: {
                 Image("Setting Button")
-                    .resizable().aspectRatio(contentMode: .fit)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
             }
             Spacer()
         }
-        .frame(height: 64)
+        .frame(height: navBarHeight)
         .background(Color.white)
     }
 }

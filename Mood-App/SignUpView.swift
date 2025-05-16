@@ -19,6 +19,7 @@ struct SignUpView: View {
     @State private var goToLogin = false
     @State private var isPasswordVisible = false
 
+    @Binding var isLoggedInBinding: Bool
 
     var body: some View {
         NavigationStack {
@@ -73,7 +74,7 @@ struct SignUpView: View {
                 GetProfileView()
             }
             .navigationDestination(isPresented: $goToLogin) {
-                LoginWithEmailView()
+                LoginWithEmailView(isLoggedInBinding: $isLoggedInBinding)
             }
 
             // Alert
@@ -149,8 +150,9 @@ struct SignUpView: View {
 }
 
 struct SignUpView_Previews: PreviewProvider {
+    @State static var isLoggedIn = false
     static var previews: some View {
-        SignUpView()
+        SignUpView(isLoggedInBinding: $isLoggedIn)
     }
 }
 

@@ -59,32 +59,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AD8243C62DACB4200087BFF9 /* Exceptions for "Mood-App" folder in "Mood-App" target */ = {
+		ADC56F1E2DD463840067585F /* Exceptions for "Mood-App" folder in "Mood-App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"font/Alexandria/Alexandria-VariableFont_wght.ttf",
-				font/Alexandria/OFL.txt,
-				font/Alexandria/README.txt,
-				"font/Alexandria/static/Alexandria-Black.ttf",
-				"font/Alexandria/static/Alexandria-Bold.ttf",
-				"font/Alexandria/static/Alexandria-ExtraBold.ttf",
-				"font/Alexandria/static/Alexandria-ExtraLight.ttf",
-				"font/Alexandria/static/Alexandria-Light.ttf",
-				"font/Alexandria/static/Alexandria-Medium.ttf",
-				"font/Alexandria/static/Alexandria-SemiBold.ttf",
-				"font/Alexandria/static/Alexandria-Thin.ttf",
-				"font/Lexend/Lexend-VariableFont_wght.ttf",
-				font/Lexend/OFL.txt,
-				font/Lexend/README.txt,
-				"font/Lexend/static/Lexend-Black.ttf",
-				"font/Lexend/static/Lexend-Bold.ttf",
-				"font/Lexend/static/Lexend-ExtraBold.ttf",
-				"font/Lexend/static/Lexend-ExtraLight.ttf",
-				"font/Lexend/static/Lexend-Light.ttf",
-				"font/Lexend/static/Lexend-Medium.ttf",
-				"font/Lexend/static/Lexend-Regular.ttf",
-				"font/Lexend/static/Lexend-SemiBold.ttf",
-				"font/Lexend/static/Lexend-Thin.ttf",
 				Info.plist,
 			);
 			target = AD09CB9C2DA8E16700C57591 /* Mood-App */;
@@ -95,7 +72,7 @@
 		AD09CB9F2DA8E16700C57591 /* Mood-App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AD8243C62DACB4200087BFF9 /* Exceptions for "Mood-App" folder in "Mood-App" target */,
+				ADC56F1E2DD463840067585F /* Exceptions for "Mood-App" folder in "Mood-App" target */,
 			);
 			path = "Mood-App";
 			sourceTree = "<group>";
