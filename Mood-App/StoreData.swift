@@ -20,6 +20,15 @@ class StoreData: ObservableObject {
     @Published var welcomeBonus: Int = 1500
 
     @Published var goalPoints:   Int = 300
+    
+    // ─── Mood tracking for analytics ───
+    @Published var moodEntries: [MoodEntry] = []
+    @Published var weeklyMoodDistribution: [Emotion: Int] = [
+        .great: 0,
+        .okay: 0,
+        .meh: 0,
+        .nsg: 0
+    ]
 
     var totalPoints: Int {
         let spent = scores["spentUnlocks"] ?? 0
@@ -36,6 +45,61 @@ class StoreData: ObservableObject {
     func addPoints(for category: String, points: Int) {
         scores[category, default: 0] += points
     }
+    
+    // Add a new mood entry
+    func addMoodEntry(mood: Mood) {
+        let newEntry = MoodEntry(date: Date(), mood: mood)
+        moodEntries.append(newEntry)
+        updateWeeklyMoodDistribution()
+        
+        // Update streak if this is the first entry of the day
+        updateStreakIfNeeded()
+        
+        saveToFirestore()
+    }
+    
+    // Update streak if this is a new day
+    func updateStreakIfNeeded() {
+        let calendar = Calendar.current
+        
+        // Check if there's already an entry for today
+        let today = calendar.startOfDay(for: Date())
+        let hasEntryToday = moodEntries.contains { entry in
+            calendar.isDate(entry.date, inSameDayAs: today)
+        }
+        
+        // If this is the first entry today, increment streak
+        if !hasEntryToday {
+            currentStreak += 1
+        }
+    }
+
+    // Initialize with empty values for all emotions
+    func initializeEmptyMoodDistribution() {
+        weeklyMoodDistribution = [
+            .great: 0,
+            .okay: 0,
+            .meh: 0,
+            .nsg: 0
+        ]
+    }
+    
+    // Update weekly mood distribution for the chart
+    func updateWeeklyMoodDistribution() {
+        // Start with empty values
+        initializeEmptyMoodDistribution()
+        
+        // Then update with actual entries
+        let weekEntries = entriesFromCurrentWeek(moodEntries)
+        let distribution = emotionDistribution(from: weekEntries)
+        
+        // Merge the distributions
+        for (emotion, count) in distribution {
+            weeklyMoodDistribution[emotion] = count
+        }
+        
+        print("Updated mood distribution: \(weeklyMoodDistribution)")
+    }
 
     func saveToFirestore() {
         guard let currentUser = Auth.auth().currentUser else {
@@ -50,6 +114,14 @@ class StoreData: ObservableObject {
         if scores["spentUnlocks"] == nil {
             scores["spentUnlocks"] = 0
         }
+        
+        // Convert mood entries to a format that can be stored in Firestore
+        let moodEntriesData: [[String: Any]] = moodEntries.map { entry in
+            return [
+                "date": entry.date,
+                "mood": entry.mood.rawValue
+            ]
+        }
 
         let userRef = db.collection("Users' info").document(documentID)
 
@@ -59,10 +131,12 @@ class StoreData: ObservableObject {
             "lastName": lastName,
             "phoneNumber": phoneNumber,
             "scores": scores,
-            "notifications": notifications
+            "notifications": notifications,
+            "moodEntries": moodEntriesData,
+            "currentStreak": currentStreak
         ]
 
-        userRef.setData(userData) { error in
+        userRef.setData(userData, merge: true) { error in
             if let error = error {
                 print("❌ Error saving to Firestore: \(error.localizedDescription)")
             } else {
@@ -131,6 +205,24 @@ class StoreData: ObservableObject {
             if let notificationData = data["notifications"] as? [String: Bool] {
                 self.notifications = notificationData
             }
+            
+            // Load mood entries
+            if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
+                self.moodEntries = moodEntriesData.compactMap { entryData in
+                    guard let dateTimestamp = entryData["date"] as? Timestamp,
+                          let moodString = entryData["mood"] as? String,
+                          let mood = Mood(rawValue: moodString) else {
+                        return nil
+                    }
+                    return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
+                }
+                self.updateWeeklyMoodDistribution()
+            }
+            
+            // Load streak
+            if let streak = data["currentStreak"] as? Int {
+                self.currentStreak = streak
+            }
 
             print("✅ User data loaded successfully.")
         }
@@ -178,8 +270,22 @@ class StoreData: ObservableObject {
 
             // Firestore fields must match these keys
             self.currentStreak = data["currentStreak"] as? Int ?? 0
-            if let moodMap = data["weeklyMoodData"] as? [String: Double] {
-                self.weeklyMoodData = moodMap
+            
+            // Load mood entries for the chart
+            if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
+                self.moodEntries = moodEntriesData.compactMap { entryData in
+                    guard let dateTimestamp = entryData["date"] as? Timestamp,
+                          let moodString = entryData["mood"] as? String,
+                          let mood = Mood(rawValue: moodString) else {
+                        return nil
+                    }
+                    return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
+                }
+                self.updateWeeklyMoodDistribution()
+                print("✅ Loaded \(self.moodEntries.count) mood entries")
+                print("✅ Weekly distribution: \(self.weeklyMoodDistribution)")
+            } else {
+                print("⚠️ No mood entries found in Firestore")
             }
         }
     }
@@ -188,7 +294,20 @@ class StoreData: ObservableObject {
     static let demo: StoreData = {
         let sd = StoreData()
         sd.currentStreak = 5
-        sd.weeklyMoodData = ["Happiness": 4, "Sadness": 1, "Anxiety": 2]
+        
+        // Add sample mood entries for demo
+        let sampleEntries: [MoodEntry] = [
+            .init(date: Date().addingTimeInterval(-86400 * 0), mood: .meh),
+            .init(date: Date().addingTimeInterval(-86400 * 1), mood: .okay),
+            .init(date: Date().addingTimeInterval(-86400 * 2), mood: .great),
+            .init(date: Date().addingTimeInterval(-86400 * 3), mood: .meh),
+            .init(date: Date().addingTimeInterval(-86400 * 4), mood: .nsg),
+            .init(date: Date().addingTimeInterval(-86400 * 5), mood: .meh),
+            .init(date: Date().addingTimeInterval(-86400 * 6), mood: .nsg)
+        ]
+        sd.moodEntries = sampleEntries
+        sd.updateWeeklyMoodDistribution()
+        
         return sd
     }()
 

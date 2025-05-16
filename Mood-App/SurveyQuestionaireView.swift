@@ -20,6 +20,7 @@ struct SurveyQuestionaireView: View {
     @State private var showAlert = false
     @State private var isFinished = false
     @State private var showLoading = false
+    @State private var totalPointsEarned = 0 // Track total points for result page
     @Environment(\.dismiss) private var dismiss
 
     // Navigation state for all main screens
@@ -30,25 +31,29 @@ struct SurveyQuestionaireView: View {
     @State private var showPet = false
     @State private var showSettingNav = false
     private let navBarHeight: CGFloat = 64
+    
+    // Index of the mood question in the survey
+    private let moodQuestionIndex = 1 // "How are you feeling overall today?"
+    private let moodPoints = 50 // Points earned for answering the mood question
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
             question: "How would you describe your mood today in one word?",
             options: [
-                ("Joyful", "", 0),
-                ("Stressed", "", 0),
-                ("Tired", "", 0),
-                ("Content", "", 0)
+                ("Joyful", "MOOD_TRACKING", 10),
+                ("Stressed", "MOOD_TRACKING", 10),
+                ("Tired", "MOOD_TRACKING", 10),
+                ("Content", "MOOD_TRACKING", 10)
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "How are you feeling overall today?",
             options: [
-                ("Great 😄", "", 0),
-                ("Okay 🙂", "", 0),
-                ("Meh 😐", "", 0),
-                ("Not so good 😞", "", 0)
+                ("Great 😄", "MOOD_TRACKING", 50),
+                ("Okay 🙂", "MOOD_TRACKING", 50),
+                ("Meh 😐", "MOOD_TRACKING", 50),
+                ("Not so good 😞", "MOOD_TRACKING", 50)
             ],
             allowsMultipleSelection: false
         ),
@@ -227,7 +232,7 @@ struct SurveyQuestionaireView: View {
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
             .navigationDestination(isPresented: $isFinished) {
-                HomeView()
+                ResultPage(pointsEarned: totalPointsEarned)
                     .environmentObject(storeData)
             }
             .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
@@ -235,7 +240,7 @@ struct SurveyQuestionaireView: View {
             }
             .onChange(of: showLoading) { oldValue, newValue in
                 if oldValue == true && newValue == false {
-                    dismiss()
+                    // Don't dismiss here anymore
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -260,7 +265,24 @@ struct SurveyQuestionaireView: View {
             return
         }
 
-        // Placeholder for potential point system in future
+        // Get the points for the selected option
+        let selectedOption = selectedOptions.first!
+        let currentQuestion = questions[currentIndex]
+        if let optionIndex = currentQuestion.options.firstIndex(where: { $0.text == selectedOption }) {
+            let option = currentQuestion.options[optionIndex]
+            
+            // Add points for the selected option
+            storeData.addPoints(for: option.category, points: option.points)
+            totalPointsEarned += option.points
+            
+            // If this is the mood question, store the selected mood
+            if currentIndex == moodQuestionIndex {
+                if let mood = Mood(rawValue: selectedOption) {
+                    storeData.addMoodEntry(mood: mood)
+                }
+            }
+        }
+        
         selectedOptions.removeAll()
 
         if currentIndex < questions.count - 1 {
@@ -272,7 +294,7 @@ struct SurveyQuestionaireView: View {
             storeData.saveToFirestore()
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 showLoading = false
-                dismiss()
+                isFinished = true
             }
         }
     }

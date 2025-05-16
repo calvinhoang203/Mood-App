@@ -156,7 +156,7 @@ struct QuestionaireView: View {
                         ForEach(questions[currentIndex].options, id: \.text) { option in
                             Button(action: { toggleSelection(for: option.text) }) {
                                 Text(option.text)
-                                    .font(.custom("Alexandria", size: 16))
+                                    .font(.custom("Alexandria-Regular", size: 16))
                                     .foregroundColor(.black)
                                     .padding()
                                     .frame(maxWidth: .infinity)
