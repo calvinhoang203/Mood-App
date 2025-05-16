@@ -12,6 +12,7 @@
 //need to see firebase schema to connect it to firebase variables
 import SwiftUI
 import FirebaseAuth
+import UIKit
 
 struct SettingView: View {
     @EnvironmentObject private var storeData: StoreData
@@ -39,11 +40,11 @@ struct SettingView: View {
     private let cowColorWidth: CGFloat = 800
     private let cowColorHeight: CGFloat = 800
     private let cowColorX: CGFloat = 290
-    private let cowColorY: CGFloat = 80
+    private let cowColorY: CGFloat = 30
     private let cowOutlineWidth: CGFloat = 800
     private let cowOutlineHeight: CGFloat = 800
     private let cowOutlineX: CGFloat = 290
-    private let cowOutlineY: CGFloat = 80
+    private let cowOutlineY: CGFloat = 30
     
     var body: some View {
         NavigationStack {
@@ -175,7 +176,7 @@ struct SettingView: View {
                     }
                     .padding(.bottom, 32)
                 }
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -239,7 +240,13 @@ struct SettingView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

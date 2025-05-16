@@ -36,17 +36,17 @@ struct LoginView: View {
                         .frame(width: 150, height: 150)
 
                     Text("Hey! Welcome to Moo'd.")
-                        .font(.custom("Alexandria", size: 24))
+                        .font(.custom("Alexandria-Regular", size: 24))
                         .foregroundColor(.black)
 
                     Text("Login to continue.")
-                        .font(.custom("Alexandria", size: 18))
+                        .font(.custom("Alexandria-Regular", size: 18))
                         .foregroundColor(.black)
 
                     Button(action: { googleLogin() }) {
                         HStack {
                             Text("Continue with Google")
-                                .font(.custom("Alexandrida", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                             Image("googleIcon")
                                 .resizable()
                                 .frame(width: 20, height: 20)
@@ -62,7 +62,7 @@ struct LoginView: View {
                     NavigationLink(destination: LoginWithEmailView(isLoggedInBinding: $isLoggedInBinding)) {
                         HStack {
                             Text("Continue with Email")
-                                .font(.custom("Alexandrida", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                             Image(systemName: "envelope")
                         }
                         .padding()

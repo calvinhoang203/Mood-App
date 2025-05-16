@@ -17,7 +17,7 @@ class StoreData: ObservableObject {
     
     // ─── Points system ───
 
-    @Published var welcomeBonus: Int = 1000
+    @Published var welcomeBonus: Int = 1500
 
     @Published var goalPoints:   Int = 300
 

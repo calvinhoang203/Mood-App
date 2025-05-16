@@ -130,7 +130,7 @@ struct JournalView: View {
                 .sheet(isPresented: $isShowingCamera) {
                     ImagePicker(image: $capturedImage, sourceType: .camera)
                 }
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -189,7 +189,13 @@ struct JournalView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 
     // MARK: – Save Logic

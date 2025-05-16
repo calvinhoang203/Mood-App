@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct CheckInView: View {
     // MARK: – Shared Data
@@ -116,7 +117,7 @@ struct CheckInView: View {
                 .padding(.bottom, navBarHeight)
 
                 // ── Bottom Tab Bar ───────────────────────────────
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -180,7 +181,13 @@ struct CheckInView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

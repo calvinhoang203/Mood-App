@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SurveyQuestionData {
     let question: String
@@ -20,7 +21,7 @@ struct SurveyQuestionaireView: View {
     @State private var isFinished = false
     @State private var showLoading = false
     @Environment(\.dismiss) private var dismiss
-    
+
     // Navigation state for all main screens
     @State private var showHomeNav = false
     @State private var showResource = false
@@ -214,7 +215,7 @@ struct SurveyQuestionaireView: View {
 
                 }
                 
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
                 }
@@ -316,7 +317,13 @@ struct SurveyQuestionaireView: View {
             Spacer()
         }
         .frame(height: navBarHeight)
-        .background(Color.white)
+        .padding(.top, 8)
+        .background(
+            Color.white
+                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
 }
 

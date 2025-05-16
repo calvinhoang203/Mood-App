@@ -54,7 +54,10 @@ struct customSecureField: View {
       .background(Color.white)
       .cornerRadius(10)
       .accentColor(.black)
-
+      .overlay(
+          RoundedRectangle(cornerRadius: 10)
+              .stroke(Color(white: 0.4), lineWidth: 1) // Darker border
+      )
       Button {
         isPasswordVisible.toggle()
       } label: {
