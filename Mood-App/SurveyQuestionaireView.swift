@@ -143,7 +143,7 @@ struct SurveyQuestionaireView: View {
                 if showLoading {
                     LoadingView()
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02){
                                 showLoading = false
                                 goToHome = true
                             }
@@ -173,7 +173,9 @@ struct SurveyQuestionaireView: View {
                                 .bold()
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
-
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity)
                             Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
                                 .font(.custom("Alexandria-Regular", size: 14))
                                 .foregroundColor(.gray)
@@ -216,7 +218,7 @@ struct SurveyQuestionaireView: View {
                         }
                         .cornerRadius(20)
                         .padding(.top, 5)
-                        .padding(.bottom, 5)
+                        .padding(.bottom, 30)
                     }
                     .padding()
                     .padding(.bottom, navBarHeight)

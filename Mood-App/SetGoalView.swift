@@ -40,7 +40,7 @@ struct SetGoalView: View {
 
                 // Greeting
                 Text("Hey! How's it going?")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.custom("Alexandria-Regular", size: 24).weight(.semibold))
 
                 // Cow illustration
                 Image("QuestionIcon")
@@ -50,7 +50,7 @@ struct SetGoalView: View {
 
                 // Prompt
                 Text("What would you like to do?")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.custom("Alexandria-Regular", size: 20).weight(.medium))
 
                 // Two columns: Set Goal / Check In
                 HStack(spacing: columnSpacing) {
@@ -69,12 +69,14 @@ struct SetGoalView: View {
                                 .scaledToFit()
                                 .frame(height: buttonHeight)
                         }
+                        .padding(.top, 10)
 
                         Text("Keep track of your progress by earning wellness points.")
-                            .font(.caption)
+                            .font(.custom("Alexandria-Regular", size: 13))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
                             .frame(width: descriptionWidth)
+                            .padding(.top, 18)
                     }
 
                     // ── Check In Column ────────────────────
@@ -94,7 +96,7 @@ struct SetGoalView: View {
                         }
 
                         Text("Check in with how you're currently feeling.")
-                            .font(.caption)
+                            .font(.custom("Alexandria-Regular", size: 13))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
                             .frame(width: descriptionWidth)
