@@ -10,6 +10,7 @@ import FirebaseFirestore
 struct GetProfileView: View {
     @State private var firstName: String = ""
     @State private var lastName: String = ""
+    @State private var pronouns: String = ""
     @State private var phoneNumber: String = ""
     @State private var showAlert = false
     @State private var goToQuestion1 = false
@@ -36,6 +37,7 @@ struct GetProfileView: View {
 
                     customTextField(title: "First Name *", text: $firstName)
                     customTextField(title: "Last Name *", text: $lastName)
+                    customTextField(title: "Pronouns *", text: $pronouns)
                     customTextField(title: "Phone Number *", text: $phoneNumber)
 
                     // Save and trigger navigation
@@ -71,11 +73,12 @@ struct GetProfileView: View {
     }
 
     func saveProfile() {
-        if firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty {
+        if firstName.isEmpty || lastName.isEmpty || pronouns.isEmpty || phoneNumber.isEmpty {
             showAlert = true
         } else {
             storeData.firstName = firstName
             storeData.lastName = lastName
+            storeData.pronouns = pronouns
             storeData.phoneNumber = phoneNumber
             goToQuestion1 = true
         }

@@ -60,12 +60,12 @@ struct GoalView: View {
                     // Motivational Text
                     VStack(spacing: 5) {
                         Text("Let's get on track!\nTime to set a goal for yourself.")
-                            .font(.custom("Alexandria", size: 18))
+                            .font(.custom("Alexandria-Regular", size: 18))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.black)
 
                         Text(steps[currentStep].title)
-                            .font(.custom("Alexandria", size: 14))
+                            .font(.custom("Alexandria-Regular", size: 14))
                             .foregroundColor(.gray)
                             .padding(.top, 5)
                     }
@@ -76,7 +76,7 @@ struct GoalView: View {
                             selectedOption = option
                         }) {
                             Text(option)
-                                .font(.custom("Alexandria", size: 16))
+                                .font(.custom("Alexandria-Regular", size: 16))
                                 .foregroundColor(.black)
                                 .padding()
                                 .frame(maxWidth: .infinity)

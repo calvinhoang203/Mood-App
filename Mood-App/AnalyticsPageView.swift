@@ -86,7 +86,7 @@ struct AnalyticsPageView: View {
     private var topNav: some View {
         HStack {
             Text("Analytics")
-                .font(.system(size: 26, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 26))
             Spacer()
             NavigationLink(destination: SavedPageView()) {
                 Image("Bookmark Icon")
@@ -154,7 +154,7 @@ struct AnalyticsPageView: View {
             .cornerRadius(7)
 
             Text("\(storeData.currentStreak) DAY STREAK")
-                .font(.system(size: 20, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 20).weight(.bold))
                 .foregroundColor(streakTextColor)
         }
         .padding(.horizontal, 16)
@@ -165,7 +165,7 @@ struct AnalyticsPageView: View {
     private var badgesView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Badges")
-                .font(.system(size: 22, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 22).weight(.bold))
                 .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -192,7 +192,7 @@ struct AnalyticsPageView: View {
                                         .offset(lockOffsets[i])
                                 }
                             }
-                                .font(.footnote)
+                                .font(.custom("Alexandria-Regular", size: 13))
                         }
                     }
                 }
@@ -206,7 +206,7 @@ struct AnalyticsPageView: View {
     private var weeklyStatsView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Weekly Stats")
-                .font(.system(size: 22, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 22).weight(.bold))
                 .padding(.horizontal, 16)
 
             ZStack {
@@ -221,7 +221,7 @@ struct AnalyticsPageView: View {
                     
                     if storeData.weeklyMoodDistribution.isEmpty {
                         Text("No mood data for this week")
-                            .font(.body)
+                            .font(.custom("Alexandria-Regular", size: 17))
                             .foregroundColor(.gray)
                     } else {
                         DonutChart(data: storeData.weeklyMoodDistribution)
