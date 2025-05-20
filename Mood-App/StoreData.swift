@@ -20,7 +20,7 @@ class StoreData: ObservableObject {
     @Published var welcomeBonus: Int = 1500
 
     @Published var goalPoints:   Int = 300
-    
+
     // ─── Mood tracking for analytics ───
     @Published var moodEntries: [MoodEntry] = []
     @Published var weeklyMoodDistribution: [Emotion: Int] = [
@@ -39,6 +39,7 @@ class StoreData: ObservableObject {
     // User profile info
     @Published var firstName: String = ""
     @Published var lastName: String = ""
+    @Published var pronouns: String = ""
     @Published var phoneNumber: String = ""
     @Published var email: String = ""
 
@@ -128,6 +129,7 @@ class StoreData: ObservableObject {
             "email": currentUser.email ?? email,
             "firstName": firstName,
             "lastName": lastName,
+            "pronouns": pronouns,
             "phoneNumber": phoneNumber,
             "scores": filteredScores,
             "notifications": notifications,
@@ -189,6 +191,7 @@ class StoreData: ObservableObject {
 
             self.firstName = data["firstName"] as? String ?? ""
             self.lastName = data["lastName"] as? String ?? ""
+            self.pronouns = data["pronouns"] as? String ?? ""
             self.phoneNumber = data["phoneNumber"] as? String ?? ""
             self.email = data["email"] as? String ?? ""
 

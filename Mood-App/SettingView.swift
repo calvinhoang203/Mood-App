@@ -26,6 +26,7 @@ struct SettingView: View {
     @State private var showAnalyticsNav = false
     @State private var showPet = false
     @State private var showSettingNav = false
+    @State private var showLogoutAlert = false
     private let navBarHeight: CGFloat = 64
     
     // MARK: - Cow & Ellipsoid Layout Constants (Adjust here)
@@ -55,7 +56,7 @@ struct SettingView: View {
                         // --- Top Bar: Title + Icon Buttons (Bookmark & Notification) ---
                         HStack(alignment: .center) {
                             Text("Your Avatar")
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.custom("Alexandria-Regular", size: 24).weight(.bold))
                             Spacer()
                             NavigationLink(destination: SavedPageView()) {
                                 Image("Bookmark Icon")
@@ -127,8 +128,8 @@ struct SettingView: View {
                         // --- Personal Info ---
                         InfoSection(title: "Personal Info") {
                             VStack(alignment: .leading) {
-                                InfoRow(label: "NAME", value: storeData.firstName, action: {})
-                                InfoRow(label: "PRONOUNS", value: storeData.lastName.isEmpty ? "" : storeData.lastName, action: {})
+                                InfoRow(label: "NAME", value: "\(storeData.firstName) \(storeData.lastName)", action: {})
+                                InfoRow(label: "PRONOUNS", value: storeData.pronouns, action: {})
                             }
                         }
                         // --- Contact Info ---
@@ -142,7 +143,7 @@ struct SettingView: View {
                         InfoSection(title: "Preference Info") {
                             HStack {
                                 Text("NOTIFICATIONS")
-                                    .font(.subheadline)
+                                    .font(.custom("Alexandria-Regular", size: 15))
                                     .foregroundColor(.black)
                                 Spacer()
                                 Toggle(isOn: $notificationsEnabled) {
@@ -151,15 +152,15 @@ struct SettingView: View {
                                 .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
                                 .labelsHidden()
                                 Text(notificationsEnabled ? "ON" : "OFF")
-                                    .font(.subheadline)
+                                    .font(.custom("Alexandria-Regular", size: 15))
                                     .foregroundColor(.black)
                             }
                         }
                         // --- Log Out Button ---
                         VStack(spacing: 16) {
                             Text("Ready to sign off?")
-                                .font(.headline)
-                            Button(action: handleLogout) {
+                                .font(.custom("Alexandria-Regular", size: 17).weight(.semibold))
+                            Button(action: { showLogoutAlert = true }) {
                                 Image("Log Out Button")
                                     .resizable()
                                     .scaledToFit()
@@ -188,15 +189,17 @@ struct SettingView: View {
                     .environmentObject(petCustomization)
             }
             .navigationBarBackButtonHidden(true)
-        }
-    }
-    
-    private func handleLogout() {
-        do {
-            try Auth.auth().signOut()
-            isLoggedIn = false
-        } catch {
-            print("Error signing out: \(error.localizedDescription)")
+            .alert("Are you sure you want to log out?", isPresented: $showLogoutAlert) {
+                Button("Yes", role: .destructive) {
+                    do {
+                        try Auth.auth().signOut()
+                        isLoggedIn = false
+                    } catch {
+                        print("Error signing out: \(error.localizedDescription)")
+                    }
+                }
+                Button("No", role: .cancel) {}
+            }
         }
     }
     
@@ -262,8 +265,7 @@ struct InfoSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.headline)
-                .bold()
+                .font(.custom("Alexandria-Regular", size: 17).weight(.bold))
             content
                 .padding()
                 .background(Color.white)
@@ -282,10 +284,11 @@ struct InfoRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 5) {
                 Text(label)
-                    .font(.caption)
+                    .font(.custom("Alexandria-Regular", size: 12))
+                    .padding(.bottom, 2)
                 Text(value)
-                    .font(.subheadline)
-                    .bold()
+                    .font(.custom("Alexandria-Regular", size: 15).weight(.bold))
+                    .padding(.vertical, 4)
             }
             Spacer()
         }

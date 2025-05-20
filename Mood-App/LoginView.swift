@@ -20,6 +20,7 @@ struct LoginView: View {
     @State private var goToGetProfile = false
     @State private var goToProfile = false
     @Binding var isLoggedInBinding: Bool
+    @EnvironmentObject var storeData: StoreData
 
     var body: some View {
         NavigationStack {
@@ -139,6 +140,8 @@ struct LoginView: View {
                         print("✅ Profile complete. Going to ProfileView.")
                         goToProfile = true
                         isLoggedIn = true
+                        isLoggedInBinding = true
+                        storeData.loadUserDataFromFirestore()
                     } else {
                         print("⚠️ Incomplete info. Going to GetProfileView.")
                         goToGetProfile = true

@@ -60,6 +60,8 @@ struct SetGoalView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: iconSize, height: iconSize)
+                            .padding(.top, 23)
+                            .padding(.bottom, 16)
 
                         Button {
                             showGoalFlow = true
@@ -69,14 +71,14 @@ struct SetGoalView: View {
                                 .scaledToFit()
                                 .frame(height: buttonHeight)
                         }
-                        .padding(.top, 10)
+                        .padding(.top, -19)
 
                         Text("Keep track of your progress by earning wellness points.")
                             .font(.custom("Alexandria-Regular", size: 13))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
                             .frame(width: descriptionWidth)
-                            .padding(.top, 18)
+                            .padding(.top, 0)
                     }
 
                     // ── Check In Column ────────────────────
