@@ -46,15 +46,11 @@ class StoreData: ObservableObject {
         scores[category, default: 0] += points
     }
     
-    // Add a new mood entry
+    // Add a new mood entry ONLY for the mood question
     func addMoodEntry(mood: Mood) {
         let newEntry = MoodEntry(date: Date(), mood: mood)
         moodEntries.append(newEntry)
         updateWeeklyMoodDistribution()
-        
-        // Update streak if this is the first entry of the day
-        updateStreakIfNeeded()
-        
         saveToFirestore()
     }
     
@@ -115,6 +111,9 @@ class StoreData: ObservableObject {
             scores["spentUnlocks"] = 0
         }
         
+        // Filter out any empty-string keys from scores
+        let filteredScores = scores.filter { !$0.key.isEmpty }
+        
         // Convert mood entries to a format that can be stored in Firestore
         let moodEntriesData: [[String: Any]] = moodEntries.map { entry in
             return [
@@ -130,7 +129,7 @@ class StoreData: ObservableObject {
             "firstName": firstName,
             "lastName": lastName,
             "phoneNumber": phoneNumber,
-            "scores": scores,
+            "scores": filteredScores,
             "notifications": notifications,
             "moodEntries": moodEntriesData,
             "currentStreak": currentStreak
@@ -268,9 +267,7 @@ class StoreData: ObservableObject {
             }
             guard let data = snapshot?.data() else { return }
 
-            // Firestore fields must match these keys
             self.currentStreak = data["currentStreak"] as? Int ?? 0
-            
             // Load mood entries for the chart
             if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
                 self.moodEntries = moodEntriesData.compactMap { entryData in
@@ -282,10 +279,6 @@ class StoreData: ObservableObject {
                     return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
                 }
                 self.updateWeeklyMoodDistribution()
-                print("✅ Loaded \(self.moodEntries.count) mood entries")
-                print("✅ Weekly distribution: \(self.weeklyMoodDistribution)")
-            } else {
-                print("⚠️ No mood entries found in Firestore")
             }
         }
     }
