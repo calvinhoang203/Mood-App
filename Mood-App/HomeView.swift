@@ -89,7 +89,8 @@ struct HomeView: View {
             // ─ Remaining content
             VStack(spacing: 24) {
               Text("Welcome back, \(storeData.firstName)")
-                .font(.system(size: 26, weight: .semibold))
+                .font(.custom("Alexandria-Regular", size: 26))
+                .bold()
                 .frame(maxWidth: .infinity,     alignment: .leading)
                 .padding(.horizontal, 16)
 
@@ -195,6 +196,8 @@ struct HomeView: View {
   private var quoteView: some View {
     VStack(spacing: 8) {
       Text("Worrying does not take away tomorrow's troubles. It takes away today's peace.")
+        .font(
+            .custom("Alexandria-Regular", size: 16))
         .italic()
         .multilineTextAlignment(.center)
         .foregroundColor(Color("cowdarkpurple"))
@@ -213,7 +216,7 @@ struct HomeView: View {
   private var dashboardSection: some View {
     VStack(spacing: 12) {
       Text("Dashboard")
-        .font(.system(size: 24, weight: .semibold))
+        .font(.custom("Alexandria-Regular", size: 24))
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
 
@@ -290,7 +293,7 @@ struct HomeView: View {
           .fontWeight(.bold)
       + Text(" points away from your goal.")
     )
-    .font(.subheadline)
+    .font(.custom("Alexandria-Regular", size: 15))
     .frame(maxWidth: .infinity, alignment: .center)
     .multilineTextAlignment(.center)
   }
@@ -353,7 +356,7 @@ private struct SectionHeader: View {
   var body: some View {
     HStack {
       Text(title)
-        .font(.system(size: fontSize, weight: .bold))
+        .font(.custom("Alexandria-Regular", size: fontSize).weight(.bold))
       Spacer()
     }
   }
