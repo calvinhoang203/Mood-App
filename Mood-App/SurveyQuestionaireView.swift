@@ -143,7 +143,7 @@ struct SurveyQuestionaireView: View {
                 if showLoading {
                     LoadingView()
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02){
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                                 showLoading = false
                                 goToHome = true
                             }

@@ -312,4 +312,39 @@ class StoreData: ObservableObject {
         scores["spentUnlocks", default: 0] += points
         saveToFirestore()
     }
+
+    /// Clears all user-related data in memory (does NOT touch Firestore)
+    func reset() {
+        firstName = ""
+        lastName = ""
+        pronouns = ""
+        phoneNumber = ""
+        email = ""
+        scores = [
+            "ANXIETY DUE TO LIFE CIRCUMSTANCES": 0,
+            "NEED PEER/SOCIAL SUPPORT SYSTEM": 0,
+            "STRESS DUE TO ACADEMIC PRESSURE": 0,
+            "LOW ENERGY / MOTIVATION": 0
+        ]
+        moodEntries = []
+        weeklyMoodDistribution = [
+            .great: 0,
+            .okay: 0,
+            .meh: 0,
+            .nsg: 0
+        ]
+        notifications = [
+            "account_created": false,
+            "point_checkpoint": false,
+            "daily_check_in": false
+        ]
+        currentStreak = 0
+        badgeTitles = [
+            "Bike Barn Boss", "Tercero Trekker", "Happy Heifer", "Fourth Badge"
+        ]
+        weeklyMoodData = [
+            "Happiness": 0, "Sadness": 0, "Anxiety": 0
+        ]
+        unlockedBadges = [false, false, false, false]
+    }
 }
