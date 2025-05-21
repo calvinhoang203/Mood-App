@@ -193,6 +193,7 @@ struct SettingView: View {
                 Button("Yes", role: .destructive) {
                     do {
                         try Auth.auth().signOut()
+                        storeData.reset()
                         isLoggedIn = false
                     } catch {
                         print("Error signing out: \(error.localizedDescription)")
