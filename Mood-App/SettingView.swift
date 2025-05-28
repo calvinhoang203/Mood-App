@@ -58,11 +58,11 @@ struct SettingView: View {
                             Text("Your Avatar")
                                 .font(.custom("Alexandria-Regular", size: 24).weight(.bold))
                             Spacer()
-                            NavigationLink(destination: SavedPageView()) {
-                                Image("Bookmark Icon")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                            }
+//                            NavigationLink(destination: SavedPageView()) {
+//                                Image("Bookmark Icon")
+//                                    .resizable()
+//                                    .frame(width: 40, height: 40)
+//                            }
                             NavigationLink(destination: NotificationView()) {
                                 Image("Notification Icon")
                                     .resizable()
