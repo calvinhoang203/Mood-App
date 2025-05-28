@@ -347,4 +347,21 @@ class StoreData: ObservableObject {
         ]
         unlockedBadges = [false, false, false, false]
     }
+
+    /// Returns an array of (weekStart, mood distribution) for each week with mood entries, sorted by weekStart ascending
+    var weeklyMoodDistributions: [(weekStart: Date, distribution: [Emotion: Int])] {
+        // Group entries by week start (Monday)
+        let calendar = Calendar(identifier: .iso8601)
+        let grouped = Dictionary(grouping: moodEntries) { entry -> Date in
+            let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: entry.date)
+            return calendar.date(from: components) ?? entry.date
+        }
+        // For each week, compute the mood distribution
+        let weekDistributions = grouped.map { (weekStart, entries) -> (Date, [Emotion: Int]) in
+            let dist = emotionDistribution(from: entries)
+            return (weekStart, dist)
+        }
+        // Sort by weekStart ascending
+        return weekDistributions.sorted { $0.0 < $1.0 }
+    }
 }
