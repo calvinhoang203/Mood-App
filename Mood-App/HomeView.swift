@@ -63,11 +63,11 @@ struct HomeView: View {
             ZStack {
               HStack(spacing: 6) {
                 // Bookmark icon
-                  NavigationLink(destination: SavedPageView()) {
-                     Image("Bookmark Icon")
-                       .resizable()
-                       .frame(width: 40, height: 40)
-                   }
+//                  NavigationLink(destination: SavedPageView()) {
+//                     Image("Bookmark Icon")
+//                       .resizable()
+//                       .frame(width: 40, height: 40)
+//                   }
 
                 // Notification icon
                   NavigationLink(destination: NotificationView()) {

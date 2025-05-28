@@ -88,11 +88,11 @@ struct AnalyticsPageView: View {
             Text("Analytics")
                 .font(.custom("Alexandria-Regular", size: 26))
             Spacer()
-            NavigationLink(destination: SavedPageView()) {
-                Image("Bookmark Icon")
-                    .resizable()
-                    .frame(width: 36, height: 36)
-            }
+//            NavigationLink(destination: SavedPageView()) {
+//                Image("Bookmark Icon")
+//                    .resizable()
+//                    .frame(width: 36, height: 36)
+//            }
             NavigationLink(destination: NotificationView()) {
                 Image("Notification Icon")
                     .resizable()
