@@ -139,23 +139,23 @@ struct SettingView: View {
                                 InfoRow(label: "PHONE", value: storeData.phoneNumber, action: {})
                             }
                         }
-                        // --- Preference Info ---
-                        InfoSection(title: "Preference Info") {
-                            HStack {
-                                Text("NOTIFICATIONS")
-                                    .font(.custom("Alexandria-Regular", size: 15))
-                                    .foregroundColor(.black)
-                                Spacer()
-                                Toggle(isOn: $notificationsEnabled) {
-                                    EmptyView()
-                                }
-                                .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
-                                .labelsHidden()
-                                Text(notificationsEnabled ? "ON" : "OFF")
-                                    .font(.custom("Alexandria-Regular", size: 15))
-                                    .foregroundColor(.black)
-                            }
-                        }
+                        // // --- Preference Info ---
+                        // InfoSection(title: "Preference Info") {
+                        //     HStack {
+                        //         Text("NOTIFICATIONS")
+                        //             .font(.custom("Alexandria-Regular", size: 15))
+                        //             .foregroundColor(.black)
+                        //         Spacer()
+                        //         Toggle(isOn: $notificationsEnabled) {
+                        //             EmptyView()
+                        //         }
+                        //         .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
+                        //         .labelsHidden()
+                        //         Text(notificationsEnabled ? "ON" : "OFF")
+                        //             .font(.custom("Alexandria-Regular", size: 15))
+                        //             .foregroundColor(.black)
+                        //     }
+                        // }
                         // --- Log Out Button ---
                         VStack(spacing: 16) {
                             Text("Ready to sign off?")

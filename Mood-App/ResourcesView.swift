@@ -70,15 +70,15 @@ struct ResourcesView: View {
                         Spacer()
                         Button {
                             navigateToSaved = true
-                        } label: {
-                            Image("Bookmark Icon")
-                               .resizable()
-                               .frame(width: 30, height: 35)
-                               .padding(.top, 15)
-                        }
+                         } label: {
+//                             Image("Bookmark Icon")
+//                                .resizable()
+//                                .frame(width: 30, height: 35)
+//                                .padding(.top, 15)
+                         }
                         Image("Notification Icon")
                             .resizable()
-                            .frame(width: 30, height: 35)
+                            .frame(width: 40, height: 40)
                             .padding(.top, 15)
 
                     }

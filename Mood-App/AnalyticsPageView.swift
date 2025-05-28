@@ -209,31 +209,46 @@ struct AnalyticsPageView: View {
                 .font(.custom("Alexandria-Regular", size: 22).weight(.bold))
                 .padding(.horizontal, 16)
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
-                    .shadow(radius: 4)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 280)
-
-                VStack(spacing: 0) {
-                    Spacer()
-                    
-                    if storeData.weeklyMoodDistribution.isEmpty {
-                        Text("No mood data for this week")
-                            .font(.custom("Alexandria-Regular", size: 17))
-                            .foregroundColor(.gray)
-                    } else {
-                        DonutChart(data: storeData.weeklyMoodDistribution)
-                            .frame(height: 220)
-                    }
-                    
-                    Spacer()
+            if storeData.weeklyMoodDistributions.isEmpty {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(radius: 4)
+                        .frame(maxWidth: .infinity, minHeight: 320, maxHeight: 350)
+                    Text("No mood data yet")
+                        .font(.custom("Alexandria-Regular", size: 17))
+                        .foregroundColor(.gray)
                 }
-                .frame(maxWidth: .infinity)
+            } else {
+                TabView {
+                    ForEach(Array(storeData.weeklyMoodDistributions.enumerated()), id: \ .offset) { item in
+                        let week = item.element
+                        VStack(spacing: 12) {
+                            Spacer(minLength: 8)
+                            DonutChart(data: week.1, weekStart: week.0)
+                                .frame(width: 160, height: 160)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 320, maxHeight: 350)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white)
+                                .shadow(radius: 4)
+                        )
+                        .padding(.horizontal, 32)
+                    }
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                .frame(height: 350)
             }
-            .padding(.horizontal, 16)
         }
+    }
+
+    // Helper for formatting the week start date
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter.string(from: date)
     }
 
     private var bottomTabBar: some View {

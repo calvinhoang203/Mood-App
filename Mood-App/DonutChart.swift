@@ -11,6 +11,7 @@ import SwiftUI
 
 struct DonutChart: View {
     let data: [Emotion: Int]
+    let weekStart: Date
     
     var total: Int {
         data.values.reduce(0, +)
@@ -35,58 +36,49 @@ struct DonutChart: View {
     // Construct pie chart
     var body: some View {
         VStack(spacing: 12) {
-        ZStack {
+            ZStack {
                 // If no data, show empty circle
                 if data.isEmpty {
                     Circle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 40)
                         .frame(width: 200, height: 200)
-                    
                     Text("No mood data")
                         .font(.caption)
                         .foregroundColor(.gray)
                 } else {
-            ForEach(angles, id: \.0) { (emotion, startAngle, endAngle) in
-                DonutSlice(startAngle: .degrees(startAngle), endAngle: .degrees(endAngle))
-                    .fill(emotion.color)
-            }
-            Circle()
-                .fill(Color.white)
-                .frame(width: 100, height: 100)
-                }
-        }
-            .frame(width: 200, height: 200)
-            
-            // Show legend and date even when empty
-            VStack(alignment: .center, spacing: 8) {
-                // Legend goes first
-                HStack(spacing: 16) {
-                    ForEach(data.isEmpty ? allEmotions : Array(data.keys), id: \.self) { emotion in
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(emotion.color)
-                                .frame(width: 10, height: 10)
-                            Text(emotion.rawValue)
-                                .font(.caption2)
-                        }
+                    ForEach(angles, id: \.0) { (emotion, startAngle, endAngle) in
+                        DonutSlice(startAngle: .degrees(startAngle), endAngle: .degrees(endAngle))
+                            .fill(emotion.color)
                     }
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 100, height: 100)
                 }
-                
-                // Date text below the legend
-                Text(formattedStartDate().uppercased())
+            }
+            .frame(width: 200, height: 200)
+
+            // Legend and week label, always centered and wrapped if needed
+            VStack(spacing: 6) {
+                // Legend
+                FixedLegend()
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                // Week label
+                Text(formattedWeekStart().uppercased())
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .padding(.top, 4)
-        }
+                    .padding(.top, 2)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .padding(.horizontal, 8)
         }
     }
     
-    // Set up date for our Week Of text
-    func formattedStartDate() -> String {
+    // Set up date for our Week Of text using the passed-in weekStart
+    func formattedWeekStart() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d"
-        let startDate = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
-        return "WEEK OF \(formatter.string(from: startDate))"
+        formatter.dateFormat = "MMMM d, yyyy"
+        return "WEEK OF \(formatter.string(from: weekStart))"
     }
 }
 
@@ -117,5 +109,29 @@ struct DonutSlice: Shape {
         
         p.closeSubpath()
         return p
+    }
+}
+
+// Helper view for a flexible, wrapping legend
+struct FixedLegend: View {
+    private let emotions: [Emotion] = [.great, .meh, .nsg, .okay]
+    var body: some View {
+        HStack(spacing: 16) {
+            ForEach(emotions, id: \.self) { emotion in
+                HStack(spacing: 5) {
+                    Circle()
+                        .fill(emotion.color)
+                        .frame(width: 10, height: 10)
+                    Text(emotion.rawValue)
+                        .font(.custom("Alexandria-Regular", size: 13))
+                        .foregroundColor(.black)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+            }
+        }
+        .frame(maxWidth: 340)
+        .padding(.top, 4)
+        .padding(.bottom, 2)
+        .multilineTextAlignment(.center)
     }
 }
