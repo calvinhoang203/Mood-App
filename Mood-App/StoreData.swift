@@ -43,6 +43,9 @@ class StoreData: ObservableObject {
     @Published var phoneNumber: String = ""
     @Published var email: String = ""
 
+    // ─── Journal Entries ───
+    @Published var journals: [String: [String: String]] = [:]
+
     func addPoints(for category: String, points: Int) {
         scores[category, default: 0] += points
     }
@@ -134,7 +137,8 @@ class StoreData: ObservableObject {
             "scores": filteredScores,
             "notifications": notifications,
             "moodEntries": moodEntriesData,
-            "currentStreak": currentStreak
+            "currentStreak": currentStreak,
+            "journals": journals
         ]
 
         userRef.setData(userData, merge: true) { error in
@@ -224,6 +228,11 @@ class StoreData: ObservableObject {
             // Load streak
             if let streak = data["currentStreak"] as? Int {
                 self.currentStreak = streak
+            }
+
+            // Load journals if present
+            if let journalsData = data["journals"] as? [String: [String: String]] {
+                self.journals = journalsData
             }
 
             print("✅ User data loaded successfully.")
@@ -346,6 +355,7 @@ class StoreData: ObservableObject {
             "Happiness": 0, "Sadness": 0, "Anxiety": 0
         ]
         unlockedBadges = [false, false, false, false]
+        journals = [:]
     }
 
     /// Returns an array of (weekStart, mood distribution) for each week with mood entries, sorted by weekStart ascending
@@ -363,5 +373,16 @@ class StoreData: ObservableObject {
         }
         // Sort by weekStart ascending
         return weekDistributions.sorted { $0.0 < $1.0 }
+    }
+
+    // Add a new journal entry with unique key and formatted date
+    func addJournalEntry(text: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        let dateString = formatter.string(from: Date())
+        let nextIndex = journals.count + 1
+        let key = "entry\(nextIndex)"
+        journals[key] = ["text": text, "date": dateString]
+        saveToFirestore()
     }
 }
