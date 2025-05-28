@@ -17,6 +17,8 @@ struct GoalView: View {
     @State private var showAnalyticsNav = false
     @State private var showPet = false
     @State private var showSettingNav = false
+    @State private var showLoading = false
+    @State private var goToHome = false
 
     let steps: [GoalStep] = [
         GoalStep(
@@ -41,92 +43,103 @@ struct GoalView: View {
             ZStack {
                 Color("lavenderColor").ignoresSafeArea()
 
-                VStack(spacing: 20) {
-                    // Top Title
-                    HStack {
-                        Text("Goal Setting")
-                            .font(.custom("Alexandria", size: 30))
-                            .foregroundColor(.black)
-                            .padding(.leading)
-                        Spacer()
-                    }
-
-                    // Cow Icon
-                    Image("QuestionIcon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
-
-                    // Motivational Text
-                    VStack(spacing: 5) {
-                        Text("Let's get on track!\nTime to set a goal for yourself.")
-                            .font(.custom("Alexandria-Regular", size: 18))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
-
-                        Text(steps[currentStep].title)
-                            .font(.custom("Alexandria-Regular", size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.top, 5)
-                    }
-
-                    // Options
-                    ForEach(steps[currentStep].options, id: \.self) { option in
-                        Button(action: {
-                            selectedOption = option
-                        }) {
-                            Text(option)
-                                .font(.custom("Alexandria-Regular", size: 16))
-                                .foregroundColor(.black)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(selectedOption == option ? Color.purple : Color.clear, lineWidth: 2)
-                                )
-                        }
-                    }
-
-                    // ✅ Image-based Next Button
-                    Button(action: {
-                        if selectedOption == nil {
-                            showAlert = true
-                        } else {
-                            if currentStep < steps.count - 1 {
-                                currentStep += 1
-                                selectedOption = nil
-                            } else {
-                                isCompleted = true
+                if showLoading {
+                    LoadingView()
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                showLoading = false
+                                goToHome = true
                             }
                         }
-                    }) {
-                        Image("NextButton")
+                } else {
+                    VStack(spacing: 20) {
+                        // Top Title
+                        HStack {
+                            Text("Goal Setting")
+                                .font(.custom("Alexandria", size: 30))
+                                .foregroundColor(.black)
+                                .padding(.leading)
+                            Spacer()
+                        }
+
+                        // Cow Icon
+                        Image("QuestionIcon")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 160, height: 50)
-                            .shadow(radius: 4)
-                    }
-                    .alert("Please choose an option before continuing.", isPresented: $showAlert) {
-                        Button("OK", role: .cancel) {}
-                    }
+                            .frame(width: 150, height: 150)
 
-                    // Progress Bar
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .frame(width: 319, height: 14)
-                            .foregroundColor(Color(hex: "#C3B9D1"))
+                        // Motivational Text
+                        VStack(spacing: 5) {
+                            Text("Let's get on track!\nTime to set a goal for yourself.")
+                                .font(.custom("Alexandria-Regular", size: 18))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
 
-                        Capsule()
-                            .frame(width: 319 * progress, height: 14)
-                            .foregroundColor(Color(hex: "#8F81DC"))
+                            Text(steps[currentStep].title)
+                                .font(.custom("Alexandria-Regular", size: 14))
+                                .foregroundColor(.gray)
+                                .padding(.top, 5)
+                        }
+
+                        // Options
+                        ForEach(steps[currentStep].options, id: \.self) { option in
+                            Button(action: {
+                                selectedOption = option
+                            }) {
+                                Text(option)
+                                    .font(.custom("Alexandria-Regular", size: 16))
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(selectedOption == option ? Color.purple : Color.clear, lineWidth: 2)
+                                    )
+                            }
+                        }
+
+                        // ✅ Image-based Next Button
+                        Button(action: {
+                            if selectedOption == nil {
+                                showAlert = true
+                            } else {
+                                if currentStep < steps.count - 1 {
+                                    currentStep += 1
+                                    selectedOption = nil
+                                } else {
+                                    // Show loading, then go home
+                                    showLoading = true
+                                }
+                            }
+                        }) {
+                            Image("NextButton")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 160, height: 50)
+                                .shadow(radius: 4)
+                        }
+                        .alert("Please choose an option before continuing.", isPresented: $showAlert) {
+                            Button("OK", role: .cancel) {}
+                        }
+
+                        // Progress Bar
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .frame(width: 319, height: 14)
+                                .foregroundColor(Color(hex: "#C3B9D1"))
+
+                            Capsule()
+                                .frame(width: 319 * progress, height: 14)
+                                .foregroundColor(Color(hex: "#8F81DC"))
+                        }
+                        .cornerRadius(20)
+                        .padding(.top, 5)
+                        .padding(.bottom, navBarHeight)
                     }
-                    .cornerRadius(20)
-                    .padding(.top, 5)
-                    .padding(.bottom, navBarHeight)
+                    .padding()
                 }
-                .padding()
                 VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
@@ -138,6 +151,7 @@ struct GoalView: View {
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+            .navigationDestination(isPresented: $goToHome) { HomeView() }
             .navigationBarBackButtonHidden(true)
         }
     }
