@@ -20,6 +20,7 @@ struct QuestionaireView: View {
     @State private var showAlert = false
     @State private var isFinished = false
     @State private var showLoading = false
+    
 
     let questions: [QuestionData] = [
         QuestionData(
@@ -249,7 +250,16 @@ struct QuestionaireView: View {
                 isFinished = true
             }
         }
+        if(isFinished){
+            storeData.addPoints(for: "SURVEY_COMPLETED", points: 100)
+            storeData.checkAndUnlockBadges()
+            storeData.saveToFirestore()
+        }
+        
+
+
     }
+    
 
 
 }

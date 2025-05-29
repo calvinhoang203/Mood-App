@@ -149,10 +149,21 @@ class StoreData: ObservableObject {
     /// NEW: track lock/unlock state for each badge
     @Published var unlockedBadges: [Bool] = [false, false, false, false]
 
+    // can also just make a disctionary here to avoid two seperate arrays*****
     /// Call this when a badge is earned
     func unlockBadge(at index: Int) {
       guard badgeTitles.indices.contains(index) else { return }
       unlockedBadges[index] = true
+    }
+    
+    func checkAndUnlockBadges(){
+        let badgeThresholds = [100, 500, 1000, 2000]  // Match with badge index
+            for (index, threshold) in badgeThresholds.enumerated() {
+                if totalPoints >= threshold && !unlockedBadges[index] {
+                    unlockBadge(at: index)
+                    print("Badge unlocked at index \(index)!: \(badgeTitles[index])")
+                }
+            }
     }
 
     /// Displays "Week of Month Day"
@@ -197,4 +208,9 @@ class StoreData: ObservableObject {
         scores["spentUnlocks", default: 0] += points
         saveToFirestore()
     }
+    
+    
+
+    
+
 }
