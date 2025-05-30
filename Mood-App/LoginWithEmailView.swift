@@ -21,6 +21,7 @@ struct LoginWithEmailView: View {
     @State private var goToLogin = false
     @State private var navSelection: AuthNavigation? = nil
     @Binding var isLoggedInBinding: Bool
+    @EnvironmentObject var storeData: StoreData
 
     var body: some View {
         NavigationStack {
@@ -161,6 +162,8 @@ struct LoginWithEmailView: View {
 
                     DispatchQueue.main.async {
                         navSelection = .profile
+                        isLoggedInBinding = true
+                        storeData.loadUserDataFromFirestore()
                     }
                 }
             }

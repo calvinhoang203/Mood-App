@@ -26,6 +26,7 @@ struct SettingView: View {
     @State private var showAnalyticsNav = false
     @State private var showPet = false
     @State private var showSettingNav = false
+    @State private var showLogoutAlert = false
     private let navBarHeight: CGFloat = 64
     
     // MARK: - Cow & Ellipsoid Layout Constants (Adjust here)
@@ -39,11 +40,11 @@ struct SettingView: View {
     // Cow Layer Layouts (match PetView)
     private let cowColorWidth: CGFloat = 800
     private let cowColorHeight: CGFloat = 800
-    private let cowColorX: CGFloat = 290
+    private let cowColorX: CGFloat = 285
     private let cowColorY: CGFloat = 30
     private let cowOutlineWidth: CGFloat = 800
     private let cowOutlineHeight: CGFloat = 800
-    private let cowOutlineX: CGFloat = 290
+    private let cowOutlineX: CGFloat = 285
     private let cowOutlineY: CGFloat = 30
     
     var body: some View {
@@ -55,13 +56,13 @@ struct SettingView: View {
                         // --- Top Bar: Title + Icon Buttons (Bookmark & Notification) ---
                         HStack(alignment: .center) {
                             Text("Your Avatar")
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.custom("Alexandria-Regular", size: 24).weight(.bold))
                             Spacer()
-                            NavigationLink(destination: SavedPageView()) {
-                                Image("Bookmark Icon")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                            }
+//                            NavigationLink(destination: SavedPageView()) {
+//                                Image("Bookmark Icon")
+//                                    .resizable()
+//                                    .frame(width: 40, height: 40)
+//                            }
                             NavigationLink(destination: NotificationView()) {
                                 Image("Notification Icon")
                                     .resizable()
@@ -124,16 +125,11 @@ struct SettingView: View {
                         }
                         .frame(height: 180)
                         .frame(maxWidth: .infinity)
-                        .sheet(isPresented: $showPetView) {
-                            PetView()
-                                .environmentObject(storeData)
-                                .environmentObject(petCustomization)
-                        }
                         // --- Personal Info ---
                         InfoSection(title: "Personal Info") {
                             VStack(alignment: .leading) {
-                                InfoRow(label: "NAME", value: storeData.firstName, action: {})
-                                InfoRow(label: "PRONOUNS", value: storeData.lastName.isEmpty ? "" : storeData.lastName, action: {})
+                                InfoRow(label: "NAME", value: "\(storeData.firstName) \(storeData.lastName)", action: {})
+                                InfoRow(label: "PRONOUNS", value: storeData.pronouns, action: {})
                             }
                         }
                         // --- Contact Info ---
@@ -143,28 +139,28 @@ struct SettingView: View {
                                 InfoRow(label: "PHONE", value: storeData.phoneNumber, action: {})
                             }
                         }
-                        // --- Preference Info ---
-                        InfoSection(title: "Preference Info") {
-                            HStack {
-                                Text("NOTIFICATIONS")
-                                    .font(.subheadline)
-                                    .foregroundColor(.black)
-                                Spacer()
-                                Toggle(isOn: $notificationsEnabled) {
-                                    EmptyView()
-                                }
-                                .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
-                                .labelsHidden()
-                                Text(notificationsEnabled ? "ON" : "OFF")
-                                    .font(.subheadline)
-                                    .foregroundColor(.black)
-                            }
-                        }
+                        // // --- Preference Info ---
+                        // InfoSection(title: "Preference Info") {
+                        //     HStack {
+                        //         Text("NOTIFICATIONS")
+                        //             .font(.custom("Alexandria-Regular", size: 15))
+                        //             .foregroundColor(.black)
+                        //         Spacer()
+                        //         Toggle(isOn: $notificationsEnabled) {
+                        //             EmptyView()
+                        //         }
+                        //         .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
+                        //         .labelsHidden()
+                        //         Text(notificationsEnabled ? "ON" : "OFF")
+                        //             .font(.custom("Alexandria-Regular", size: 15))
+                        //             .foregroundColor(.black)
+                        //     }
+                        // }
                         // --- Log Out Button ---
                         VStack(spacing: 16) {
                             Text("Ready to sign off?")
-                                .font(.headline)
-                            Button(action: handleLogout) {
+                                .font(.custom("Alexandria-Regular", size: 17).weight(.semibold))
+                            Button(action: { showLogoutAlert = true }) {
                                 Image("Log Out Button")
                                     .resizable()
                                     .scaledToFit()
@@ -187,16 +183,24 @@ struct SettingView: View {
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+            .navigationDestination(isPresented: $showPetView) {
+                PetView()
+                    .environmentObject(storeData)
+                    .environmentObject(petCustomization)
+            }
             .navigationBarBackButtonHidden(true)
-        }
-    }
-    
-    private func handleLogout() {
-        do {
-            try Auth.auth().signOut()
-            isLoggedIn = false
-        } catch {
-            print("Error signing out: \(error.localizedDescription)")
+            .alert("Are you sure you want to log out?", isPresented: $showLogoutAlert) {
+                Button("Yes", role: .destructive) {
+                    do {
+                        try Auth.auth().signOut()
+                        storeData.reset()
+                        isLoggedIn = false
+                    } catch {
+                        print("Error signing out: \(error.localizedDescription)")
+                    }
+                }
+                Button("No", role: .cancel) {}
+            }
         }
     }
     
@@ -262,8 +266,7 @@ struct InfoSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.headline)
-                .bold()
+                .font(.custom("Alexandria-Regular", size: 17).weight(.bold))
             content
                 .padding()
                 .background(Color.white)
@@ -282,10 +285,11 @@ struct InfoRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 5) {
                 Text(label)
-                    .font(.caption)
+                    .font(.custom("Alexandria-Regular", size: 12))
+                    .padding(.bottom, 2)
                 Text(value)
-                    .font(.subheadline)
-                    .bold()
+                    .font(.custom("Alexandria-Regular", size: 15).weight(.bold))
+                    .padding(.vertical, 4)
             }
             Spacer()
         }

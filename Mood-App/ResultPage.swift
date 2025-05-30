@@ -8,7 +8,14 @@
 import SwiftUI
 
 struct ResultPage: View {
+    @EnvironmentObject var storeData: StoreData
+    @Environment(\.dismiss) private var dismiss
+    @State private var showHomeView = false
+    
+    var pointsEarned: Int
+    
     var body: some View {
+        NavigationStack {
         ZStack {
             // set up gradient in background
             ZStack {
@@ -37,42 +44,51 @@ struct ResultPage: View {
                 
                 // add text under
                 (
-                    Text("Thanks for checking in!\nYou’ve earned ")
-                        .font(Font.custom("Alexandria", size: 20))
+                        Text("Thanks for checking in!\nYou've earned ")
+                        .font(Font.custom("Alexandria-Regular", size: 20))
                     +
-                    Text("30")
-                        .font(Font.custom("Alexandria", size: 20).weight(.bold))
+                        Text("\(pointsEarned)")
+                        .font(Font.custom("Alexandria-Regular", size: 20).weight(.bold))
                     +
                     Text(" points.")
-                        .font(Font.custom("Alexandria", size: 20).weight(.bold))
+                        .font(Font.custom("Alexandria-Regular", size: 20).weight(.bold))
                 )
                 .multilineTextAlignment(.center)
                 .foregroundColor(.black)
                 .padding(.horizontal, 30)
-            }
+                    
+                    Spacer()
+                    
             // button that should transport user home
                         Button(action: {
-                            print("Button tapped!")
+                        showHomeView = true
                         }) {
                             Text("Return Home")
                                 .font(.headline)
                                 .padding(.horizontal, 28)
-                                .padding(.vertical, 5)
+                            .padding(.vertical, 8)
                                 .foregroundColor(.white)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
                                                     .fill(Color(red: 0.56, green: 0.51, blue: 0.86))
-                                                    
                                 )
-                                
                                 .cornerRadius(10)
                         }
-            .padding(.top, 320)
+                    .padding(.bottom, 50)
+                }
+                .padding(.top, 50)
+            }
+            .navigationDestination(isPresented: $showHomeView) {
+                HomeView()
+                    .environmentObject(storeData)
+            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }
 
 #Preview {
-    ContentView()
+    ResultPage(pointsEarned: 50)
+        .environmentObject(StoreData.demo)
 }
 

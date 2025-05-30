@@ -42,7 +42,7 @@ struct CheckInView: View {
 
                     // Title
                     Text("Let's check your moo'd.")
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.custom("Alexandria-Regular", size: 24).weight(.semibold))
 
                     // Cow Illustration
                     Image("QuestionIcon")
@@ -52,7 +52,7 @@ struct CheckInView: View {
 
                     // Prompt
                     Text("How do you want to check in?")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.custom("Alexandria-Regular", size: 20).weight(.medium))
 
                     // Two Options
                     HStack(spacing: columnSpacing) {
@@ -62,6 +62,7 @@ struct CheckInView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: iconSize, height: iconSize)
+                                .padding(.top, 10)
 
                             Button {
                                 showSurveyFlow = true
@@ -71,16 +72,18 @@ struct CheckInView: View {
                                     .scaledToFit()
                                     .frame(height: buttonHeight)
                             }
+                            .padding(.top, 0)
 
                             Text("Answer a couple questions about your current mood.")
-                                .font(.caption)
+                                .font(.custom("Alexandria-Regular", size: 13))
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .frame(width: descriptionWidth)
+                                .padding(.top, 0)
 
                             Text("About 2–5 minutes")
-                                .font(.footnote)
-                                .fontWeight(.semibold)
+                                .font(.custom("Alexandria-Regular", size: 12).weight(.semibold))
+                                .padding(.top, 0)
                         }
 
                         // ── Journal Column ─────────────────
@@ -89,6 +92,7 @@ struct CheckInView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: iconSize, height: iconSize)
+                                .padding(.top, 10)
 
                             Button {
                                 showJournalFlow = true
@@ -98,16 +102,18 @@ struct CheckInView: View {
                                     .scaledToFit()
                                     .frame(height: buttonHeight)
                             }
+                            .padding(.top, 0)
 
                             Text("Write about how you're currently feeling in a journal.")
-                                .font(.caption)
+                                .font(.custom("Alexandria-Regular", size: 13))
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .frame(width: descriptionWidth)
+                                .padding(.top, 0)
 
                             Text("About 5–10 minutes")
-                                .font(.footnote)
-                                .fontWeight(.semibold)
+                                .font(.custom("Alexandria-Regular", size: 12).weight(.semibold))
+                                .padding(.top, 0)
                         }
                     }
 

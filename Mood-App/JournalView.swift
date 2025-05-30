@@ -113,7 +113,9 @@ struct JournalView: View {
 
                         // — Submit Button —
                         Button {
-                            saveEntry()
+                            storeData.addJournalEntry(text: journalEntry)
+                            journalEntry = ""
+                            userEdited = false
                             showCheckInFlow = true
                         } label: {
                             Image("Submit Button")

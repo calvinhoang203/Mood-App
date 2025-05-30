@@ -20,6 +20,8 @@ struct SurveyQuestionaireView: View {
     @State private var showAlert = false
     @State private var isFinished = false
     @State private var showLoading = false
+    @State private var totalPointsEarned = 0 // Track total points for result page
+    @State private var goToHome = false // New navigation state
     @Environment(\.dismiss) private var dismiss
 
     // Navigation state for all main screens
@@ -30,6 +32,10 @@ struct SurveyQuestionaireView: View {
     @State private var showPet = false
     @State private var showSettingNav = false
     private let navBarHeight: CGFloat = 64
+    
+    // Index of the mood question in the survey
+    private let moodQuestionIndex = 1 // "How are you feeling overall today?"
+    private let moodPoints = 50 // Points earned for answering the mood question
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
@@ -45,10 +51,10 @@ struct SurveyQuestionaireView: View {
         SurveyQuestionData(
             question: "How are you feeling overall today?",
             options: [
-                ("Great 😄", "", 0),
-                ("Okay 🙂", "", 0),
-                ("Meh 😐", "", 0),
-                ("Not so good 😞", "", 0)
+                ("Great 😄", "MOOD_TRACKING", 50),
+                ("Okay 🙂", "MOOD_TRACKING", 50),
+                ("Meh 😐", "MOOD_TRACKING", 50),
+                ("Not so good 😞", "MOOD_TRACKING", 50)
             ],
             allowsMultipleSelection: false
         ),
@@ -137,8 +143,9 @@ struct SurveyQuestionaireView: View {
                 if showLoading {
                     LoadingView()
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                                isFinished = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                showLoading = false
+                                goToHome = true
                             }
                         }
                 } else {
@@ -151,7 +158,7 @@ struct SurveyQuestionaireView: View {
                             .multilineTextAlignment(.center)
 
                         Text("Answer a couple questions to get started.")
-                            .font(.custom("Alexandria", size: 16))
+                            .font(.custom("Alexandria-Regular", size: 16))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
 
@@ -162,13 +169,15 @@ struct SurveyQuestionaireView: View {
 
                         VStack(spacing: 5) {
                             Text(questions[currentIndex].question)
-                                .font(.custom("Alexandria", size: 18))
+                                .font(.custom("Alexandria-Regular", size: 18))
                                 .bold()
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
-
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity)
                             Text(questions[currentIndex].allowsMultipleSelection ? "Select all that apply." : "Select one.")
-                                .font(.custom("Alexandria", size: 14))
+                                .font(.custom("Alexandria-Regular", size: 14))
                                 .foregroundColor(.gray)
                         }
 
@@ -177,7 +186,7 @@ struct SurveyQuestionaireView: View {
                                 toggleSelection(for: option.text)
                             }) {
                                 Text(option.text)
-                                    .font(.custom("Alexandria", size: 16))
+                                    .font(.custom("Alexandria-Regular", size: 16))
                                     .foregroundColor(.black)
                                     .padding()
                                     .frame(maxWidth: .infinity)
@@ -209,6 +218,7 @@ struct SurveyQuestionaireView: View {
                         }
                         .cornerRadius(20)
                         .padding(.top, 5)
+                        .padding(.bottom, 30)
                     }
                     .padding()
                     .padding(.bottom, navBarHeight)
@@ -226,17 +236,11 @@ struct SurveyQuestionaireView: View {
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .navigationDestination(isPresented: $isFinished) {
-                HomeView()
-                    .environmentObject(storeData)
+            .navigationDestination(isPresented: $goToHome) {
+                HomeView().environmentObject(storeData)
             }
             .alert("Please choose an answer before continuing.", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {}
-            }
-            .onChange(of: showLoading) { oldValue, newValue in
-                if oldValue == true && newValue == false {
-                    dismiss()
-                }
             }
             .navigationBarBackButtonHidden(true)
         }
@@ -260,9 +264,23 @@ struct SurveyQuestionaireView: View {
             return
         }
 
-        // Placeholder for potential point system in future
+        let selectedOption = selectedOptions.first!
+        let currentQuestion = questions[currentIndex]
+        if let optionIndex = currentQuestion.options.firstIndex(where: { $0.text == selectedOption }) {
+            let option = currentQuestion.options[optionIndex]
+            // Only add points if the category is not empty
+            if !option.category.isEmpty {
+                storeData.addPoints(for: option.category, points: option.points)
+                totalPointsEarned += option.points
+            }
+            // Only add mood entry for the mood question
+            if currentIndex == moodQuestionIndex {
+                if let mood = Mood(rawValue: selectedOption) {
+                    storeData.addMoodEntry(mood: mood)
+                }
+            }
+        }
         selectedOptions.removeAll()
-
         if currentIndex < questions.count - 1 {
             withAnimation {
                 currentIndex += 1
@@ -270,10 +288,6 @@ struct SurveyQuestionaireView: View {
         } else {
             showLoading = true
             storeData.saveToFirestore()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                showLoading = false
-                dismiss()
-            }
         }
     }
     

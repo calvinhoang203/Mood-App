@@ -32,7 +32,10 @@ struct AnalyticsPageView: View {
         return min(CGFloat(storeData.currentStreak) / CGFloat(maxStreakDays), 1)
     }
     
-    
+    // Get all emotions for the legend
+    private var allEmotions: [Emotion] {
+        [.great, .okay, .meh, .nsg]
+    }
 
     /// Per‐badge lock offsets in case you need to tweak
     private let lockOffsets: [CGSize] = [.zero, .zero, .zero, .zero]
@@ -68,7 +71,11 @@ struct AnalyticsPageView: View {
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .onAppear { storeData.fetchAnalyticsData() }
+            .onAppear { 
+                storeData.fetchAnalyticsData() 
+                print("Analytics page appeared, fetching data")
+                print("Current mood distribution: \(storeData.weeklyMoodDistribution)")
+            }
             
         }
         .navigationBarBackButtonHidden(true)
@@ -79,13 +86,13 @@ struct AnalyticsPageView: View {
     private var topNav: some View {
         HStack {
             Text("Analytics")
-                .font(.system(size: 26, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 26))
             Spacer()
-            NavigationLink(destination: SavedPageView()) {
-                Image("Bookmark Icon")
-                    .resizable()
-                    .frame(width: 36, height: 36)
-            }
+//            NavigationLink(destination: SavedPageView()) {
+//                Image("Bookmark Icon")
+//                    .resizable()
+//                    .frame(width: 36, height: 36)
+//            }
             NavigationLink(destination: NotificationView()) {
                 Image("Notification Icon")
                     .resizable()
@@ -147,7 +154,7 @@ struct AnalyticsPageView: View {
             .cornerRadius(7)
 
             Text("\(storeData.currentStreak) DAY STREAK")
-                .font(.system(size: 20, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 20).weight(.bold))
                 .foregroundColor(streakTextColor)
         }
         .padding(.horizontal, 16)
@@ -158,7 +165,7 @@ struct AnalyticsPageView: View {
     private var badgesView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Badges")
-                .font(.system(size: 22, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 22).weight(.bold))
                 .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -185,8 +192,7 @@ struct AnalyticsPageView: View {
                                         .offset(lockOffsets[i])
                                 }
                             }
-//                            Text(storeData.badgeTitles[safe: i] ?? "")
-                                .font(.footnote)
+                                .font(.custom("Alexandria-Regular", size: 13))
                         }
                     }
                 }
@@ -200,31 +206,49 @@ struct AnalyticsPageView: View {
     private var weeklyStatsView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Weekly Stats")
-                .font(.system(size: 22, weight: .bold))
+                .font(.custom("Alexandria-Regular", size: 22).weight(.bold))
                 .padding(.horizontal, 16)
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
-                    .shadow(radius: 4)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 240)
-
-                VStack(spacing: 8) {
-                    Spacer()
-//                    DonutChart(data: storeData.weeklyMoodData)
-//                        .frame(width: 150, height: 150)
-
-                    Text(storeData.weekRangeText.uppercased())
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .padding(.top, 8)
-                    Spacer()
+            if storeData.weeklyMoodDistributions.isEmpty {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(radius: 4)
+                        .frame(maxWidth: .infinity, minHeight: 320, maxHeight: 350)
+                    Text("No mood data yet")
+                        .font(.custom("Alexandria-Regular", size: 17))
+                        .foregroundColor(.gray)
                 }
-                .frame(maxWidth: .infinity)
+            } else {
+                TabView {
+                    ForEach(Array(storeData.weeklyMoodDistributions.enumerated()), id: \ .offset) { item in
+                        let week = item.element
+                        VStack(spacing: 12) {
+                            Spacer(minLength: 8)
+                            DonutChart(data: week.1, weekStart: week.0)
+                                .frame(width: 160, height: 160)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 320, maxHeight: 350)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white)
+                                .shadow(radius: 4)
+                        )
+                        .padding(.horizontal, 32)
+                    }
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                .frame(height: 350)
             }
-            .padding(.horizontal, 16)
         }
+    }
+
+    // Helper for formatting the week start date
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter.string(from: date)
     }
 
     private var bottomTabBar: some View {
@@ -276,76 +300,6 @@ struct AnalyticsPageView: View {
         )
     }
 }
-
-
-// MARK: – DonutChart Support
-
-//struct DonutSegment: Shape {
-//    var startAngle: Angle, endAngle: Angle
-//    func path(in rect: CGRect) -> Path {
-//        var p = Path()
-//        let r = min(rect.width, rect.height) / 2
-//        let c = CGPoint(x: rect.midX, y: rect.midY)
-//        p.addArc(center: c,
-//                 radius: r,
-//                 startAngle: startAngle - .degrees(90),
-//                 endAngle:   endAngle   - .degrees(90),
-//                 clockwise: false)
-//        return p.strokedPath(.init(lineWidth: r * 0.4, lineCap: .butt))
-//    }
-//}
-
-//struct DonutChart: View {
-//    let data: [String: Double]
-//    private var total: Double { data.values.reduce(0, +) }
-//    private var segments: [(Color, Angle, Angle, String)] {
-//        var res: [(Color,Angle,Angle,String)] = []
-//        var start = Angle.degrees(0)
-//        for (cat, val) in data {
-//            let end = start + .degrees((val / total) * 360)
-////            let col: Color = {
-////                switch cat {
-////                case "Happiness": return Color(hex: "#FFCE9A")
-////                case "Sadness":    return Color(hex: "#4A90E2")
-////                case "Anxiety":    return Color(hex: "#B8E7A6")
-////                default:           return .gray
-////                }
-////            }()
-////            res.append((col, start, end, cat))
-//            start = end
-//        }
-//        return res
-//    }
-
-//    var body: some View {
-//        ZStack {
-//            ForEach(0..<segments.count, id: \.self) { i in
-//                DonutSegment(startAngle: segments[i].1,
-//                             endAngle:   segments[i].2)
-//                    .fill(segments[i].0)
-//            }
-//            ForEach(segments, id: \.3) { seg in
-//                let mid = (seg.1 + seg.2) / 2
-//                let rad = 75 * 0.75
-//                let x = cos(mid.radians) * rad + 75
-//                let y = sin(mid.radians) * rad + 75
-//                Text(seg.3)
-//                    .font(.caption2)
-//                    .position(x: x, y: y)
-//            }
-//        }
-//    }
-//}
-
-
-// MARK: – Safe Array Indexing
-
-//extension Collection {
-//    subscript(safe i: Index) -> Element? {
-//        indices.contains(i) ? self[i] : nil
-//    }
-//}
-
 
 // MARK: – Preview
 
