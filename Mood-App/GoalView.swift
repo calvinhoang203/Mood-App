@@ -23,7 +23,7 @@ struct GoalView: View {
     let steps: [GoalStep] = [
         GoalStep(
             title: "Set a tangible goal for yourself.",
-            options: ["Daily Check Ins", "300 Points", "500 Points", "Custom Goal Set"]
+            options: ["Daily Check Ins", "300 Points", "500 Points", "800 Points"]
         ),
         GoalStep(
             title: "Set your timeline.",

@@ -127,7 +127,7 @@ struct HomeView: View {
       .navigationDestination(isPresented: $showHomeNav) { HomeView() }
       .navigationDestination(isPresented: $showResource) { ResourcesView() }
       .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
-      .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+      .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView().environmentObject(storeData) }
       .navigationDestination(isPresented: $showPet) { PetView() }
       .navigationDestination(isPresented: $showSettingNav) { SettingView() }
       .navigationDestination(isPresented: $showCheckIn) { SurveyQuestionaireView().environmentObject(storeData) }
@@ -284,7 +284,7 @@ struct HomeView: View {
   }
 
   private var remainingPointsText: some View {
-    let total = storeData.totalPoints
+    let total = storeData.totalBadgePoints
     let remaining = max(storeData.goalPoints - total, 0)
     return (
       Text("You are ")
@@ -371,3 +371,4 @@ struct HomeView_Previews: PreviewProvider {
       .environmentObject(PetCustomization())
   }
 }
+
