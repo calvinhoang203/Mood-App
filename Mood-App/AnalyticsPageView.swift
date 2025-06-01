@@ -38,7 +38,7 @@ struct AnalyticsPageView: View {
     }
 
     /// Per‐badge lock offsets in case you need to tweak
-    private let lockOffsets: [CGSize] = [.zero, .zero, .zero, .zero]
+    private let lockOffsets: [CGSize] = [.zero, .zero, .zero, .zero, .zero, .zero, .zero, .zero, .zero, .zero, .zero, .zero]
 
     var body: some View {
         NavigationStack {
@@ -170,20 +170,39 @@ struct AnalyticsPageView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 32) {
+                    //storeData.badgeTitles.count
                     ForEach(0..<storeData.badgeTitles.count, id: \.self) { i in
                         let unlocked = storeData.unlockedBadges[i]
                         VStack(spacing: 8) {
                             ZStack {
-                                Image("Trophy \(i+1)")
-                                    .resizable()
-                                    .frame(width: 80, height: 80)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .overlay(
-                                        unlocked
+                                if((i+1) <= 4){
+                                    Image("Trophy \(i+1)")
+                                        .resizable()
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .overlay(
+                                            unlocked
                                             ? nil
                                             : Color.black.opacity(0.3)
                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    )
+                                        )
+                                }
+                                else{
+                                    Image("Trophy \(i+1)")
+                                        .resizable()
+                                        .scaledToFill() // Ensures full fill, can crop edges
+                                        .frame(width: 80, height: 80)
+                                        .scaleEffect(2.5)
+                                        .offset(x: -4)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .overlay(
+                                            unlocked
+                                            ? nil
+                                            : Color.black.opacity(0.3)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        )
+
+                                }
 
                                 if !unlocked {
                                     Image("Lock Icon")
@@ -199,7 +218,13 @@ struct AnalyticsPageView: View {
                 .padding(.horizontal, 16)
             }
         }
-    }
+        .onAppear {
+                if let badgeIndex = storeData.checkBadgeStatus() {
+                    storeData.unlockBadge(at: badgeIndex)
+                    print("Unlocked badge at index \(badgeIndex) from badgesView onAppear")
+                }
+            }
+        }
 
     // MARK: – Weekly Stats View
 
