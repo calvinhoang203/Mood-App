@@ -60,18 +60,6 @@ Moo’d was created to support mental wellness through personalized check-ins an
 ---
 
 
-## 🎯 Future Enhancements
-
-- Localization for broader accessibility.
-- Advanced analytics with mood-based content recommendations.
-- Integration of health tracking (sleep, activity) from HealthKit.
-- Gamified challenges and community engagement features.
-- Scheduled notifications and background task handling.
-- Push notifications for timely reminders.
-
----
-
-
 ## 🏃‍♀️ How to Run
 
 1. Clone the repository.
