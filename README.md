@@ -1,4 +1,5 @@
-# 🌈 Moo'd – Your Mood Matters
+content = """
+# 🌈 Moo’d – Your Mood Matters
 
 ## 🧠 Inspiration
 
@@ -8,33 +9,75 @@ Moo’d was created to support mental wellness through personalized check-ins an
 
 ## 📱 Overview
 
-**Moo’d** is a mobile mental health application built using **SwiftUI** and **Firebase**. It allows users to track their emotions, complete wellness check-ins, and monitor their growth through dynamic dashboards and playful incentives.
+**Moo’d** is a mobile mental health application built with **SwiftUI** and **Firebase**, designed to help users track their emotions, complete wellness check-ins, and monitor their progress through dynamic dashboards and playful incentives. The app transforms emotional self-care into a fun and rewarding experience with an adorable pet cow that grows with you.
 
 ---
 
-## 🚀 Features (In Progress)
+## 🚀 Features
 
-- 🧑‍💼 **User Profiles** – Collects name, pronouns, and preferences for a personalized experience  
-- 🧠 **Emotional Surveys** – Step-by-step questions to evaluate users’ current mental state  
-- 📊 **Dynamic Dashboard** – Visualizes progress and stores survey results  
-- 🎁 **Rewards System** – Earn points for each check-in and redeem them for virtual items  
-- 💬 **Quote of the Day** – Delivers calming and motivational messages  
-- 🐮 **Pet Companion** – A digital cow reacts to your progress and check-ins  
-- 🌐 **Firebase Integration** – Real-time user authentication and data storage  
+- 🧑‍💼 **User Profiles** – Collect and store names, pronouns, and preferences for a tailored user experience.
+- 🧠 **Emotional Surveys** – Step-by-step questionnaires to assess users' current mood and mental state.
+- 📊 **Dynamic Dashboard** – Visualize progress and score summaries tied to wellness categories like stress, anxiety, and energy.
+- 🎁 **Rewards System** – Earn points through daily check-ins and redeem them for digital items to customize the cow companion.
+- 💬 **Quote of the Day** – Get inspired with a daily motivational or calming message.
+- 🐮 **Pet Companion** – A customizable digital cow with skins, outfits, and accessories that respond to progress and engagement.
+- 🌐 **Firebase Integration** – Real-time user authentication, Firestore data storage, and notification updates.
+- 🔔 **Notifications** – Personalized reminders for check-ins, point milestones, and more.
+- 🔎 **Analytics** – View and reflect on mood trends, goals, and achievements.
+- 🌿 **Goal Setting** – Set personal growth targets and track progress with interactive goal views.
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ Architecture
 
-- **Frontend:** SwiftUI (iOS), Swift 5  
-- **Backend:** Firebase (Authentication, Firestore)  
-- **Authentication:** Email & Google Sign-In  
-- **Design Assets:** Custom illustrations, vector logos (`logosamp`, `cow`, etc.)  
+- **Frontend:** SwiftUI, Swift 5  
+- **Backend:** Firebase Authentication, Firestore, FirebaseManager for secure data handling  
+- **State Management:** ObservableObject with StoreData and PetCustomization models  
+- **Navigation:** NavigationStack with modular views (Home, Login, Survey, Pet, Goals, Resources, Analytics, etc.)  
+- **Design Assets:** Custom illustrations (including cow images and accessory sets), vector logos (`logosamp`, `cow`, etc.)
 
 ---
 
 ## 🧪 Development Status
 
-🚧 This project is currently under active development. Some features like full survey scoring, Google OAuth error handling, and mood-based recommendations are still being implemented. Expect more UI polish and animations in future updates. 🚧
+🚧 **Moo’d** is in active development with core features like surveys, profile customization, Firebase integration, and point tracking implemented. Future updates will include:
+- Complete Google OAuth error handling.
+- Enhanced animations and UI polish.
+- Expanded wellness check-ins with tailored questions.
+- Deeper insights and mood-based content recommendations.
+- Improved accessibility and localization support.
+
+---
+
+
+## 🔐 Security & Privacy
+
+- User data (name, email, phone) is securely stored in Firestore.
+- Authentication via Firebase supports Email and Google Sign-In with proper Firestore document IDs.
+- Data transmission complies with App Transport Security (ATS) requirements.
+- Sensitive data such as scores and notifications are protected and updated securely.
+
+---
+
+
+## 🎯 Future Enhancements
+
+- Localization for broader accessibility.
+- Advanced analytics with mood-based content recommendations.
+- Integration of health tracking (sleep, activity) from HealthKit.
+- Gamified challenges and community engagement features.
+- Scheduled notifications and background task handling.
+- Push notifications for timely reminders.
+
+---
+
+
+## 🏃‍♀️ How to Run
+
+1. Clone the repository.
+2. Open `MoodApp.xcodeproj` in Xcode.
+3. Set up a Firebase project and download `GoogleService-Info.plist`.
+4. Replace the placeholder Firebase configuration in Xcode with your own.
+5. Build and run the app on a simulator or a real device.
 
 ---
