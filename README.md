@@ -1,4 +1,4 @@
-content = """
+
 # 🌈 Moo’d – Your Mood Matters
 
 ## 🧠 Inspiration
