@@ -71,7 +71,7 @@ struct HomeView: View {
 
                 // Notification icon
                   NavigationLink(destination: NotificationView()) {
-                     Image("Notification Icon")
+                     Image("Bookmark Icon")
                        .resizable()
                        .frame(width: 40, height: 40)
                    }
