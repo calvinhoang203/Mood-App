@@ -94,7 +94,7 @@ struct AnalyticsPageView: View {
 //                    .frame(width: 36, height: 36)
 //            }
             NavigationLink(destination: NotificationView()) {
-                Image("Notification Icon")
+                Image("Bookmark Icon")
                     .resizable()
                     .frame(width: 36, height: 36)
             }
