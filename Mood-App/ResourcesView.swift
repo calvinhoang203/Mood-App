@@ -76,7 +76,7 @@ struct ResourcesView: View {
 //                                .frame(width: 30, height: 35)
 //                                .padding(.top, 15)
                          }
-                        Image("Notification Icon")
+                        Image("Bookmark Icon")
                             .resizable()
                             .frame(width: 40, height: 40)
                             .padding(.top, 15)
