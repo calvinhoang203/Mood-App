@@ -9,7 +9,7 @@ import UIKit
 
 struct SurveyQuestionData {
     let question: String
-    let options: [(text: String, category: String, points: Int)]
+    let options: [(text: String, category: String, points: Int, resultCategory: String)]
     let allowsMultipleSelection: Bool
 }
 
@@ -22,6 +22,11 @@ struct SurveyQuestionaireView: View {
     @State private var showLoading = false
     @State private var totalPointsEarned = 0 // Track total points for result page
     @State private var goToHome = false // New navigation state
+
+    // TEAMMATE NOTE: This array stores all the resultCategories that users select throughout the survey
+    // Each time user picks an answer, that answer's resultCategory gets added to this list
+    @State private var selectedCategories: [String] = []
+
     @Environment(\.dismiss) private var dismiss
 
     // Navigation state for all main screens
@@ -41,90 +46,92 @@ struct SurveyQuestionaireView: View {
         SurveyQuestionData(
             question: "How would you describe your mood today in one word?",
             options: [
-                ("Joyful", "", 0),
-                ("Stressed", "", 0),
-                ("Tired", "", 0),
-                ("Content", "", 0)
+                // TEAMMATE NOTE: Add your resultCategory as the 4th parameter for each answer
+                // Example format: ("answer text", "points category", points, "your result category")
+                ("Joyful", "", 0, "POSITIVE_MOOD"),
+                ("Stressed", "", 0, "STRESS_RELATED"),
+                ("Tired", "", 0, "ENERGY_RELATED"),
+                ("Content", "", 0, "POSITIVE_MOOD")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "How are you feeling overall today?",
             options: [
-                ("Great 😄", "MOOD_TRACKING", 50),
-                ("Okay 🙂", "MOOD_TRACKING", 50),
-                ("Meh 😐", "MOOD_TRACKING", 50),
-                ("Not so good 😞", "MOOD_TRACKING", 50)
+                ("Great 😄", "MOOD_TRACKING", 50, "POSITIVE_MOOD"),
+                ("Okay 🙂", "MOOD_TRACKING", 50, "NEUTRAL_MOOD"),
+                ("Meh 😐", "MOOD_TRACKING", 50, "NEUTRAL_MOOD"),
+                ("Not so good 😞", "MOOD_TRACKING", 50, "NEGATIVE_MOOD")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "Which emotion best matches your current mood?",
             options: [
-                ("Calm 😌", "", 0),
-                ("Anxious 😬", "", 0),
-                ("Sad 😢", "", 0),
-                ("Energized ⚡", "", 0)
+                ("Calm 😌", "", 0, "POSITIVE_MOOD"),
+                ("Anxious 😬", "", 0, "ANXIETY_RELATED"),
+                ("Sad 😢", "", 0, "NEGATIVE_MOOD"),
+                ("Energized ⚡", "", 0, "ENERGY_RELATED")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "Did something specific affect your mood today?",
             options: [
-                ("Yes, something positive", "", 0),
-                ("Yes, something negative", "", 0),
-                ("A mix of both", "", 0),
-                ("Not really, it just is what it is", "", 0)
+                ("Yes, something positive", "", 0, "POSITIVE_MOOD"),
+                ("Yes, something negative", "", 0, "NEGATIVE_MOOD"),
+                ("A mix of both", "", 0, "MIXED_MOOD"),
+                ("Not really, it just is what it is", "", 0, "NEUTRAL_MOOD")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "How well did you sleep last night?",
             options: [
-                ("Very well", "", 0),
-                ("Okay, not great", "", 0),
-                ("Not much at all", "", 0),
-                ("I don't remember", "", 0)
+                ("Very well", "", 0, "GOOD_HEALTH"),
+                ("Okay, not great", "", 0, "MODERATE_HEALTH"),
+                ("Not much at all", "", 0, "POOR_HEALTH"),
+                ("I don't remember", "", 0, "NEUTRAL_HEALTH")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "Did you eat a balanced meal today?",
             options: [
-                ("Yes, I ate well", "", 0),
-                ("I ate, but not very balanced", "", 0),
-                ("Not yet, but I plan to", "", 0),
-                ("No, not really", "", 0)
+                ("Yes, I ate well", "", 0, "GOOD_HEALTH"),
+                ("I ate, but not very balanced", "", 0, "MODERATE_HEALTH"),
+                ("Not yet, but I plan to", "", 0, "PLANNING_HEALTH"),
+                ("No, not really", "", 0, "POOR_HEALTH")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "How socially connected do you feel today?",
             options: [
-                ("Very connected", "", 0),
-                ("Somewhat connected", "", 0),
-                ("A bit isolated", "", 0),
-                ("Very disconnected", "", 0)
+                ("Very connected", "", 0, "SOCIAL_POSITIVE"),
+                ("Somewhat connected", "", 0, "SOCIAL_MODERATE"),
+                ("A bit isolated", "", 0, "SOCIAL_NEGATIVE"),
+                ("Very disconnected", "", 0, "SOCIAL_NEGATIVE")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "Did you do something for yourself today (self-care, hobby, rest)?",
             options: [
-                ("Yes, definitely", "", 0),
-                ("A little bit", "", 0),
-                ("Not yet, but I plan to", "", 0),
-                ("No, not at all", "", 0)
+                ("Yes, definitely", "", 0, "SELF_CARE_POSITIVE"),
+                ("A little bit", "", 0, "SELF_CARE_MODERATE"),
+                ("Not yet, but I plan to", "", 0, "SELF_CARE_PLANNING"),
+                ("No, not at all", "", 0, "SELF_CARE_NEGATIVE")
             ],
             allowsMultipleSelection: false
         ),
         SurveyQuestionData(
             question: "What's your focus or intention for tomorrow?",
             options: [
-                ("Take care of myself 💆‍♀️", "", 0),
-                ("Get things done 💼", "", 0),
-                ("Rest and recharge 🌿", "", 0),
-                ("Connect with others 💬", "", 0)
+                ("Take care of myself 💆‍♀️", "", 0, "SELF_CARE_FOCUS"),
+                ("Get things done 💼", "", 0, "PRODUCTIVITY_FOCUS"),
+                ("Rest and recharge 🌿", "", 0, "RECOVERY_FOCUS"),
+                ("Connect with others 💬", "", 0, "SOCIAL_FOCUS")
             ],
             allowsMultipleSelection: false
         )
@@ -268,6 +275,11 @@ struct SurveyQuestionaireView: View {
         let currentQuestion = questions[currentIndex]
         if let optionIndex = currentQuestion.options.firstIndex(where: { $0.text == selectedOption }) {
             let option = currentQuestion.options[optionIndex]
+            
+            // TEAMMATE NOTE: Store the resultCategory from user's selected answer
+            // This builds up the list of categories that will be analyzed at the end
+            selectedCategories.append(option.resultCategory)
+            
             // Only add points if the category is not empty
             if !option.category.isEmpty {
                 storeData.addPoints(for: option.category, points: option.points)
@@ -286,9 +298,65 @@ struct SurveyQuestionaireView: View {
                 currentIndex += 1
             }
         } else {
+            // TEAMMATE NOTE: User finished all questions, now we analyze their category selections
+            processCategoryResults()
             showLoading = true
             storeData.saveToFirestore()
         }
+    }
+    
+    // TEAMMATE NOTE: This function counts which categories appeared most and ranks them
+    // It stores the results in Firebase so your recommendation system can access them
+    func processCategoryResults() {
+        // Count how many times each category was selected
+        var categoryCount: [String: Int] = [:]
+        for category in selectedCategories {
+            categoryCount[category, default: 0] += 1
+        }
+        
+        // Sort categories by count (highest first), then alphabetically for ties
+        // This ensures consistent ranking even when categories have same count
+        let sortedCategories = categoryCount.sorted { 
+            if $0.value == $1.value {
+                // If counts are equal, sort alphabetically for consistent results
+                return $0.key < $1.key
+            }
+            // Otherwise sort by count (highest first)
+            return $0.value > $1.value
+        }
+        
+        // Create ranked result dictionary
+        var rankedResults: [String: String] = [:]
+        for (index, categoryData) in sortedCategories.enumerated() {
+            let rankKey: String
+            switch index {
+            case 0: rankKey = "first"
+            case 1: rankKey = "second" 
+            case 2: rankKey = "third"
+            case 3: rankKey = "fourth"
+            case 4: rankKey = "fifth"
+            default: rankKey = "rank_\(index + 1)"
+            }
+            rankedResults[rankKey] = categoryData.key
+        }
+        
+        // TEAMMATE NOTE: Save the ranked categories to Firebase
+        // Access this data using: storeData.categoryResults["first"], storeData.categoryResults["second"], etc.
+        storeData.saveCategoryResults(rankedResults)
+        
+        // Debug print to see the results - shows exactly what you described
+        print("TEAMMATE DEBUG - Category selections: \(selectedCategories)")
+        print("TEAMMATE DEBUG - Category counts: \(categoryCount)")
+        print("TEAMMATE DEBUG - Final ranked results: \(rankedResults)")
+        
+        // TEAMMATE DEBUG - Example output for [sad, sad, happy, sad, normal, normal]:
+        // Category counts: ["sad": 3, "normal": 2, "happy": 1]
+        // Final ranked results: ["first": "sad", "second": "normal", "third": "happy"]
+        
+        // TEAMMATE DEBUG - Example output for [sad, sad, happy, happy, normal]:
+        // Category counts: ["sad": 2, "happy": 2, "normal": 1]  
+        // Final ranked results: ["first": "happy", "second": "sad", "third": "normal"]
+        // (happy comes first because H < S alphabetically when counts are tied)
     }
     
     private var bottomTabBar: some View {

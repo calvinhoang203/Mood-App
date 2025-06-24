@@ -45,6 +45,18 @@ class StoreData: ObservableObject {
 
     // ─── Journal Entries ───
     @Published var journals: [String: [String: String]] = [:]
+    
+    // ─── Category Results for Recommendation System ───
+    // TEAMMATE NOTE: This stores the ranked categories from survey results
+    // Access like: storeData.categoryResults["first"] to get the top category
+    // 
+    // EXAMPLE USAGE FOR YOUR RECOMMENDATION SYSTEM:
+    // let topCategory = storeData.categoryResults["first"] ?? "NO_DATA"
+    // let secondCategory = storeData.categoryResults["second"] ?? "NO_DATA"
+    // 
+    // Available keys: "first", "second", "third", "fourth", "fifth"
+    // Categories come from the survey answers (like "POSITIVE_MOOD", "ANXIETY_RELATED", etc.)
+    @Published var categoryResults: [String: String] = [:]
 
     func addPoints(for category: String, points: Int) {
         scores[category, default: 0] += points
@@ -138,7 +150,8 @@ class StoreData: ObservableObject {
             "notifications": notifications,
             "moodEntries": moodEntriesData,
             "currentStreak": currentStreak,
-            "journals": journals
+            "journals": journals,
+            "categoryResults": categoryResults
         ]
 
         userRef.setData(userData, merge: true) { error in
@@ -233,6 +246,12 @@ class StoreData: ObservableObject {
             // Load journals if present
             if let journalsData = data["journals"] as? [String: [String: String]] {
                 self.journals = journalsData
+            }
+            
+            // TEAMMATE NOTE: Load category results from Firebase
+            // This loads the ranked categories that your recommendation system needs
+            if let categoryResultsData = data["categoryResults"] as? [String: String] {
+                self.categoryResults = categoryResultsData
             }
 
             print("✅ User data loaded successfully.")
@@ -356,6 +375,7 @@ class StoreData: ObservableObject {
         ]
         unlockedBadges = [false, false, false, false]
         journals = [:]
+        categoryResults = [:]
     }
 
     /// Returns an array of (weekStart, mood distribution) for each week with mood entries, sorted by weekStart ascending
@@ -384,5 +404,33 @@ class StoreData: ObservableObject {
         let key = "entry\(nextIndex)"
         journals[key] = ["text": text, "date": dateString]
         saveToFirestore()
+    }
+    
+    // TEAMMATE NOTE: This function saves the ranked category results to Firebase
+    // Call this after processing survey responses to store recommendation data
+    // The ranked results will be available for your recommendation system
+    func saveCategoryResults(_ rankedResults: [String: String]) {
+        self.categoryResults = rankedResults
+        
+        // Save specifically to Firebase
+        guard let currentUser = Auth.auth().currentUser else {
+            print("❌ User not logged in - cannot save category results")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users' info").document(currentUser.uid)
+        
+        userRef.updateData([
+            "categoryResults": rankedResults
+        ]) { error in
+            if let error = error {
+                print("❌ Error saving category results: \(error.localizedDescription)")
+            } else {
+                print("✅ Category results saved successfully!")
+                print("TEAMMATE INFO - Saved results: \(rankedResults)")
+                print("TEAMMATE INFO - Access with: storeData.categoryResults[\"first\"], storeData.categoryResults[\"second\"], etc.")
+            }
+        }
     }
 }
