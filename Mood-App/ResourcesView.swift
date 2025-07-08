@@ -10,6 +10,8 @@ struct ResourcesView: View {
     @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
     @State private var showSettingNav = false
+    @State private var showNotification = false
+
 
     @FocusState private var isSearchFocused: Bool
     let navBarHeight: CGFloat = 64
@@ -143,14 +145,18 @@ struct ResourcesView: View {
                                 .padding(.trailing, 5)
                         }
 
-                        Button {
-                            navigateToSaved = true
-                        } label: {
-                            Image("bookmark")
-                                .resizable()
-                                .frame(width: 30, height: 35)
-                                .padding(.top, 15)
-                        }
+                            Button {
+                                showNotification = true
+                            } label: {
+                                Image("Bookmark Icon")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                            }
+                            .navigationDestination(isPresented: $showNotification) {
+                                NotificationView().environmentObject(storeData)
+                            }
+
+
 
                         Image("notification")
                             .resizable()

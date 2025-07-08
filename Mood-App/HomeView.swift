@@ -29,6 +29,8 @@ struct HomeView: View {
     @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
     @State private var showSettingNav = false
+    @State private var showNotification = false
+
 
     // Layout constants
     private let headerImageHeight: CGFloat = 360
@@ -52,11 +54,17 @@ struct HomeView: View {
                 VStack(spacing: 0) {
                    ZStack {
                         HStack(spacing: 6) {
-                            NavigationLink(destination: NotificationView()) {
-                                Image("Notification Icon")
+                            Button {
+                                showNotification = true
+                            } label: {
+                                Image("Bookmark Icon")
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
+                            .navigationDestination(isPresented: $showNotification) {
+                                NotificationView().environmentObject(storeData)
+                            }
+
                         }
                         .padding(.top, 75)
                         .padding(.trailing, 0)
