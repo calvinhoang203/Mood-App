@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A39C0742DE914D100C58EA9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5A39C0732DE914D100C58EA9 /* GoogleService-Info.plist */; };
 		AD09CCFA2DAA489500C57591 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = AD09CCF92DAA489500C57591 /* GoogleSignIn */; };
 		AD09CCFC2DAA489500C57591 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AD09CCFB2DAA489500C57591 /* GoogleSignInSwift */; };
 		AD09CCFF2DAA48D900C57591 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AD09CCFE2DAA48D900C57591 /* FirebaseAnalytics */; };
@@ -53,6 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5A39C0732DE914D100C58EA9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AD09CB9D2DA8E16700C57591 /* Mood-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mood-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD09CBAD2DA8E16900C57591 /* Mood-AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mood-AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD09CBB72DA8E16900C57591 /* Mood-AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mood-AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,6 +145,7 @@
 		AD09CB942DA8E16700C57591 = {
 			isa = PBXGroup;
 			children = (
+				5A39C0732DE914D100C58EA9 /* GoogleService-Info.plist */,
 				AD09CB9F2DA8E16700C57591 /* Mood-App */,
 				AD09CBB02DA8E16900C57591 /* Mood-AppTests */,
 				AD09CBBA2DA8E16900C57591 /* Mood-AppUITests */,
@@ -310,6 +313,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A39C0742DE914D100C58EA9 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

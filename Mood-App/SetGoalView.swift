@@ -60,7 +60,7 @@ struct SetGoalView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: iconSize, height: iconSize)
-                            .padding(.top, 23)
+                            .padding(.top, 18)
                             .padding(.bottom, 16)
 
                         Button {

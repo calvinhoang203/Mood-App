@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 import UIKit
 
-// Custom shape for rounded corners that is specific to HomeView
+// Custom shape for rounded corners
 struct HomeCornerShape: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
@@ -14,360 +14,354 @@ struct HomeCornerShape: Shape {
 }
 
 struct HomeView: View {
-  @EnvironmentObject private var storeData: StoreData
-  @EnvironmentObject private var petCustomization: PetCustomization
-  @State private var tabSwitchTrigger = false
+    @EnvironmentObject var savedItems: SavedItems
+    @EnvironmentObject private var storeData: StoreData
+    @EnvironmentObject private var petCustomization: PetCustomization
+    @State private var tabSwitchTrigger = false
 
-  // MARK: – Navigation State
-  @State private var showPet = false
-  @State private var showCheckIn = false
-  @State private var showHomeNav = false
-  @State private var showResource = false
-  @State private var showSetGoal = false
-  @State private var showAnalyticsNav = false
-  @State private var showSettingNav = false
-    
-  // MARK: – Layout State
-  @State private var editIconX: CGFloat = 0.51
-  @State private var editIconY: CGFloat = 0.65
-  @State private var topIconPadding: CGFloat = 70
-  @State private var trailingIconPadding: CGFloat = 0
+    private let topTags: [String] = ["exercise", "happy", "peaceful"]
 
-  // MARK: – Configurable Constants
-  private let headerImageHeight: CGFloat = 360
-  private let cowSize: CGFloat = 750
-  private let editButtonSize: CGFloat = 21
-  private let contentExtraOffsetY: CGFloat = 160
-  private let accentColor = Color("d3cpurple")
-  private let navBarHeight: CGFloat = 64
+    // Navigation state
+    @State private var showPet = false
+    @State private var showCheckIn = false
+    @State private var showHomeNav = false
+    @State private var showResource = false
+    @State private var showSetGoal = false
+    @State private var showAnalyticsNav = false
+    @State private var showSettingNav = false
 
-  // MARK: – Cow Position Helpers
-  private var cowOffsetX: CGFloat { 160 }
-  private var cowOffsetY: CGFloat { headerImageHeight - (cowSize / 3.0) }
-  private var editOffsetX: CGFloat { (cowSize / 2) - (editButtonSize / 2) - 40 }
-  private var editOffsetY: CGFloat { (cowSize / 2) - (editButtonSize / 2) - 15 }
+    // Layout constants
+    private let headerImageHeight: CGFloat = 360
+    private let cowSize: CGFloat = 750
+    private let editButtonSize: CGFloat = 21
+    private let contentExtraOffsetY: CGFloat = 20
+    private let accentColor = Color("d3cpurple")
+    private let navBarHeight: CGFloat = 64
 
-  var body: some View {
-    NavigationStack {
-      ZStack {
-        // Full-screen background
-        Image("homepageview")
-          .resizable()
-          .scaledToFill()
-          .ignoresSafeArea()
+    private var cowOffsetX: CGFloat { 160 }
+    private var cowOffsetY: CGFloat { headerImageHeight - (cowSize / 3.0) }
 
-        // Scrollable content
-        ScrollView(showsIndicators: false) {
-          VStack(spacing: 24) {
-            // ─ Cow + top icons
+    var body: some View {
+        NavigationStack {
             ZStack {
-              HStack(spacing: 6) {
-                // Bookmark icon
-//                  NavigationLink(destination: SavedPageView()) {
-//                     Image("Bookmark Icon")
-//                       .resizable()
-//                       .frame(width: 40, height: 40)
-//                   }
+                Image("homepageview")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
 
-                // Notification icon
-                  NavigationLink(destination: NotificationView()) {
-                     Image("Notification Icon")
-                       .resizable()
-                       .frame(width: 40, height: 40)
-                   }
-              }
-              .padding(.top, topIconPadding)
-              .padding(.trailing, trailingIconPadding)
-              .frame(width: 360, alignment: .topTrailing)
+                VStack(spacing: 0) {
+                   ZStack {
+                        HStack(spacing: 6) {
+                            NavigationLink(destination: NotificationView()) {
+                                Image("Notification Icon")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                            }
+                        }
+                        .padding(.top, 75)
+                        .padding(.trailing, 0)
+                        .frame(width: 360, alignment: .topTrailing)
+                    }
+                   .overlay(
+                        cowView
+                            .offset(x: cowOffsetX, y: cowOffsetY)
+                    )
+
+                    VStack {
+                        ZStack {
+                            VStack {
+                                Text("Welcome back, \(storeData.firstName)")
+                                    .font(.custom("Alexandria-Regular", size: 26))
+                                    .bold()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 16)
+                            }
+                            .safeAreaInset(edge: .top) {
+                                Color.clear.frame(height: 25)
+                            }
+                        }
+                        .padding(.top, 150)
+
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 40) {
+                                VStack(spacing: 10) {
+                                    quoteView
+
+                                    Button {
+                                        showCheckIn = true
+                                    } label: {
+                                        Image("Start A Check In Button")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(height: 50)
+                                    }
+                                    .padding(.horizontal, 32)
+                                }
+
+                                dashboardSection
+
+                                // Liked Activities
+                                VStack(spacing: 24) {
+                                    Text("Liked Activities")
+                                        .font(.custom("Alexandria-Regular", size: 22))
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 16)
+
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 20) {
+                                            ForEach(savedItems.savedActivities) { activity in
+                                                ActivityCard(activity: activity, topTags: topTags)
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                }
+
+                                // Saved Resources
+                                VStack(spacing: 24) {
+                                    Text("Saved Resources")
+                                        .font(.custom("Alexandria-Regular", size: 22))
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 16)
+
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 20) {
+                                            ForEach(savedItems.savedResources) { resource in
+                                                ResourceCard(resource: resource, topTags: topTags)
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                }
+
+                                // Added Activities/Resources
+                            }
+                            .padding(.top, contentExtraOffsetY)
+                        }
+                    }
+                    .padding(.bottom, navBarHeight + 16)
+                }
+                .ignoresSafeArea(edges: .top)
+                .onAppear {
+                    storeData.loadUserDataFromFirestore()
+                    petCustomization.fetchInitialCustomizations()
+                }
+
+                VStack(spacing: 0) {
+                    Spacer()
+                    bottomTabBar
+                }
             }
-            .overlay(
-              cowView
-                .offset(x: cowOffsetX, y: cowOffsetY)
-                
-            )
-
-            // ─ Remaining content
-            VStack(spacing: 24) {
-              Text("Welcome back, \(storeData.firstName)")
-                .font(.custom("Alexandria-Regular", size: 26))
-                .bold()
-                .frame(maxWidth: .infinity,     alignment: .leading)
-                .padding(.horizontal, 16)
-
-              quoteView
-                
-              Button {
-                showCheckIn = true
-              } label: {
-                Image("Start A Check In Button")
-                  .resizable()
-                  .scaledToFit()
-                  .frame(height: 50)
-              }
-              .padding(.horizontal, 32)
-                
-              dashboardSection
-              placeholderSection
+            .navigationDestination(isPresented: $showHomeNav) {
+                HomeView()
+                    .environmentObject(storeData)
+                    .environmentObject(petCustomization)
+                    .environmentObject(savedItems)
             }
-            .padding(.top, contentExtraOffsetY)
-          }
-          .padding(.bottom, navBarHeight + 16)
+            .navigationDestination(isPresented: $showResource) { ResourcesView() }
+            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+            .navigationDestination(isPresented: $showPet) { PetView() }
+            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+            .navigationDestination(isPresented: $showCheckIn) { SurveyQuestionaireView().environmentObject(storeData) }
+            .navigationBarBackButtonHidden(true)
         }
-        .ignoresSafeArea(edges: .top)
-        .onAppear {
-            storeData.loadUserDataFromFirestore()
-            petCustomization.fetchInitialCustomizations()
-        }
-        
-        VStack(spacing: 0) {
-            Spacer()
-            bottomTabBar
-        }
-      }
-      .navigationDestination(isPresented: $showHomeNav) { HomeView() }
-      .navigationDestination(isPresented: $showResource) { ResourcesView() }
-      .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
-      .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-      .navigationDestination(isPresented: $showPet) { PetView() }
-      .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-      .navigationDestination(isPresented: $showCheckIn) { SurveyQuestionaireView().environmentObject(storeData) }
-      .navigationBarBackButtonHidden(true)
     }
-  }
 
-    // MARK: – Cow + Edit View
     private var cowView: some View {
         ZStack {
-            Group{
-                // 1) Base color layer
-                petCustomization.colorcow
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: cowSize, height: cowSize)
-                
-                // 2) Outline
-                petCustomization.outlineImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: cowSize, height: cowSize)
-                
-                // 3) Top accessory (only if selected)
-                if !petCustomization.topName.isEmpty {
-                    petCustomization.topImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: cowSize, height: cowSize)
-                }
-                
-                // 4) Extra accessory (only if selected)
-                if !petCustomization.extraName.isEmpty {
-                    petCustomization.extraImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: cowSize, height: cowSize)
-                }
-            }
-            
-            .allowsHitTesting(false)
+            petCustomization.colorcow
+                .resizable()
+                .scaledToFit()
+                .frame(width: cowSize, height: cowSize)
 
-            // 5) Edit button
+            petCustomization.outlineImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: cowSize, height: cowSize)
+            
+            petCustomization.pantsImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: cowSize, height: cowSize)
+
+                petCustomization.topImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
+            
+
+                petCustomization.extraImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
+            
+
             GeometryReader { geometry in
                 Button {
                     showPet = true
                 } label: {
                     Image("Edit Icon")
-                      .resizable()
-                      .frame(width: editButtonSize, height: editButtonSize)
-                      .padding(editButtonSize / 4)
-                      .background(Color.white.opacity(0.9))
-                      .clipShape(Circle())
-                      .shadow(radius: 2)
+                        .resizable()
+                        .frame(width: editButtonSize, height: editButtonSize)
+                        .padding(editButtonSize / 4)
+                        .background(Color.white.opacity(0.9))
+                        .clipShape(Circle())
+                        .shadow(radius: 2)
                 }
                 .position(
-                    x: geometry.size.width * editIconX,
-                    y: geometry.size.height * editIconY
+                    x: geometry.size.width * 0.51,
+                    y: geometry.size.height * 0.65
                 )
             }
         }
     }
 
+    private var quoteView: some View {
+        VStack(spacing: 8) {
+            Text("Worrying does not take away tomorrow's troubles. It takes away today's peace.")
+                .font(.custom("Alexandria-Regular", size: 16))
+                .italic()
+                .multilineTextAlignment(.center)
+                .foregroundColor(Color("cowdarkpurple"))
 
-  // MARK: – Quote View
-  private var quoteView: some View {
-    VStack(spacing: 8) {
-      Text("Worrying does not take away tomorrow's troubles. It takes away today's peace.")
-        .font(
-            .custom("Alexandria-Regular", size: 16))
-        .italic()
-        .multilineTextAlignment(.center)
-        .foregroundColor(Color("cowdarkpurple"))
-      Text("– Randy Armstrong")
-        .font(.caption)
-        .foregroundColor(.secondary)
-    }
-    .padding()
-    .background(Color.white)
-    .cornerRadius(12)
-    .shadow(radius: 4)
-    .padding(.horizontal, 16)
-  }
-
-  // MARK: – Dashboard Section
-  private var dashboardSection: some View {
-    VStack(spacing: 12) {
-      Text("Dashboard")
-        .font(.custom("Alexandria-Regular", size: 24))
-        .frame(maxWidth: .infinity, alignment: .leading)
+            Text("– Randy Armstrong")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 4)
         .padding(.horizontal, 16)
-
-      HStack {
-        ringGauge
-        remainingPointsText
-      }
-      .padding()
-      .background(Color.white)
-      .cornerRadius(12)
-      .shadow(radius: 4)
-      .padding(.horizontal, 16)
-
-      Button {
-        showSetGoal = true
-      } label: {
-        Image("Set New Goal Button")
-          .resizable()
-          .scaledToFit()
-          .frame(height: 50)
-      }
-      .padding(.horizontal, 32)
     }
-  }
 
-  // MARK: – Placeholders
-  private var placeholderSection: some View {
-    VStack(spacing: 20) {
-      SectionHeader(title: "Activity", fontSize: 22)
-        placeholderBox
-      SectionHeader(title: "Resources", fontSize: 22)
-        placeholderBox
-      SectionHeader(title: "Your Top Moo'ds", fontSize: 22)
-        placeholderBox
+    private var dashboardSection: some View {
+        VStack(spacing: 12) {
+            Text("Dashboard")
+                .font(.custom("Alexandria-Regular", size: 24))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+
+            HStack {
+                ringGauge
+                remainingPointsText
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(radius: 4)
+            .padding(.horizontal, 16)
+
+            Button {
+                showSetGoal = true
+            } label: {
+                Image("Set New Goal Button")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 50)
+            }
+            .padding(.horizontal, 32)
+        }
     }
-    .padding(.horizontal, 16)
-  }
 
-  private var placeholderBox: some View {
-    Rectangle()
-      .fill(Color.white.opacity(0.5))
-      .frame(height: 120)
-      .cornerRadius(10)
-  }
+    private var ringGauge: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.gray.opacity(0.3), lineWidth: 12)
+                .frame(width: 100, height: 100)
 
-  // MARK: – Supplementary Views
-  private var ringGauge: some View {
-    ZStack {
-      Circle()
-        .stroke(Color.gray.opacity(0.3), lineWidth: 12)
-        .frame(width: 100, height: 100)
+            let total = storeData.totalPoints
+            Circle()
+                .trim(from: 0, to: CGFloat(total) / CGFloat(storeData.goalPoints))
+                .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .frame(width: 100, height: 100)
+
+            VStack {
+                Text("\(total)")
+                    .font(.title3.bold())
+                Text("pts")
+                    .font(.caption)
+            }
+        }
+    }
+
+    private var remainingPointsText: some View {
         let total = storeData.totalPoints
-      Circle()
-        .trim(from: 0, to: CGFloat(total) / CGFloat(storeData.goalPoints))
-        .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-        .rotationEffect(.degrees(-90))
-        .frame(width: 100, height: 100)
-      VStack {
-        Text("\(total)")
-          .font(.title3.bold())
-        Text("pts")
-          .font(.caption)
-      }
+        let remaining = max(storeData.goalPoints - total, 0)
+        return (
+            Text("You are ")
+            + Text("\(remaining)")
+                .foregroundColor(accentColor)
+                .fontWeight(.bold)
+            + Text(" points away from your goal.")
+        )
+        .font(.custom("Alexandria-Regular", size: 15))
+        .frame(maxWidth: .infinity, alignment: .center)
+        .multilineTextAlignment(.center)
     }
-  }
 
-  private var remainingPointsText: some View {
-    let total = storeData.totalPoints
-    let remaining = max(storeData.goalPoints - total, 0)
-    return (
-      Text("You are ")
-      + Text("\(remaining)")
-          .foregroundColor(accentColor)
-          .fontWeight(.bold)
-      + Text(" points away from your goal.")
-    )
-    .font(.custom("Alexandria-Regular", size: 15))
-    .frame(maxWidth: .infinity, alignment: .center)
-    .multilineTextAlignment(.center)
-  }
-  
-  private var bottomTabBar: some View {
-      HStack {
-          Spacer()
-          Button { withAnimation(.none) { showHomeNav = true } } label: {
-              Image("Home Button")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-          }
-          Spacer()
-          Button { withAnimation(.none) { showResource = true } } label: {
-              Image("Resource Button")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-          }
-          Spacer()
-          Button { withAnimation(.none) { showSetGoal = true } } label: {
-              Image("Set Goal Button")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-          }
-          Spacer()
-          Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
-              Image("Analytics Button")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-          }
-          Spacer()
-          Button { withAnimation(.none) { showSettingNav = true } } label: {
-              Image("Setting Button")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 36, height: 36)
-          }
-          Spacer()
-      }
-      .frame(height: navBarHeight)
-      .padding(.top, 8)
-      .padding(.bottom, 8)
-      .background(
-          Color.white
-              .clipShape(HomeCornerShape(radius: 30, corners: [.topLeft, .topRight]))
-              .edgesIgnoringSafeArea(.bottom)
-              .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
-      )
-  }
-}
-
-// MARK: – Section Header
-private struct SectionHeader: View {
-  let title: String
-  let fontSize: CGFloat
-  var body: some View {
-    HStack {
-      Text(title)
-        .font(.custom("Alexandria-Regular", size: fontSize).weight(.bold))
-      Spacer()
+    private var bottomTabBar: some View {
+        HStack {
+            Spacer()
+            Button { withAnimation(.none) { showHomeNav = true } } label: {
+                Image("Home Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showResource = true } } label: {
+                Image("Resource Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSetGoal = true } } label: {
+                Image("Set Goal Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showAnalyticsNav = true } } label: {
+                Image("Analytics Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+            Button { withAnimation(.none) { showSettingNav = true } } label: {
+                Image("Setting Button")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 36, height: 36)
+            }
+            Spacer()
+        }
+        .frame(height: navBarHeight)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .background(
+            Color.white
+                .clipShape(HomeCornerShape(radius: 30, corners: [.topLeft, .topRight]))
+                .edgesIgnoringSafeArea(.bottom)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
+        )
     }
-  }
 }
 
 struct HomeView_Previews: PreviewProvider {
-  static var previews: some View {
-    let demo = StoreData()
-    demo.scores = ["demo": 500]
-    return HomeView()
-      .environmentObject(demo)
-      .environmentObject(PetCustomization())
-  }
+    static var previews: some View {
+        let demo = StoreData()
+        demo.scores = ["demo": 500]
+        return HomeView()
+            .environmentObject(demo)
+            .environmentObject(PetCustomization())
+            .environmentObject(SavedItems())
+    }
 }

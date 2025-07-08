@@ -41,44 +41,48 @@ struct AnalyticsPageView: View {
     private let lockOffsets: [CGSize] = [.zero, .zero, .zero, .zero]
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color("lavenderColor").ignoresSafeArea()
-
-                // ─── Main scroll content ───────────────────────────────
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 32) {
-
-                        topNav
-                        cowIllustration
-                        streakView
-                        badgesView
-                        weeklyStatsView
-
-                        Spacer(minLength: 32)
+        ZStack{
+            Color("lavenderColor").ignoresSafeArea()
+            NavigationStack {
+                ZStack {
+                    Color("lavenderColor").ignoresSafeArea()
+                    
+                    // ─── Main scroll content ───────────────────────────────
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 32) {
+                            
+                            topNav
+                            cowIllustration
+                            streakView
+                            badgesView
+                            weeklyStatsView
+                            
+                            Spacer(minLength: 32)
+                        }
+                        .padding(.vertical, 16)
+                        .padding(.bottom, navBarHeight)
                     }
-                    .padding(.vertical, 16)
-                    .padding(.bottom, navBarHeight)
+                    VStack(spacing: 0) {
+                        Spacer()
+                        bottomTabBar
+                    }
                 }
-                VStack(spacing: 0) {
-                    Spacer()
-                    bottomTabBar
+                .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+                .navigationDestination(isPresented: $showResource) { ResourcesView() }
+                .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+                .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+                .navigationDestination(isPresented: $showPet) { PetView() }
+                .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+                .onAppear {
+                    storeData.fetchAnalyticsData()
+                    print("Analytics page appeared, fetching data")
+                    print("Current mood distribution: \(storeData.weeklyMoodDistribution)")
                 }
+                
             }
-            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
-            .navigationDestination(isPresented: $showResource) { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
-            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-            .navigationDestination(isPresented: $showPet) { PetView() }
-            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .onAppear { 
-                storeData.fetchAnalyticsData() 
-                print("Analytics page appeared, fetching data")
-                print("Current mood distribution: \(storeData.weeklyMoodDistribution)")
-            }
-            
+            .navigationBarBackButtonHidden(true)
+            .padding(.top, 5)
         }
-        .navigationBarBackButtonHidden(true)
     }
 
     // MARK: – Top Nav

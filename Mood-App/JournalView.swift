@@ -30,124 +30,128 @@ struct JournalView: View {
 
     // MARK: – Layout Constants
     private let navBarHeight: CGFloat  = 64
-    private let topPadding: CGFloat    = 80
+    private let topPadding: CGFloat    = 40
     private let textEditorHeight: CGFloat = 300
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color("lavenderColor")
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(spacing: 24) {
-                        Spacer().frame(height: topPadding)
-
-                        // — Title —
-                        Text("Write what you're feeling. Include as much or as little detail as you'd like.")
-                            .font(.system(size: 20, weight: .semibold))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 16)
-
-                        // — Cow —
-                        Image("QuestionIcon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-
-                        // — Photo Prompt & Button —
-                        HStack(alignment: .center) {
-                            Text("Want to check in with a photo")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            Image(systemName: "camera.fill")
-                                .foregroundColor(.gray)
-                            Text("?")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-
-                            Spacer()
-
-                            Button {
-                                isShowingCamera = true
-                            } label: {
-                                Text("Take Photo")
-                                    .font(.subheadline)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 16)
-                                    .background(Color("d3cpurple"))
-                                    .foregroundColor(.white)
-                                    .cornerRadius(20)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-
-                        // — Show Captured Image (if any) —
-                        if let image = capturedImage {
-                            Image(uiImage: image)
+        ZStack{
+            Color("lavenderColor").ignoresSafeArea()
+            NavigationStack {
+                ZStack {
+                    Color("lavenderColor")
+                        .ignoresSafeArea()
+                    
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            Spacer().frame(height: topPadding)
+                            
+                            // — Title —
+                            Text("Write what you're feeling. Include as much or as little detail as you'd like.")
+                                .font(.system(size: 20, weight: .semibold))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 16)
+                            
+                            // — Cow —
+                            Image("QuestionIcon")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 200, height: 200)
-                                .cornerRadius(10)
-                        }
-
-                        // — Journal TextEditor —
-                        TextEditor(text: $journalEntry)
-                            .padding(8)
-                            .font(.body)
-                            .foregroundColor(userEdited ? .primary : .gray)
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
-                            .frame(height: textEditorHeight)
-                            .padding(.horizontal, 16)
-                            .onTapGesture {
-                                if !userEdited {
-                                    journalEntry = ""
-                                    userEdited = true
+                                .frame(width: 150, height: 150)
+                            
+                            // — Photo Prompt & Button —
+                            HStack(alignment: .center) {
+                                Text("Want to check in with a photo")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Image(systemName: "camera.fill")
+                                    .foregroundColor(.gray)
+                                Text("?")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                
+                                Spacer()
+                                
+                                Button {
+                                    isShowingCamera = true
+                                } label: {
+                                    Text("Take Photo")
+                                        .font(.subheadline)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 16)
+                                        .background(Color("d3cpurple"))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(20)
                                 }
                             }
-
-                        // — Submit Button —
-                        Button {
-                            storeData.addJournalEntry(text: journalEntry)
-                            journalEntry = ""
-                            userEdited = false
-                            showCheckInFlow = true
-                        } label: {
-                            Image("Submit Button")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 44)
-                                .padding(.horizontal, 40)
+                            .padding(.horizontal, 16)
+                            
+                            // — Show Captured Image (if any) —
+                            if let image = capturedImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 200, height: 200)
+                                    .cornerRadius(10)
+                            }
+                            
+                            // — Journal TextEditor —
+                            TextEditor(text: $journalEntry)
+                                .padding(8)
+                                .font(.body)
+                                .foregroundColor(userEdited ? .primary : .gray)
+                                .background(Color.white)
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                                .frame(height: textEditorHeight)
+                                .padding(.horizontal, 16)
+                                .onTapGesture {
+                                    if !userEdited {
+                                        journalEntry = ""
+                                        userEdited = true
+                                    }
+                                }
+                            
+                            // — Submit Button —
+                            Button {
+                                storeData.addJournalEntry(text: journalEntry)
+                                journalEntry = ""
+                                userEdited = false
+                                showCheckInFlow = true
+                            } label: {
+                                Image("Submit Button")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 44)
+                                    .padding(.horizontal, 40)
+                            }
+                            .padding(.top, 16)
+                            
+                            Spacer(minLength: navBarHeight + 16)
                         }
-                        .padding(.top, 16)
-
-                        Spacer(minLength: navBarHeight + 16)
+                    }
+                    .sheet(isPresented: $isShowingCamera) {
+                        ImagePicker(image: $capturedImage, sourceType: .camera)
+                    }
+                    VStack(spacing: 0) {
+                        Spacer()
+                        bottomTabBar
                     }
                 }
-                .sheet(isPresented: $isShowingCamera) {
-                    ImagePicker(image: $capturedImage, sourceType: .camera)
+                .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+                .navigationDestination(isPresented: $showResource) { ResourcesView() }
+                .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+                .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+                .navigationDestination(isPresented: $showPet) { PetView() }
+                .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+                .navigationDestination(isPresented: $showCheckInFlow) {
+                    CheckInView()
+                        .environmentObject(storeData)
                 }
-                VStack(spacing: 0) {
-                    Spacer()
-                    bottomTabBar
-                }
+                .navigationBarBackButtonHidden(true)
+                .padding(.top, 5)
             }
-            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
-            .navigationDestination(isPresented: $showResource) { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
-            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-            .navigationDestination(isPresented: $showPet) { PetView() }
-            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .navigationDestination(isPresented: $showCheckInFlow) {
-                CheckInView()
-                    .environmentObject(storeData)
-            }
-            .navigationBarBackButtonHidden(true)
         }
     }
 

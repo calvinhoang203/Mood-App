@@ -48,159 +48,167 @@ struct SettingView: View {
     private let cowOutlineY: CGFloat = 30
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color("lightd3cpurple").ignoresSafeArea()
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 32) {
-                        // --- Top Bar: Title + Icon Buttons (Bookmark & Notification) ---
-                        HStack(alignment: .center) {
-                            Text("Your Avatar")
-                                .font(.custom("Alexandria-Regular", size: 24).weight(.bold))
-                            Spacer()
-//                            NavigationLink(destination: SavedPageView()) {
-//                                Image("Bookmark Icon")
-//                                    .resizable()
-//                                    .frame(width: 40, height: 40)
-//                            }
-                            NavigationLink(destination: NotificationView()) {
-                                Image("Notification Icon")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
+        ZStack{
+            Color("lightd3cpurple").ignoresSafeArea()
+            NavigationStack {
+                ZStack {
+                    Color("lightd3cpurple").ignoresSafeArea()
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 32) {
+                            // --- Top Bar: Title + Icon Buttons (Bookmark & Notification) ---
+                            HStack(alignment: .center) {
+                                Text("Your Avatar")
+                                    .font(.custom("Alexandria-Regular", size: 24).weight(.bold))
+                                Spacer()
+                                //                            NavigationLink(destination: SavedPageView()) {
+                                //                                Image("Bookmark Icon")
+                                //                                    .resizable()
+                                //                                    .frame(width: 40, height: 40)
+                                //                            }
+                                NavigationLink(destination: NotificationView()) {
+                                    Image("Notification Icon")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                }
                             }
-                        }
-                        .padding(.top, 24)
-                        .padding(.horizontal, 24)
-                        // --- Avatar Section (Cow, Ellipsoid, Edit) ---
-                        GeometryReader { geometry in
-                            ZStack {
-                                // Ellipsoid shadow (adjustable)
-                                Ellipse()
-                                    .fill(Color("d3cpurple"))
-                                    .frame(width: ellipsoidWidth, height: ellipsoidHeight)
-                                    .shadow(color: .gray, radius: 9, x: 5, y: 5)
-                                    .position(x: geometry.size.width / 2, y: ellipsoidY)
-                                // Cow color layer
-                                petCustomization.colorcow
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: cowColorWidth, height: cowColorHeight)
-                                    .position(x: cowColorX, y: cowColorY)
-                                // Cow outline layer
-                                petCustomization.outlineImage
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: cowOutlineWidth, height: cowOutlineHeight)
-                                    .position(x: cowOutlineX, y: cowOutlineY)
-                                // Top accessory (if any)
-                                if !petCustomization.topName.isEmpty {
+                            .padding(.top, 24)
+                            .padding(.horizontal, 24)
+                            // --- Avatar Section (Cow, Ellipsoid, Edit) ---
+                            GeometryReader { geometry in
+                                ZStack {
+                                    // Ellipsoid shadow (adjustable)
+                                    Ellipse()
+                                        .fill(Color("d3cpurple"))
+                                        .frame(width: ellipsoidWidth, height: ellipsoidHeight)
+                                        .shadow(color: .gray, radius: 9, x: 5, y: 5)
+                                        .position(x: geometry.size.width / 2, y: ellipsoidY)
+                                    // Cow color layer
+                                    petCustomization.colorcow
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: cowColorWidth, height: cowColorHeight)
+                                        .position(x: cowColorX, y: cowColorY)
+                                    // Cow outline layer
+                                    petCustomization.outlineImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: cowOutlineWidth, height: cowOutlineHeight)
+                                        .position(x: cowOutlineX, y: cowOutlineY)
+                                    petCustomization.pantsImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: cowColorWidth, height: cowColorHeight)
+                                        .position(x: cowColorX, y: cowColorY)
+                                    // Top accessory (if any)
                                     petCustomization.topImage
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: cowColorWidth, height: cowColorHeight)
                                         .position(x: cowColorX, y: cowColorY)
-                                }
-                                // Extra accessory (if any)
-                                if !petCustomization.extraName.isEmpty {
+                                    
+                                    // Extra accessory (if any)
                                     petCustomization.extraImage
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: cowColorWidth, height: cowColorHeight)
                                         .position(x: cowColorX, y: cowColorY)
+                                    
+                                    // Edit icon (adjustable)
+                                    Button {
+                                        showPetView = true
+                                    } label: {
+                                        Image("Edit Icon")
+                                            .resizable()
+                                            .frame(width: editIconSize, height: editIconSize)
+                                            .background(Color.white.opacity(0.9))
+                                            .clipShape(Circle())
+                                            .shadow(radius: 2)
+                                    }
+                                    .position(x: geometry.size.width / 2 + editIconOffsetX, y: editIconY)
                                 }
-                                // Edit icon (adjustable)
-                                Button {
-                                    showPetView = true
-                                } label: {
-                                    Image("Edit Icon")
+                                .frame(height: max(ellipsoidY + ellipsoidHeight/2, cowColorY + cowColorHeight/2, editIconY + editIconSize/2))
+                            }
+                            .frame(height: 180)
+                            .frame(maxWidth: .infinity)
+                            // --- Personal Info ---
+                            InfoSection(title: "Personal Info") {
+                                VStack(alignment: .leading) {
+                                    InfoRow(label: "NAME", value: "\(storeData.firstName) \(storeData.lastName)", action: {})
+                                    InfoRow(label: "PRONOUNS", value: storeData.pronouns, action: {})
+                                }
+                            }
+                            // --- Contact Info ---
+                            InfoSection(title: "Contact Info") {
+                                VStack(alignment: .leading) {
+                                    InfoRow(label: "EMAIL", value: storeData.email, action: {})
+                                    InfoRow(label: "PHONE", value: storeData.phoneNumber, action: {})
+                                }
+                            }
+                            // // --- Preference Info ---
+                            // InfoSection(title: "Preference Info") {
+                            //     HStack {
+                            //         Text("NOTIFICATIONS")
+                            //             .font(.custom("Alexandria-Regular", size: 15))
+                            //             .foregroundColor(.black)
+                            //         Spacer()
+                            //         Toggle(isOn: $notificationsEnabled) {
+                            //             EmptyView()
+                            //         }
+                            //         .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
+                            //         .labelsHidden()
+                            //         Text(notificationsEnabled ? "ON" : "OFF")
+                            //             .font(.custom("Alexandria-Regular", size: 15))
+                            //             .foregroundColor(.black)
+                            //     }
+                            // }
+                            // --- Log Out Button ---
+                            VStack(spacing: 16) {
+                                Text("Ready to sign off?")
+                                    .font(.custom("Alexandria-Regular", size: 17).weight(.semibold))
+                                Button(action: { showLogoutAlert = true }) {
+                                    Image("Log Out Button")
                                         .resizable()
-                                        .frame(width: editIconSize, height: editIconSize)
-                                        .background(Color.white.opacity(0.9))
-                                        .clipShape(Circle())
-                                        .shadow(radius: 2)
+                                        .scaledToFit()
+                                        .frame(height: 48)
                                 }
-                                .position(x: geometry.size.width / 2 + editIconOffsetX, y: editIconY)
                             }
-                            .frame(height: max(ellipsoidY + ellipsoidHeight/2, cowColorY + cowColorHeight/2, editIconY + editIconSize/2))
+                            .padding(.top, 8)
+                            Spacer(minLength: 32)
                         }
-                        .frame(height: 180)
-                        .frame(maxWidth: .infinity)
-                        // --- Personal Info ---
-                        InfoSection(title: "Personal Info") {
-                            VStack(alignment: .leading) {
-                                InfoRow(label: "NAME", value: "\(storeData.firstName) \(storeData.lastName)", action: {})
-                                InfoRow(label: "PRONOUNS", value: storeData.pronouns, action: {})
-                            }
-                        }
-                        // --- Contact Info ---
-                        InfoSection(title: "Contact Info") {
-                            VStack(alignment: .leading) {
-                                InfoRow(label: "EMAIL", value: storeData.email, action: {})
-                                InfoRow(label: "PHONE", value: storeData.phoneNumber, action: {})
-                            }
-                        }
-                        // // --- Preference Info ---
-                        // InfoSection(title: "Preference Info") {
-                        //     HStack {
-                        //         Text("NOTIFICATIONS")
-                        //             .font(.custom("Alexandria-Regular", size: 15))
-                        //             .foregroundColor(.black)
-                        //         Spacer()
-                        //         Toggle(isOn: $notificationsEnabled) {
-                        //             EmptyView()
-                        //         }
-                        //         .toggleStyle(SwitchToggleStyle(tint: Color("d3cpurple")))
-                        //         .labelsHidden()
-                        //         Text(notificationsEnabled ? "ON" : "OFF")
-                        //             .font(.custom("Alexandria-Regular", size: 15))
-                        //             .foregroundColor(.black)
-                        //     }
-                        // }
-                        // --- Log Out Button ---
-                        VStack(spacing: 16) {
-                            Text("Ready to sign off?")
-                                .font(.custom("Alexandria-Regular", size: 17).weight(.semibold))
-                            Button(action: { showLogoutAlert = true }) {
-                                Image("Log Out Button")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 48)
-                            }
-                        }
-                        .padding(.top, 8)
-                        Spacer(minLength: 32)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.bottom, 32)
-                }
-                VStack(spacing: 0) {
-                    Spacer()
-                    bottomTabBar
-                }
-            }
-            .navigationDestination(isPresented: $showHomeNav) { HomeView() }
-            .navigationDestination(isPresented: $showResource) { ResourcesView() }
-            .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
-            .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
-            .navigationDestination(isPresented: $showPet) { PetView() }
-            .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .navigationDestination(isPresented: $showPetView) {
-                PetView()
-                    .environmentObject(storeData)
-                    .environmentObject(petCustomization)
-            }
-            .navigationBarBackButtonHidden(true)
-            .alert("Are you sure you want to log out?", isPresented: $showLogoutAlert) {
-                Button("Yes", role: .destructive) {
-                    do {
-                        try Auth.auth().signOut()
-                        storeData.reset()
-                        isLoggedIn = false
-                    } catch {
-                        print("Error signing out: \(error.localizedDescription)")
+                    VStack(spacing: 0) {
+                        Spacer()
+                        bottomTabBar
                     }
                 }
-                Button("No", role: .cancel) {}
+                .navigationDestination(isPresented: $showHomeNav) { HomeView() }
+                .navigationDestination(isPresented: $showResource) { ResourcesView() }
+                .navigationDestination(isPresented: $showSetGoal) { SetGoalView() }
+                .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
+                .navigationDestination(isPresented: $showPet) { PetView() }
+                .navigationDestination(isPresented: $showSettingNav) { SettingView() }
+                .navigationDestination(isPresented: $showPetView) {
+                    PetView()
+                        .environmentObject(storeData)
+                        .environmentObject(petCustomization)
+                }
+                .navigationBarBackButtonHidden(true)
+                .alert("Are you sure you want to log out?", isPresented: $showLogoutAlert) {
+                    Button("Yes", role: .destructive) {
+                        do {
+                            try Auth.auth().signOut()
+                            storeData.reset()
+                            isLoggedIn = false
+                        } catch {
+                            print("Error signing out: \(error.localizedDescription)")
+                        }
+                    }
+                    Button("No", role: .cancel) {}
+                }
             }
+            .padding(.top, 5)
+            
         }
     }
     

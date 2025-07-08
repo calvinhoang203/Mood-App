@@ -9,101 +9,134 @@ import SwiftUI
 
 struct QuestionData {
     let question: String
-    let options: [(text: String, category: String, points: Int)]
+    let options: [(text: String, category: String, points: Int, resultCategory: String)]
     let allowsMultipleSelection: Bool
 }
 
 struct QuestionaireView: View {
     @EnvironmentObject var storeData: StoreData
+    @State private var rankedResults: [String: String] = [:]
+    @State private var showResources = false
     @State private var currentIndex = 0
     @State private var selectedOptions: Set<String> = []
     @State private var showAlert = false
     @State private var isFinished = false
     @State private var showLoading = false
+    @State private var totalPointsEarned = 0 // Track total points for result pag
+    // TEAMMATE NOTE: This array stores all the resultCategories that users select throughout the survey
+    // Each time user picks an answer, that answer's resultCategory gets added to this list
+    @State private var selectedCategories: [String] = []
+    // Index of the mood question in the survey
+    private let moodQuestionIndex = 1 // "How are you feeling overall today?"
 
     let questions: [QuestionData] = [
         QuestionData(
-            question: "I want to learn how to . . .",
+            question: "How have you been feeling emotionally this week?",
             options: [
-                ("Better Deal With My Emotions", "LOW ENERGY / MOTIVATION", 1),
-                ("Navigate Stress And Anxiety", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 2),
-                ("Manage My Workload", "STRESS DUE TO ACADEMIC PRESSURE", 2),
-                ("Practice Regular Self Care", "LOW ENERGY / MOTIVATION", 1),
-                ("Gain Confidence And Grow", "NEED PEER/SOCIAL SUPPORT SYSTEM", 2)
+                ("😵 Anxious, overwhelmed, or uncertain", "", 0, "Calm"),
+                ("💤 Sluggish, tired, or low-energy", "", 0, "Movement"),
+                ("😔 Burned out, unmotivated, or stuck", "", 0, "Focus"),
+                ("🫥 Lonely or disconnected", "", 0, "Community"),
+                ("🙂 Doing okay, but want more joy or purpose", "", 0, "Joy")
+            ],
+            allowsMultipleSelection: false
+        ),
+        QuestionData(
+            question: "What’s been hardest for you to manage lately?",
+            options: [
+                ("My thoughts and emotions", "", 0, "Calm"),
+                ("My energy levels and physical health", "", 0, "Movement"),
+                ("My ability to focus and stay productive", "", 0, "Focus"),
+                ("My relationships or social life", "", 0, "Community"),
+                ("My happiness and sense of fulfillment", "", 0, "Joy")
+            ],
+            allowsMultipleSelection: false
+        ),
+        QuestionData(
+            question: "When you're stressed, what’s your go-to response?",
+            options: [
+                ("I overthink or shut down", "", 0, "Calm"),
+                ("I isolate myself", "", 0, "Community"),
+                ("I try to power through but feel stuck", "", 0, "Focus"),
+                ("I crash physically and need to rest", "", 0, "Movement"),
+                ("I distract myself with hobbies or beauty rituals", "", 0, "Joy")
+            ],
+            allowsMultipleSelection: false
+        ),
+        QuestionData(
+            question: "How connected do you feel to other people right now?",
+            options: [
+                ("Very connected", "", 0, ""),
+                ("Somewhat connected", "", 0, "Community"),
+                ("Not very connected", "", 0, "Community"),
+                ("I feel isolated or alone", "", 0, "Community")
+            ],
+            allowsMultipleSelection: false
+        ),
+        QuestionData(
+            question: "How often do you move your body in a way that feels good?",
+            options: [
+                ("Almost every day", "", 0, ""),
+                ("A few times a week", "", 0, "Movement"),
+                ("Occasionally", "", 0, "Movement"),
+                ("Rarely", "", 0, "Movement")
+            ],
+            allowsMultipleSelection: false
+        ),
+        QuestionData(
+            question: "What helps you reset or feel grounded?",
+            options: [
+                ("Being in nature or doing breathwork", "", 0, "Calm"),
+                ("Creative hobbies (art, crafts)", "", 0, "Joy"),
+                ("Talking to someone", "", 0, "Community"),
+                ("Physical activity (yoga, dance)", "", 0, "Movement"),
+                ("Journaling, meditation, skincare rituals", "", 0, "Joy_Focus")
             ],
             allowsMultipleSelection: true
         ),
         QuestionData(
-            question: "How do you usually feel at the end of the day?",
+            question: "Do you feel like you’re getting things done the way you’d like to?",
             options: [
-                ("Mentally drained and emotionally overwhelmed", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 4),
-                ("Physically tired but emotionally fine", "LOW ENERGY / MOTIVATION", 1),
-                ("Anxious about what’s next", "NEED PEER/SOCIAL SUPPORT SYSTEM", 2),
-                ("Content and relaxed", "STRESS DUE TO ACADEMIC PRESSURE", 0)
+                ("Yes, I’m managing well", "", 0, ""),
+                ("Somewhat, but I struggle staying focused", "", 0, "Focus"),
+                ("Not really, I feel unmotivated or behind", "", 0, "Focus")
             ],
             allowsMultipleSelection: false
         ),
         QuestionData(
-            question: "How do you typically manage difficult emotions?",
+            question: "What do you wish you had more of in your life right now?",
             options: [
-                ("I try to solve things logically on my own", "NEED PEER/SOCIAL SUPPORT SYSTEM", 0),
-                ("I vent to my friends and family", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 2),
-                ("I avoid or distract myself", "LOW ENERGY / MOTIVATION", 4),
-                ("I engage in activities like journaling and meditation", "STRESS DUE TO ACADEMIC PRESSURE", 0)
+                ("Peace of mind", "", 0, "Calm"),
+                ("Physical energy", "", 0, "Movement"),
+                ("Productivity or motivation", "", 0, "Focus"),
+                ("Deeper friendships or support", "", 0, "Community"),
+                ("Joy or meaningful routines", "", 0, "Joy")
             ],
             allowsMultipleSelection: false
         ),
         QuestionData(
-            question: "How do you respond to feeling overwhelmed?",
+            question: "When was the last time you did something just for yourself?",
             options: [
-                ("I withdraw and spend time alone", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 2),
-                ("I seek out people who make me feel better", "NEED PEER/SOCIAL SUPPORT SYSTEM", 4),
-                ("I procrastinate and put things off", "LOW ENERGY / MOTIVATION", 0),
-                ("I take small steps to feel more in control", "STRESS DUE TO ACADEMIC PRESSURE", 0)
+                ("Today", "", 0, ""),
+                ("This week", "", 0, "Joy"),
+                ("This month", "", 0, "Joy"),
+                ("I honestly can’t remember", "", 0, "Joy")
             ],
             allowsMultipleSelection: false
         ),
         QuestionData(
-            question: "What situations tend to affect your mood the most?",
+            question: "Would you like support in any of the following areas?",
             options: [
-                ("Academic pressure and deadlines", "STRESS DUE TO ACADEMIC PRESSURE", 2),
-                ("Social situations and relationships", "NEED PEER/SOCIAL SUPPORT SYSTEM", 4),
-                ("Uncertainty about the future", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 4),
-                ("Personal expectations and perfectionism", "STRESS DUE TO ACADEMIC PRESSURE", 4)
+                ("Managing stress or emotions", "", 0, "Calm"),
+                ("Building a routine or setting goals", "", 0, "Focus"),
+                ("Boosting physical health or movement", "", 0, "Movement"),
+                ("Connecting with people or joining groups", "", 0, "Community"),
+                ("Feeling happier or developing a self-care routine", "", 0, "Joy")
             ],
-            allowsMultipleSelection: false
-        ),
-        QuestionData(
-            question: "What’s your main goal for improving your mental health?",
-            options: [
-                ("Learning to better handle stress and anxiety", "STRESS DUE TO ACADEMIC PRESSURE", 0),
-                ("Building stronger social connections", "NEED PEER/SOCIAL SUPPORT SYSTEM", 2),
-                ("Finding balance and self-care routines", "LOW ENERGY / MOTIVATION", 0),
-                ("Gaining confidence and self-awareness", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 2)
-            ],
-            allowsMultipleSelection: false
-        ),
-        QuestionData(
-            question: "How do you prefer to get support when you need it?",
-            options: [
-                ("One-on-one counseling or therapy", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 3),
-                ("Talking with friends or peers", "NEED PEER/SOCIAL SUPPORT SYSTEM", 2),
-                ("Reading articles or using apps", "LOW ENERGY / MOTIVATION", 0),
-                ("Joining a group or attending workshops", "STRESS DUE TO ACADEMIC PRESSURE", 0)
-            ],
-            allowsMultipleSelection: false
-        ),
-        QuestionData(
-            question: "How do you describe your overall energy level throughout the day?",
-            options: [
-                ("I often feel drained and struggle to stay motivated", "LOW ENERGY / MOTIVATION", 0),
-                ("My energy flunctuates depending on the situation", "ANXIETY DUE TO LIFE CIRCUMSTANCES", 3),
-                ("I usually have a steady level of energy", "STRESS DUE TO ACADEMIC PRESSURE", 0),
-                ("I tend to feel energetic and motivated", "NEED PEER/SOCIAL SUPPORT SYSTEM", 4)
-            ],
-            allowsMultipleSelection: false
+            allowsMultipleSelection: true
         )
     ]
+
 
     var progress: CGFloat {
         guard !questions.isEmpty else { return 0 }
@@ -208,6 +241,8 @@ struct QuestionaireView: View {
             }
             .navigationBarBackButtonHidden(true)
         }
+       
+
     }
 
 
@@ -223,32 +258,98 @@ struct QuestionaireView: View {
         }
     }
 
+    
     func handleNext() {
         if selectedOptions.isEmpty {
             showAlert = true
             return
         }
 
-        for selected in selectedOptions {
-            if let match = questions[currentIndex].options.first(where: { $0.text == selected }) {
-                storeData.addPoints(for: match.category, points: match.points)
+        let selectedOption = selectedOptions.first!
+        let currentQuestion = questions[currentIndex]
+        if let optionIndex = currentQuestion.options.firstIndex(where: { $0.text == selectedOption }) {
+            let option = currentQuestion.options[optionIndex]
+            
+            // TEAMMATE NOTE: Store the resultCategory from user's selected answer
+            // This builds up the list of categories that will be analyzed at the end
+            selectedCategories.append(option.resultCategory)
+            
+            // Only add points if the category is not empty
+            if !option.category.isEmpty {
+                storeData.addPoints(for: option.category, points: option.points)
+                totalPointsEarned += option.points
+            }
+            // Only add mood entry for the mood question
+            if currentIndex == moodQuestionIndex {
+                if let mood = Mood(rawValue: selectedOption) {
+                    storeData.addMoodEntry(mood: mood)
+                }
             }
         }
-
         selectedOptions.removeAll()
-
         if currentIndex < questions.count - 1 {
             withAnimation {
                 currentIndex += 1
             }
         } else {
-            // This will allow the progress bar to visually fill before transitioning
+            // TEAMMATE NOTE: User finished all questions, now we analyze their category selections
+            processCategoryResults()
             showLoading = true
             storeData.saveToFirestore()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                isFinished = true
-            }
         }
+    }
+    // TEAMMATE NOTE: This function counts which categories appeared most and ranks them
+    // It stores the results in Firebase so your recommendation system can access them
+    func processCategoryResults() {
+        // Count how many times each category was selected
+        var categoryCount: [String: Int] = [:]
+        for category in selectedCategories {
+            categoryCount[category, default: 0] += 1
+        }
+        
+        // Sort categories by count (highest first), then alphabetically for ties
+        // This ensures consistent ranking even when categories have same count
+        let sortedCategories = categoryCount.sorted {
+            if $0.value == $1.value {
+                // If counts are equal, sort alphabetically for consistent results
+                return $0.key < $1.key
+            }
+            // Otherwise sort by count (highest first)
+            return $0.value > $1.value
+        }
+        
+        // Create ranked result dictionary
+        rankedResults = [:]
+        for (index, categoryData) in sortedCategories.enumerated() {
+            let rankKey: String
+            switch index {
+            case 0: rankKey = "first"
+            case 1: rankKey = "second"
+            case 2: rankKey = "third"
+            case 3: rankKey = "fourth"
+            case 4: rankKey = "fifth"
+            default: rankKey = "rank_\(index + 1)"
+            }
+            rankedResults[rankKey] = categoryData.key
+        }
+        
+        // TEAMMATE NOTE: Save the ranked categories to Firebase
+        // Access this data using: storeData.categoryResults["first"], storeData.categoryResults["second"], etc.
+        storeData.saveCategoryResults(rankedResults)
+        
+        // Debug print to see the results - shows exactly what you described
+        print("TEAMMATE DEBUG - Category selections: \(selectedCategories)")
+        print("TEAMMATE DEBUG - Category counts: \(categoryCount)")
+        print("TEAMMATE DEBUG - Final ranked results: \(rankedResults)")
+        
+        // TEAMMATE DEBUG - Example output for [sad, sad, happy, sad, normal, normal]:
+        // Category counts: ["sad": 3, "normal": 2, "happy": 1]
+        // Final ranked results: ["first": "sad", "second": "normal", "third": "happy"]
+        
+        // TEAMMATE DEBUG - Example output for [sad, sad, happy, happy, normal]:
+        // Category counts: ["sad": 2, "happy": 2, "normal": 1]
+        // Final ranked results: ["first": "happy", "second": "sad", "third": "normal"]
+        // (happy comes first because H < S alphabetically when counts are tied)
     }
 
 
@@ -258,3 +359,8 @@ struct QuestionaireView: View {
     QuestionaireView()
         .environmentObject(StoreData())
 }
+
+
+
+
+

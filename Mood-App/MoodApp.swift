@@ -1,10 +1,3 @@
-//
-//  MoodApp.swift
-//  MoodApp
-//
-//
-//
-
 import SwiftUI
 import Firebase
 
@@ -12,8 +5,11 @@ import Firebase
 struct MoodApp: App {
     @State private var showSplash = true
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+
     @StateObject var storeData = StoreData()
     @StateObject private var petCustomization = PetCustomization()
+    @StateObject private var savedItems = SavedItems()
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
@@ -26,24 +22,34 @@ struct MoodApp: App {
                         }
                     }
             } else if !isLoggedIn {
-                LoginRoot()
+                LoginRoot(
+                    savedItems: savedItems,
+                    storeData: storeData,
+                    petCustomization: petCustomization
+                )
             } else {
                 HomeView()
                     .environmentObject(storeData)
                     .environmentObject(petCustomization)
+                    .environmentObject(savedItems)
             }
         }
     }
 }
 
-// MARK: - LoginRoot
+
 private struct LoginRoot: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
-    @StateObject var storeData = StoreData()
-    @StateObject private var petCustomization = PetCustomization()
+
+    let savedItems: SavedItems
+    let storeData: StoreData
+    let petCustomization: PetCustomization
+
     var body: some View {
         LoginView(isLoggedInBinding: $isLoggedIn)
-        .environmentObject(storeData)
-        .environmentObject(petCustomization)
+            .environmentObject(storeData)
+            .environmentObject(petCustomization)
+            .environmentObject(savedItems)
     }
 }
+
