@@ -7,27 +7,32 @@ import SwiftUI
 import UIKit
 
 struct GoalView: View {
+    @EnvironmentObject var storeData: StoreData
+    
     @State private var currentStep = 0
     @State private var selectedOption: String?
+    @State private var customInput: String = ""
     @State private var showAlert = false
-    @State private var isCompleted = false
+    @State private var showLimitAlert = false
+    @State private var showLoading = false
+    @State private var goToHome = false
+
+    // Navigation State
     @State private var showHomeNav = false
     @State private var showResource = false
     @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
     @State private var showPet = false
     @State private var showSettingNav = false
-    @State private var showLoading = false
-    @State private var goToHome = false
 
     let steps: [GoalStep] = [
         GoalStep(
             title: "Set a tangible goal for yourself.",
-            options: ["Daily Check Ins", "300 Points", "500 Points", "Custom Goal Set"]
+            options: ["100 Points", "300 Points", "500 Points", "Custom Goal Set"]
         ),
         GoalStep(
-            title: "Set your timeline.",
-            options: ["1 Week", "1 Month", "3 Months", "Custom Time Frame"]
+            title: "Want to adjust your goal down?",
+            options: ["No, keep it", "Subtract 50", "Subtract 100", "Custom Subtraction"]
         )
     ]
 
@@ -36,7 +41,6 @@ struct GoalView: View {
     }
 
     private let navBarHeight: CGFloat = 64
-    
     
     var body: some View {
         NavigationStack {
@@ -79,49 +83,75 @@ struct GoalView: View {
                                 .font(.custom("Alexandria-Regular", size: 14))
                                 .foregroundColor(.gray)
                                 .padding(.top, 5)
+                            
+                            // UPDATED FONT HERE
+                            Text("Current Goal Total: \(storeData.goalPoints)")
+                                .font(.custom("Alexandria-Regular", size: 12)) // Fixed to match your font
+                                .foregroundColor(.purple)
+                                .padding(.top, 2)
                         }
 
                         // Options
                         ForEach(steps[currentStep].options, id: \.self) { option in
                             Button(action: {
-                                selectedOption = option
+                                // Toggle selection logic if you want clicking again to deselect
+                                if selectedOption == option {
+                                    selectedOption = nil
+                                    customInput = ""
+                                } else {
+                                    selectedOption = option
+                                    if !option.contains("Custom") {
+                                        customInput = ""
+                                    }
+                                }
                             }) {
-                                Text(option)
-                                    .font(.custom("Alexandria-Regular", size: 16))
-                                    .foregroundColor(.black)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.white)
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(selectedOption == option ? Color.purple : Color.clear, lineWidth: 2)
-                                    )
+                                VStack {
+                                    Text(option)
+                                        .font(.custom("Alexandria-Regular", size: 16))
+                                        .foregroundColor(.black)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.white)
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(selectedOption == option ? Color.purple : Color.clear, lineWidth: 2)
+                                        )
+                                }
                             }
                         }
 
-                        // ✅ Image-based Next Button
-                        Button(action: {
-                            if selectedOption == nil {
-                                showAlert = true
-                            } else {
-                                if currentStep < steps.count - 1 {
-                                    currentStep += 1
-                                    selectedOption = nil
-                                } else {
-                                    // Show loading, then go home
-                                    showLoading = true
-                                }
-                            }
-                        }) {
+                        // Custom Input Field
+                        if let option = selectedOption, option.contains("Custom") {
+                            TextField("Enter amount (e.g. 50)", text: $customInput)
+                                .keyboardType(.numberPad)
+                                .font(.custom("Alexandria-Regular", size: 16)) // Ensure input font matches too
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.purple, lineWidth: 1)
+                                )
+                                .padding(.horizontal)
+                        }
+
+                        // Next Button
+                        Button(action: handleNextStep) {
                             Image("NextButton")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 160, height: 50)
                                 .shadow(radius: 4)
                         }
+                        // Validation alert removed from logic, but modifier kept safe
                         .alert("Please choose an option before continuing.", isPresented: $showAlert) {
                             Button("OK", role: .cancel) {}
+                        }
+                        .alert("Slow down!", isPresented: $showLimitAlert) {
+                            Button("OK", role: .cancel) {}
+                        } message: {
+                            Text("Please aim for a total goal lower than 1000 points.")
                         }
 
                         // Progress Bar
@@ -154,6 +184,84 @@ struct GoalView: View {
             .navigationDestination(isPresented: $goToHome) { HomeView() }
             .navigationBarBackButtonHidden(true)
         }
+    }
+    
+    // MARK: - Logic
+    func handleNextStep() {
+        // ✅ UPDATED: Removed check for nil selection.
+        // Users can now proceed without selecting an answer.
+        
+        /*
+        if selectedOption == nil {
+            showAlert = true
+            return
+        }
+        */
+        
+        // STEP 0: ADDING POINTS
+        if currentStep == 0 {
+            if processAdditionStep() {
+                withAnimation {
+                    currentStep += 1
+                    selectedOption = nil
+                    customInput = ""
+                }
+            }
+        }
+        // STEP 1: SUBTRACTING POINTS
+        else if currentStep == 1 {
+            processSubtractionStep()
+            storeData.saveToFirestore()
+            showLoading = true
+        }
+    }
+    
+    func processAdditionStep() -> Bool {
+        // If no option selected, default to 0 points added
+        var pointsToAdd = 0
+        
+        if let option = selectedOption {
+            if option == "100 Points" {
+                pointsToAdd = 100
+            } else if option == "300 Points" {
+                pointsToAdd = 300
+            } else if option == "500 Points" {
+                pointsToAdd = 500
+            } else if option == "Custom Goal Set", let custom = Int(customInput) {
+                pointsToAdd = custom
+            }
+        }
+        
+        let potentialTotal = storeData.goalPoints + pointsToAdd
+        
+        if potentialTotal > 1000 {
+            showLimitAlert = true
+            return false
+        } else {
+            storeData.goalPoints += pointsToAdd
+            print("Added \(pointsToAdd). New Total: \(storeData.goalPoints)")
+            return true
+        }
+    }
+    
+    func processSubtractionStep() {
+        // If no option selected, default to 0 points subtracted
+        var pointsToSubtract = 0
+        
+        if let option = selectedOption {
+            if option == "Subtract 50" {
+                pointsToSubtract = 50
+            } else if option == "Subtract 100" {
+                pointsToSubtract = 100
+            } else if option == "Custom Subtraction", let custom = Int(customInput) {
+                pointsToSubtract = custom
+            } else if option == "No, keep it" {
+                pointsToSubtract = 0
+            }
+        }
+        
+        storeData.goalPoints = max(0, storeData.goalPoints - pointsToSubtract)
+        print("Subtracted \(pointsToSubtract). Final Total: \(storeData.goalPoints)")
     }
 
     private var bottomTabBar: some View {
@@ -213,4 +321,5 @@ struct GoalStep {
 
 #Preview {
     GoalView()
+        .environmentObject(StoreData.demo)
 }

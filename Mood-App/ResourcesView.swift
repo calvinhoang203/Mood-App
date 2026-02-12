@@ -12,7 +12,6 @@ struct ResourcesView: View {
     @State private var showSettingNav = false
     @State private var showNotification = false
 
-
     @FocusState private var isSearchFocused: Bool
     let navBarHeight: CGFloat = 64
 
@@ -56,8 +55,6 @@ struct ResourcesView: View {
         )
     ]
 
-
-
     let allResources: [Resource] = [
         Resource(
             name: "South Hall Therapy",
@@ -90,7 +87,6 @@ struct ResourcesView: View {
             tags: ["Joy"]
         )
     ]
-
 
     var filteredActivities: [Activity] {
         let base = searchText.isEmpty
@@ -126,24 +122,25 @@ struct ResourcesView: View {
                 Color.clear
 
                 VStack(alignment: .leading, spacing: 20) {
-                    HStack {
+                    
+                    // MARK: - UPDATED HEADER
+                    HStack(alignment: .center) {
                         Text("Discover ways to cope.")
                             .font(.custom("Alexandria-Regular", size: 22))
                             .bold()
-                            .padding(.top, 15)
 
                         Spacer()
-
-                        Button {
-                            navigateToHome = true
-                        } label: {
-                            Image(systemName: "house.fill")
-                                .resizable()
-                                .frame(width: 28, height: 28)
-                                .foregroundColor(.black)
-                                .padding(.top, 10)
-                                .padding(.trailing, 5)
-                        }
+                        
+                        // Group icons together with spacing
+                        HStack(spacing: 12) {
+                            Button {
+                                navigateToHome = true
+                            } label: {
+                                Image(systemName: "house.fill")
+                                    .resizable()
+                                    .frame(width: 28, height: 28)
+                                    .foregroundColor(Color("darkd3cpurple"))
+                            }
 
                             Button {
                                 showNotification = true
@@ -155,15 +152,10 @@ struct ResourcesView: View {
                             .navigationDestination(isPresented: $showNotification) {
                                 NotificationView().environmentObject(storeData)
                             }
-
-
-
-                        Image("notification")
-                            .resizable()
-                            .frame(width: 30, height: 35)
-                            .padding(.top, 15)
+                        }
                     }
                     .padding(.horizontal)
+                    .padding(.top, 15)
 
                     TextField("Search...", text: $searchText)
                         .padding(10)
@@ -220,18 +212,9 @@ struct ResourcesView: View {
                 .onTapGesture {
                     isSearchFocused = false
                 }
-
-                /*VStack(spacing: 0) {
-                    Spacer()
-                    bottomTabBar
-                }*/
             }
             .navigationBarBackButtonHidden(true)
             .background(Color("lightd3cpurple").ignoresSafeArea())
-           /* .navigationDestination(isPresented: $navigateToSaved) {
-                ResourcesPersonalView()
-                    .environmentObject(savedItems)
-            }*/
             .navigationDestination(isPresented: $navigateToHome) {
                 HomeView()
             }
@@ -242,8 +225,6 @@ struct ResourcesView: View {
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
         }
     }
-
-   
 }
 
 // MARK: – ActivityCard
@@ -258,15 +239,15 @@ struct ActivityCard: View {
             Image(activity.imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 185)
+                .frame(height: 150)
                 .cornerRadius(10)
-                .frame(maxWidth: .infinity, alignment: .center) // centers the image horizontally
+                .frame(maxWidth: .infinity, alignment: .center)
 
-            HStack{
+            HStack {
                 Text(activity.name)
                     .font(.custom("Alexandria-Regular", size: 15))
                     .bold()
-                    .lineLimit(nil) // or remove this line entirely; nil means unlimited lines
+                    .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(activity.tags.prefix(2), id: \.self) { tag in
                     HStack(spacing: 4) {
@@ -289,25 +270,34 @@ struct ActivityCard: View {
             Text(activity.description)
                 .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
-                .fixedSize(horizontal: false, vertical: true) // allow text to wrap onto multiple lines
+                .fixedSize(horizontal: false, vertical: true)
 
-            //Spacer()
-            
-
-            HStack {
-                Button(action: {
-                    savedItems.toggleActivity(activity)
-                }) {
-                    Image(systemName: savedItems.isActivitySaved(activity) ? "heart.fill" : "heart")
-                        .foregroundColor(.blue)
-                }
-            }
+            // Pushes content up since the button is no longer taking space here
+            Spacer()
         }
         .padding()
-        .frame(width: 250, height: 350)
+        .frame(width: 230, height: 300)
         .background(Color.white)
         .cornerRadius(12)
         .shadow(radius: 2)
+        // MARK: - Overlay Heart Icon
+        .overlay(alignment: .topTrailing) {
+            Button(action: {
+                savedItems.toggleActivity(activity)
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 32, height: 32)
+                        .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 1)
+                    
+                    Image(systemName: savedItems.isActivitySaved(activity) ? "heart.fill" : "heart")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 14, weight: .bold))
+                }
+            }
+            .padding(12) // Padding from the top-right edges
+        }
     }
 }
 
@@ -323,15 +313,15 @@ struct ResourceCard: View {
             Image(resource.imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 175)
+                .frame(height: 160)
                 .cornerRadius(10)
-                .frame(maxWidth: .infinity, alignment: .center) // centers the image horizontally
+                .frame(maxWidth: .infinity, alignment: .center)
 
-            HStack{
+            HStack {
                 Text(resource.name)
                     .font(.custom("Alexandria-Regular", size: 15))
                     .bold()
-                    .lineLimit(nil) // or remove this line entirely; nil means unlimited lines
+                    .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(resource.tags.prefix(2), id: \.self) { tag in
                     HStack(spacing: 4) {
@@ -354,23 +344,32 @@ struct ResourceCard: View {
             Text(resource.description)
                 .font(.custom("Alexandria-Regular", size: 12))
                 .foregroundColor(.gray)
-                .fixedSize(horizontal: false, vertical: true) // allow text to wrap onto multiple lines
+                .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
-           
-            HStack {
-                Button(action: {
-                    savedItems.toggleResource(resource)
-                }) {
-                    Image(systemName: savedItems.isResourceSaved(resource) ? "bookmark.fill" : "bookmark")
-                        .foregroundColor(.blue)
-                }
-            }
         }
         .padding()
-        .frame(width: 250, height: 375)
+        .frame(width: 230, height: 350)
         .background(Color.white)
         .cornerRadius(12)
         .shadow(radius: 2)
+        // MARK: - Overlay Bookmark Icon
+        .overlay(alignment: .topTrailing) {
+            Button(action: {
+                savedItems.toggleResource(resource)
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 32, height: 32)
+                        .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 1)
+                    
+                    Image(systemName: savedItems.isResourceSaved(resource) ? "bookmark.fill" : "bookmark")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 14, weight: .bold))
+                }
+            }
+            .padding(12) // Padding from the top-right edges
+        }
     }
 }

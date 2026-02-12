@@ -83,6 +83,17 @@ struct ResultPage: View {
                     .environmentObject(storeData)
             }
             .navigationBarBackButtonHidden(true)
+            .onAppear {
+                
+                storeData.addBadgePoints(points: 50)
+                
+                if let badgeIndex = storeData.checkBadgeStatus() {
+                    
+                    storeData.unlockBadge(at: badgeIndex)
+                    
+                }
+                
+            }
         }
     }
 }

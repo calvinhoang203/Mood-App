@@ -29,8 +29,9 @@ struct HomeView: View {
     @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
     @State private var showSettingNav = false
-    @State private var showNotification = false
-
+    
+    // Alert state for check-in limit
+    @State private var showLimitAlert = false
 
     // Layout constants
     private let headerImageHeight: CGFloat = 360
@@ -52,29 +53,43 @@ struct HomeView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                   ZStack {
-                        HStack(spacing: 6) {
-                            Button {
-                                showNotification = true
-                            } label: {
-                                Image("Bookmark Icon")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                            }
-                            .navigationDestination(isPresented: $showNotification) {
-                                NotificationView().environmentObject(storeData)
-                            }
+                    
+                    // MARK: - HEADER SECTION
+                ZStack {
+                    HStack(spacing: 6) {
 
-                        }
-                        .padding(.top, 75)
-                        .padding(.trailing, 0)
-                        .frame(width: 360, alignment: .topTrailing)
+                        // MARK: - BOOKMARK BUTTON
+
+                        // This simply toggles the state. The destination is handled at the bottom.
+
+                        Image(storeData.dominantMoodIcon)
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                        /*Button {
+
+                            showNotification = true
+
+                        } label: {
+
+                            Image(storeData.dominantMoodIcon)
+
+                                .resizable()
+
+                                .frame(width: 40, height: 40)
+
+                        } */
                     }
-                   .overlay(
-                        cowView
-                            .offset(x: cowOffsetX, y: cowOffsetY)
-                    )
+                    .padding(.top, 75)
+                    .padding(.trailing, 0)
+                    .frame(width: 360, alignment: .topTrailing)
+                }
+               .overlay(
+                    cowView
+                        .offset(x: cowOffsetX, y: cowOffsetY)
 
+                )
+
+                    // MARK: - CONTENT SECTION
                     VStack {
                         ZStack {
                             VStack {
@@ -95,6 +110,7 @@ struct HomeView: View {
                                 VStack(spacing: 10) {
                                     quoteView
 
+                                    // Check-In Button with Limit Logic
                                     Button {
                                         showCheckIn = true
                                     } label: {
@@ -143,8 +159,6 @@ struct HomeView: View {
                                         .padding(.horizontal)
                                     }
                                 }
-
-                                // Added Activities/Resources
                             }
                             .padding(.top, contentExtraOffsetY)
                         }
@@ -180,32 +194,33 @@ struct HomeView: View {
 
     private var cowView: some View {
         ZStack {
-            petCustomization.colorcow
-                .resizable()
-                .scaledToFit()
-                .frame(width: cowSize, height: cowSize)
+            Group {
+                petCustomization.colorcow
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
 
-            petCustomization.outlineImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: cowSize, height: cowSize)
-            
-            petCustomization.pantsImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: cowSize, height: cowSize)
+                petCustomization.outlineImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
+                
+                petCustomization.pantsImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: cowSize, height: cowSize)
 
                 petCustomization.topImage
                     .resizable()
                     .scaledToFit()
                     .frame(width: cowSize, height: cowSize)
-            
-
+                
                 petCustomization.extraImage
                     .resizable()
                     .scaledToFit()
                     .frame(width: cowSize, height: cowSize)
-            
+            }
+            .allowsHitTesting(false)
 
             GeometryReader { geometry in
                 Button {
@@ -229,17 +244,21 @@ struct HomeView: View {
 
     private var quoteView: some View {
         VStack(spacing: 8) {
-            Text("Worrying does not take away tomorrow's troubles. It takes away today's peace.")
+            Text(storeData.customQuote)
                 .font(.custom("Alexandria-Regular", size: 16))
                 .italic()
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color("cowdarkpurple"))
+                .minimumScaleFactor(0.9) // Scales down slightly if text is very long
 
-            Text("– Randy Armstrong")
+            Text("~ \(storeData.firstName) \(storeData.lastName)")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
         .padding()
+        // UPDATED: Fixed frame height
+        .frame(maxWidth: .infinity)
+        .frame(height: 140)
         .background(Color.white)
         .cornerRadius(12)
         .shadow(radius: 4)

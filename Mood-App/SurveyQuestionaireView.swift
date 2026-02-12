@@ -36,7 +36,7 @@ struct SurveyQuestionaireView: View {
     private let navBarHeight: CGFloat = 64
     
  
-    private let moodPoints = 50 // Points earned for answering the mood question
+    private let moodPoints = 0 // Reset to 0 so we can award flat 25 at the end
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
@@ -52,10 +52,10 @@ struct SurveyQuestionaireView: View {
         SurveyQuestionData(
             question: "How are you feeling overall today?",
             options: [
-                ("Great 😄", "POSITIVE_MOOD", 50),
-                ("Okay 🙂", "NEUTRAL_MOOD", 50),
-                ("Meh 😐", "NEUTRAL_MOOD", 50),
-                ("Not so good 😞", "NEGATIVE_MOOD", 50)
+                ("Great 😄", "POSITIVE_MOOD", 0), // Set to 0 so we don't double count
+                ("Okay 🙂", "NEUTRAL_MOOD", 0),
+                ("Meh 😐", "NEUTRAL_MOOD", 0),
+                ("Not so good 😞", "NEGATIVE_MOOD", 0)
             ],
             allowsMultipleSelection: false
         ),
@@ -226,7 +226,7 @@ struct SurveyQuestionaireView: View {
                     .padding(.bottom, navBarHeight)
 
                 }
-                
+               
                 VStack(spacing: 0) {
                     Spacer()
                     bottomTabBar
@@ -268,7 +268,22 @@ struct SurveyQuestionaireView: View {
 
         for selected in selectedOptions {
             if let match = questions[currentIndex].options.first(where: { $0.text == selected }) {
+                // Add points (currently 0 from the array)
                 storeData.addPoints(for: match.category, points: match.points)
+
+                // Map specific categories to Mood and add entry
+                switch match.category {
+                case "POSITIVE_MOOD":
+                    storeData.addMoodEntry(mood: .great)
+                case "NEUTRAL_MOOD":
+                    storeData.addMoodEntry(mood: .okay)
+                case "NEGATIVE_MOOD":
+                    storeData.addMoodEntry(mood: .nsg)
+                case "ANXIETY_RELATED":
+                    storeData.addMoodEntry(mood: .meh)
+                default:
+                    break // Non-mood categories are ignored
+                }
             }
         }
 
@@ -279,16 +294,21 @@ struct SurveyQuestionaireView: View {
                 currentIndex += 1
             }
         } else {
-            // This will allow the progress bar to visually fill before transitioning
+            // Final step: show loading, add 25 points, save to Firestore, then navigate home
             showLoading = true
+            
+            // Add the 25 points for completing the check-in
+            storeData.addPoints(for: "SURVEY_COMPLETED", points: 10)
+            storeData.checkAndUnlockBadges()
             storeData.saveToFirestore()
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 isFinished = true
             }
         }
     }
-    
 
+    
     
     private var bottomTabBar: some View {
         HStack {

@@ -40,7 +40,7 @@ struct JournalView: View {
                 ZStack {
                     Color("lavenderColor")
                         .ignoresSafeArea()
-                    
+                   
                     ScrollView {
                         VStack(spacing: 24) {
                             Spacer().frame(height: topPadding)
@@ -67,7 +67,7 @@ struct JournalView: View {
                                 Text("?")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
-                                
+                               
                                 Spacer()
                                 
                                 Button {
@@ -116,6 +116,9 @@ struct JournalView: View {
                             // — Submit Button —
                             Button {
                                 storeData.addJournalEntry(text: journalEntry)
+                                storeData.addPoints(for: "JOURNAL_ENTRY", points: 5) // Set to 5 Points
+                                storeData.checkAndUnlockBadges()
+                                storeData.saveToFirestore()
                                 journalEntry = ""
                                 userEdited = false
                                 showCheckInFlow = true
@@ -233,7 +236,7 @@ extension JournalView {
             let parent: ImagePicker
             init(_ parent: ImagePicker) { self.parent = parent }
             func imagePickerController(_ picker: UIImagePickerController,
-                                       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+                                     didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
                 if let uiImage = info[.originalImage] as? UIImage {
                     parent.image = uiImage
                 }

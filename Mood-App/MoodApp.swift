@@ -37,7 +37,6 @@ struct MoodApp: App {
     }
 }
 
-
 private struct LoginRoot: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
@@ -52,4 +51,3 @@ private struct LoginRoot: View {
             .environmentObject(savedItems)
     }
 }
-

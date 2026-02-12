@@ -20,6 +20,9 @@ struct CheckInView: View {
     @State private var showSetGoal       = false
     @State private var showAnalyticsNav  = false
     @State private var showSettingNav    = false
+    
+    // Alert State (No longer needed for limit, but kept structure clean)
+    // @State private var showLimitAlert    = false
 
     // MARK: – Layout Constants
     private let navBarHeight: CGFloat    = 64
@@ -65,6 +68,7 @@ struct CheckInView: View {
                                 .padding(.top, 10)
 
                             Button {
+                                // UPDATED: Unlimited check-ins allowed
                                 showSurveyFlow = true
                             } label: {
                                 Image("Survey Button")
@@ -95,6 +99,7 @@ struct CheckInView: View {
                                 .padding(.top, 10)
 
                             Button {
+                                // UPDATED: Unlimited check-ins allowed
                                 showJournalFlow = true
                             } label: {
                                 Image("Journal Button")
@@ -121,6 +126,8 @@ struct CheckInView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, navBarHeight)
+                
+                // Alert removed
 
                 // ── Bottom Tab Bar ───────────────────────────────
                 VStack(spacing: 0) {

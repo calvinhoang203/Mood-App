@@ -17,10 +17,16 @@ struct DonutChart: View {
         data.values.reduce(0, +)
     }
     
-    // Calculate angle for each emotion
+    // Define the display order
+    private var allEmotions: [Emotion] {
+        [.great, .okay, .meh, .nsg]  // <-- correct order
+    }
+    
+    // Calculate angles based on ordered emotions
     var angles: [(Emotion, Double, Double)] {
         var start: Double = 0
-        return data.map { (emotion, value) in
+        return allEmotions.map { emotion in
+            let value = data[emotion] ?? 0
             let angle = Double(value) / Double(max(total, 1)) * 360
             let result = (emotion, start, start + angle)
             start += angle
@@ -28,16 +34,9 @@ struct DonutChart: View {
         }
     }
     
-    // All emotions for empty state
-    private var allEmotions: [Emotion] {
-        [.great, .okay, .meh, .nsg]
-    }
-    
-    // Construct pie chart
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
-                // If no data, show empty circle
                 if data.isEmpty {
                     Circle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 40)
@@ -56,8 +55,7 @@ struct DonutChart: View {
                 }
             }
             .frame(width: 200, height: 200)
-
-            // Legend and week label, always centered and wrapped if needed
+            
             VStack(spacing: 6) {
                 // Legend
                 FixedLegend()
@@ -74,7 +72,6 @@ struct DonutChart: View {
         }
     }
     
-    // Set up date for our Week Of text using the passed-in weekStart
     func formattedWeekStart() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM d, yyyy"
@@ -82,41 +79,17 @@ struct DonutChart: View {
     }
 }
 
-// Create slices of pie chart based on data
-struct DonutSlice: Shape {
-    let startAngle: Angle
-    let endAngle: Angle
-
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = min(rect.width, rect.height) / 2
-
-        // Create a donut shape rather than a pie slice
-        p.addArc(center: center,
-                 radius: radius,
-                    startAngle: startAngle - .degrees(90),
-                    endAngle: endAngle - .degrees(90),
-                    clockwise: false)
-        
-        // Inner circle
-        let innerRadius = radius * 0.5
-        p.addArc(center: center,
-                 radius: innerRadius,
-                 startAngle: endAngle - .degrees(90),
-                 endAngle: startAngle - .degrees(90),
-                 clockwise: true)
-        
-        p.closeSubpath()
-        return p
-    }
-}
-
-// Helper view for a flexible, wrapping legend
+// FixedLegend updated to match order
 struct FixedLegend: View {
-    private let emotions: [Emotion] = [.great, .meh, .nsg, .okay]
+    private let emotions: [Emotion] = [.great, .okay, .meh, .nsg]
+
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+
     var body: some View {
-        HStack(spacing: 16) {
+        LazyVGrid(columns: columns, spacing: 8) {
             ForEach(emotions, id: \.self) { emotion in
                 HStack(spacing: 5) {
                     Circle()
@@ -132,6 +105,31 @@ struct FixedLegend: View {
         .frame(maxWidth: 340)
         .padding(.top, 4)
         .padding(.bottom, 2)
-        .multilineTextAlignment(.center)
+    }
+}
+
+
+struct DonutSlice: Shape {
+    let startAngle: Angle
+    let endAngle: Angle
+
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = min(rect.width, rect.height) / 2
+        p.addArc(center: center,
+                 radius: radius,
+                 startAngle: startAngle - .degrees(90),
+                 endAngle: endAngle - .degrees(90),
+                 clockwise: false)
+
+        let innerRadius = radius * 0.5
+        p.addArc(center: center,
+                 radius: innerRadius,
+                 startAngle: endAngle - .degrees(90),
+                 endAngle: startAngle - .degrees(90),
+                 clockwise: true)
+        p.closeSubpath()
+        return p
     }
 }

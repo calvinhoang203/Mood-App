@@ -1,12 +1,8 @@
-//
-//  StoreData.swift
-//  Mental Health
-//
-
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
+// MARK: - Main Class
 class StoreData: ObservableObject {
     @Published var scores: [String: Int] = [
         "ANXIETY DUE TO LIFE CIRCUMSTANCES": 0,
@@ -15,54 +11,172 @@ class StoreData: ObservableObject {
         "LOW ENERGY / MOTIVATION": 0
     ]
     
-    // ─── Points system ───
-
-    @Published var welcomeBonus: Int = 1500
-
-    @Published var goalPoints:   Int = 300
-
-    // ─── Mood tracking for analytics ───
+    @Published var welcomeBonus: Int = 50
+    @Published var goalPoints: Int = 300
+    @Published var totalBadgePoints: Int = 0
+    @Published var goalSetPoints: Int = 0
+    @Published var unlockedBadges: [Bool] = Array(repeating: false, count: 12)
+    
+    // Custom Quote
+    @Published var customQuote: String = "Worrying does not take away tomorrow's troubles. It takes away today's peace."
+    
     @Published var moodEntries: [MoodEntry] = []
     @Published var weeklyMoodDistribution: [Emotion: Int] = [
-        .great: 0,
-        .okay: 0,
-        .meh: 0,
-        .nsg: 0
+        .great: 0, .okay: 0, .meh: 0, .nsg: 0
     ]
-
-    var totalPoints: Int {
-        let spent = scores["spentUnlocks"] ?? 0
-        let earned = scores.filter { $0.key != "spentUnlocks" }.map { $0.value }.reduce(0, +)
-        return earned + welcomeBonus - spent
-    }
-
-    // User profile info
+    
     @Published var firstName: String = ""
     @Published var lastName: String = ""
     @Published var pronouns: String = ""
     @Published var phoneNumber: String = ""
     @Published var email: String = ""
-
-    // ─── Journal Entries ───
-    @Published var journals: [String: [String: String]] = [:]
     
-    // ─── Category Results for Recommendation System ───
-    // TEAMMATE NOTE: This stores the ranked categories from survey results
-    // Access like: storeData.categoryResults["first"] to get the top category
-    // 
-    // EXAMPLE USAGE FOR YOUR RECOMMENDATION SYSTEM:
-    // let topCategory = storeData.categoryResults["first"] ?? "NO_DATA"
-    // let secondCategory = storeData.categoryResults["second"] ?? "NO_DATA"
-    // 
-    // Available keys: "first", "second", "third", "fourth", "fifth"
-    // Categories come from the survey answers (like "POSITIVE_MOOD", "ANXIETY_RELATED", etc.)
+    @Published var journals: [String: [String: String]] = [:]
     @Published var categoryResults: [String: String] = [:]
+    
+    @Published var notifications: [String: Bool] = [
+        "account_created": false,
+        "point_checkpoint": false,
+        "daily_check_in": false
+    ]
+    
+    @Published var currentStreak: Int = 0
+    @Published var weeklyMoodData: [String: Double] = [
+        "Happiness": 0, "Sadness": 0, "Anxiety": 0
+    ]
+    
+    @Published var badgeTitles: [String] = [
+        "Library Scholar", "Boba Enthusiast", "Rec Sports MVP", "Spa Day Specialist",
+        "Bike Barn Boss", "Library Scholar", "Piercing Perfectionist", "Farmer’s Market Fashionista",
+        "Arboretum Explorer", "MU Gaming Area Champion", "It-Girl Aggie", "Rec Sports MVP"
+    ]
+    
+    @Published var badgeScores: [Int] = [150, 300, 450, 600, 750, 900, 1050, 1200, 1350, 1500, 1650, 1800]
 
+    var weekRangeText: String {
+        let start = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
+        let df = DateFormatter()
+        df.dateFormat = "MMMM d"
+        return "Week of \(df.string(from: start))"
+    }
+    
+    var checkInDaysThisWeekCount: Int {
+        let calendar = Calendar.current
+        let thisWeekEntries = entriesFromCurrentWeek(moodEntries)
+        let uniqueDays = Set(thisWeekEntries.map { calendar.startOfDay(for: $0.date) })
+        return uniqueDays.count
+    }
+    
+    func hasCheckedInToday() -> Bool {
+        let calendar = Calendar.current
+        return moodEntries.contains { calendar.isDateInToday($0.date) }
+    }
+    
+    // MARK: - UPDATED: AVERAGE MOOD LOGIC
+    // Calculates the average mood value (Great=4, Okay=3, Meh=2, NSG=1)
+    var dominantMoodIcon: String {
+        // Get counts from the weekly distribution
+        let greatCount = Double(weeklyMoodDistribution[.great] ?? 0)
+        let okayCount  = Double(weeklyMoodDistribution[.okay] ?? 0)
+        let mehCount   = Double(weeklyMoodDistribution[.meh] ?? 0)
+        let nsgCount   = Double(weeklyMoodDistribution[.nsg] ?? 0)
+        
+        let totalCount = greatCount + okayCount + mehCount + nsgCount
+        
+        // If no entries, default to okay
+        guard totalCount > 0 else { return "moodokay" }
+        
+        // Calculate weighted sum
+        // Great = 4, Okay = 3, Meh = 2, NSG = 1
+        let totalScore = (greatCount * 4.0) + (okayCount * 3.0) + (mehCount * 2.0) + (nsgCount * 1.0)
+        
+        // Calculate average
+        let average = totalScore / totalCount
+        
+        // Round to nearest integer
+        let roundedAverage = Int(round(average))
+        
+        // Map back to image name
+        switch roundedAverage {
+        case 4: return "moodhappy"      // Average is ~Great
+        case 3: return "moodokay"       // Average is ~Okay
+        case 2: return "moodmeh"        // Average is ~Meh
+        case 1: return "moodnotsogood"  // Average is ~Not so good
+        default: return "moodokay"      // Fallback
+        }
+    }
+    
+    // Points Logic
+    var totalPoints: Int {
+        let spent = scores["spentUnlocks"] ?? 0
+        let relevantKeys = ["SURVEY_COMPLETED", "JOURNAL_ENTRY"]
+        let earned = scores.filter { relevantKeys.contains($0.key) }
+            .map { $0.value }
+            .reduce(0, +)
+        return earned + welcomeBonus - spent
+    }
+    
+    var lifetimePoints: Int {
+        let relevantKeys = ["SURVEY_COMPLETED", "JOURNAL_ENTRY"]
+        let earned = scores.filter { relevantKeys.contains($0.key) }
+            .map { $0.value }
+            .reduce(0, +)
+        return earned + welcomeBonus
+    }
+    
     func addPoints(for category: String, points: Int) {
         scores[category, default: 0] += points
     }
     
-    // Add a new mood entry ONLY for the mood question
+    func deductPoints(_ points: Int) {
+        scores["spentUnlocks", default: 0] += points
+        saveToFirestore()
+    }
+    
+    func fetchAnalyticsData() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users' info").document(uid)
+        
+        userRef.getDocument { snapshot, error in
+            if let error = error {
+                print("❌ Error fetching analytics data: \(error.localizedDescription)")
+                return
+            }
+            guard let data = snapshot?.data() else { return }
+            
+            DispatchQueue.main.async {
+                self.currentStreak = data["currentStreak"] as? Int ?? 0
+                if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
+                    self.moodEntries = moodEntriesData.compactMap { entryData in
+                        guard let dateTimestamp = entryData["date"] as? Timestamp,
+                              let moodString = entryData["mood"] as? String,
+                              let mood = Mood(rawValue: moodString) else {
+                            return nil
+                        }
+                        return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
+                    }
+                    self.updateWeeklyMoodDistribution()
+                }
+            }
+        }
+    }
+    
+    static let demo: StoreData = {
+        let sd = StoreData()
+        sd.currentStreak = 5
+        sd.weeklyMoodData = ["Happiness": 4, "Sadness": 1, "Anxiety": 2]
+        sd.moodEntries = [
+            .init(date: Date().addingTimeInterval(-86400 * 0), mood: .meh),
+            .init(date: Date().addingTimeInterval(-86400 * 1), mood: .okay)
+        ]
+        sd.updateWeeklyMoodDistribution()
+        return sd
+    }()
+}
+
+// MARK: - Mood Tracking & Badges
+extension StoreData {
     func addMoodEntry(mood: Mood) {
         let newEntry = MoodEntry(date: Date(), mood: mood)
         moodEntries.append(newEntry)
@@ -70,367 +184,209 @@ class StoreData: ObservableObject {
         saveToFirestore()
     }
     
-    // Update streak if this is a new day
-    func updateStreakIfNeeded() {
-        let calendar = Calendar.current
-        
-        // Check if there's already an entry for today
-        let today = calendar.startOfDay(for: Date())
-        let hasEntryToday = moodEntries.contains { entry in
-            calendar.isDate(entry.date, inSameDayAs: today)
-        }
-        
-        // If this is the first entry today, increment streak
-        if !hasEntryToday {
-            currentStreak += 1
-        }
-    }
-
-    // Initialize with empty values for all emotions
-    func initializeEmptyMoodDistribution() {
-        weeklyMoodDistribution = [
-            .great: 0,
-            .okay: 0,
-            .meh: 0,
-            .nsg: 0
-        ]
-    }
-    
-    // Update weekly mood distribution for the chart
     func updateWeeklyMoodDistribution() {
-        // Start with empty values
         initializeEmptyMoodDistribution()
-        
-        // Then update with actual entries
         let weekEntries = entriesFromCurrentWeek(moodEntries)
         let distribution = emotionDistribution(from: weekEntries)
-        
-        // Merge the distributions
         for (emotion, count) in distribution {
             weeklyMoodDistribution[emotion] = count
         }
-        
-        print("Updated mood distribution: \(weeklyMoodDistribution)")
     }
+    
+    func initializeEmptyMoodDistribution() {
+        weeklyMoodDistribution = [
+            .great: 0, .okay: 0, .meh: 0, .nsg: 0
+        ]
+    }
+    
+    func applyInitialBadgePoints() {
+        let spent = scores["spentUnlocks"] ?? 0
+        totalBadgePoints += welcomeBonus - spent
+    }
+    
+    func addBadgePoints(points: Int) {
+        applyInitialBadgePoints()
+        totalBadgePoints += points
+    }
+    
+    func checkBadgeStatus() -> Int? {
+        applyInitialBadgePoints()
+        for index in 0..<badgeScores.count {
+            guard index < unlockedBadges.count else { continue }
+            // Check if user has enough points AND the badge is currently locked
+            if totalBadgePoints >= badgeScores[index], !unlockedBadges[index] {
+                return index
+            }
+        }
+        return nil
+    }
+    
+    func unlockBadge(at index: Int) {
+        applyInitialBadgePoints()
+        guard badgeTitles.indices.contains(index) else { return }
+        unlockedBadges[index] = true
+        // Optionally trigger a save here if needed
+    }
+    
+    func badgeCheckpoint(at index: Int) -> Bool {
+        applyInitialBadgePoints()
+        return totalBadgePoints >= badgeScores[index]
+    }
+    
+    func checkAndUnlockBadges() {
+        let badgeThresholds = [150, 300, 450, 600, 750, 900, 1050, 1200, 1350, 1500, 1650, 1800]
+        for (index, threshold) in badgeThresholds.enumerated() {
+            if lifetimePoints >= threshold && !unlockedBadges[index] {
+                unlockedBadges[index] = true
+            }
+        }
+    }
+}
 
+// MARK: - Firestore
+extension StoreData {
     func saveToFirestore() {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("User not logged in.")
-            return
-        }
-
+        guard let currentUser = Auth.auth().currentUser else { return }
+        
         let db = Firestore.firestore()
-        let documentID = currentUser.uid
-
-        // Ensure spentUnlocks is always present
-        if scores["spentUnlocks"] == nil {
-            scores["spentUnlocks"] = 0
+        let userRef = db.collection("Users' info").document(currentUser.uid)
+        
+        let moodEntriesData: [[String: Any]] = moodEntries.map {
+            ["date": $0.date, "mood": $0.mood.rawValue]
         }
         
-        // Filter out any empty-string keys from scores
-        let filteredScores = scores.filter { !$0.key.isEmpty }
-        
-        // Convert mood entries to a format that can be stored in Firestore
-        let moodEntriesData: [[String: Any]] = moodEntries.map { entry in
-            return [
-                "date": entry.date,
-                "mood": entry.mood.rawValue
-            ]
-        }
-
-        let userRef = db.collection("Users' info").document(documentID)
-
         let userData: [String: Any] = [
             "email": currentUser.email ?? email,
             "firstName": firstName,
             "lastName": lastName,
             "pronouns": pronouns,
             "phoneNumber": phoneNumber,
-            "scores": filteredScores,
+            "scores": scores.filter { !$0.key.isEmpty },
             "notifications": notifications,
             "moodEntries": moodEntriesData,
             "currentStreak": currentStreak,
             "journals": journals,
-            "categoryResults": categoryResults
+            "totalBadgePoints": totalBadgePoints,
+            "goalSetPoints": goalSetPoints,
+            "unlockedBadges": unlockedBadges,
+            "welcomeBonus": welcomeBonus,
+            "goalPoints": goalPoints,
+            "categoryResults": categoryResults,
+            "customQuote": customQuote
         ]
-
-        userRef.setData(userData, merge: true) { error in
-            if let error = error {
-                print("❌ Error saving to Firestore: \(error.localizedDescription)")
-            } else {
-                print("✅ User data (profile + scores) saved successfully.")
-            }
-        }
+        
+        userRef.setData(userData, merge: true)
     }
     
-    // Notification variables
-    @Published var notifications: [String: Bool] = [
-        "account_created": false,
-        "point_checkpoint": false,
-        "daily_check_in": false
-    ]
-    
-    //  Mark notification as seen for users
-    func markNotificationAsSeen(_ key: String) {
-        guard let currentUser = Auth.auth().currentUser else { return }
-        let db = Firestore.firestore()
-        let userRef = db.collection("Users' info").document(currentUser.uid)
-
-        notifications[key] = true
-
-        userRef.updateData([
-            "notifications.\(key)": true
-        ]) { error in
-            if let error = error {
-                print("❌ Error updating notification: \(error.localizedDescription)")
-            } else {
-                print("✅ Notification '\(key)' marked as seen.")
-            }
-        }
-    }
-
-    // Load the notifications that have already been seen by users
     func loadUserDataFromFirestore() {
         guard let currentUser = Auth.auth().currentUser else { return }
-        let db = Firestore.firestore()
-        let userRef = db.collection("Users' info").document(currentUser.uid)
-
+        let userRef = Firestore.firestore().collection("Users' info").document(currentUser.uid)
+        
         userRef.getDocument { document, error in
             if let error = error {
                 print("❌ Error loading user data: \(error.localizedDescription)")
                 return
             }
-
-            guard let data = document?.data() else {
-                print("⚠️ No user data found.")
-                return
-            }
-
+            guard let data = document?.data() else { return }
+            
             self.firstName = data["firstName"] as? String ?? ""
             self.lastName = data["lastName"] as? String ?? ""
             self.pronouns = data["pronouns"] as? String ?? ""
             self.phoneNumber = data["phoneNumber"] as? String ?? ""
             self.email = data["email"] as? String ?? ""
-
-            if let scoresData = data["scores"] as? [String: Int] {
-                // Always ensure spentUnlocks is present
-                var fixedScores = scoresData
-                if fixedScores["spentUnlocks"] == nil {
-                    fixedScores["spentUnlocks"] = 0
-                }
-                self.scores = fixedScores
-            }
-
-            if let notificationData = data["notifications"] as? [String: Bool] {
-                self.notifications = notificationData
-            }
-            
-            // Load mood entries
-            if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
-                self.moodEntries = moodEntriesData.compactMap { entryData in
-                    guard let dateTimestamp = entryData["date"] as? Timestamp,
-                          let moodString = entryData["mood"] as? String,
-                          let mood = Mood(rawValue: moodString) else {
-                        return nil
-                    }
-                    return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
-                }
-                self.updateWeeklyMoodDistribution()
-            }
-            
-            // Load streak
-            if let streak = data["currentStreak"] as? Int {
-                self.currentStreak = streak
-            }
-
-            // Load journals if present
-            if let journalsData = data["journals"] as? [String: [String: String]] {
-                self.journals = journalsData
-            }
-            
-            // TEAMMATE NOTE: Load category results from Firebase
-            // This loads the ranked categories that your recommendation system needs
-            if let categoryResultsData = data["categoryResults"] as? [String: String] {
-                self.categoryResults = categoryResultsData
-            }
-
-            print("✅ User data loaded successfully.")
-        }
-    }
-
-    // ── Analytics Page Properties ──────────────────────────────────────
-
-    @Published var currentStreak: Int = 0
-    @Published var badgeTitles: [String] = [
-      "Bike Barn Boss", "Tercero Trekker", "Happy Heifer", "Fourth Badge"
-    ]
-    @Published var weeklyMoodData: [String: Double] = [
-      "Happiness": 0, "Sadness": 0, "Anxiety": 0
-    ]
-
-    /// NEW: track lock/unlock state for each badge
-    @Published var unlockedBadges: [Bool] = [false, false, false, false]
-
-    /// Call this when a badge is earned
-    func unlockBadge(at index: Int) {
-      guard badgeTitles.indices.contains(index) else { return }
-      unlockedBadges[index] = true
-    }
-
-    /// Displays "Week of Month Day"
-    var weekRangeText: String {
-      let start = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
-      let df = DateFormatter()
-      df.dateFormat = "MMMM d"
-      return "Week of \(df.string(from: start))"
-    }
-
-    /// Fetches `currentStreak` and `weeklyMoodData` from Firestore
-    func fetchAnalyticsData() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        let db = Firestore.firestore()
-        let userRef = db.collection("Users' info").document(uid)
-
-        userRef.getDocument { snapshot, error in
-            if let error = error {
-                print("❌ Error fetching analytics data: \(error.localizedDescription)")
-                return
-            }
-            guard let data = snapshot?.data() else { return }
-
+            self.goalPoints = data["goalPoints"] as? Int ?? 0
+            self.totalBadgePoints = data["totalBadgePoints"] as? Int ?? 0
+            self.goalSetPoints = data["goalSetPoints"] as? Int ?? 0
+            self.unlockedBadges = data["unlockedBadges"] as? [Bool] ?? []
+            self.categoryResults = data["categoryResults"] as? [String: String] ?? [:]
+            self.notifications = data["notifications"] as? [String: Bool] ?? self.notifications
+            self.journals = data["journals"] as? [String: [String: String]] ?? [:]
             self.currentStreak = data["currentStreak"] as? Int ?? 0
-            // Load mood entries for the chart
-            if let moodEntriesData = data["moodEntries"] as? [[String: Any]] {
-                self.moodEntries = moodEntriesData.compactMap { entryData in
-                    guard let dateTimestamp = entryData["date"] as? Timestamp,
-                          let moodString = entryData["mood"] as? String,
-                          let mood = Mood(rawValue: moodString) else {
-                        return nil
-                    }
-                    return MoodEntry(date: dateTimestamp.dateValue(), mood: mood)
+            self.customQuote = data["customQuote"] as? String ?? "Worrying does not take away tomorrow's troubles. It takes away today's peace."
+            
+            if let scoresData = data["scores"] as? [String: Int] {
+                self.scores = scoresData
+                if self.scores["spentUnlocks"] == nil {
+                    self.scores["spentUnlocks"] = 0
+                }
+            }
+            
+            if let moodData = data["moodEntries"] as? [[String: Any]] {
+                self.moodEntries = moodData.compactMap {
+                    guard let ts = $0["date"] as? Timestamp,
+                          let moodStr = $0["mood"] as? String,
+                          let mood = Mood(rawValue: moodStr) else { return nil }
+                    return MoodEntry(date: ts.dateValue(), mood: mood)
                 }
                 self.updateWeeklyMoodDistribution()
             }
+            
+            if self.unlockedBadges.count < self.badgeScores.count {
+                self.unlockedBadges += Array(repeating: false, count: self.badgeScores.count - self.unlockedBadges.count)
+            }
+            self.checkAndUnlockBadges()
         }
     }
+}
 
-    /// A demo instance pre‐loaded with example data for SwiftUI previews
-    static let demo: StoreData = {
-        let sd = StoreData()
-        sd.currentStreak = 5
+// MARK: - Journals & Category Saving
+extension StoreData {
+    func addJournalEntry(text: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        let dateString = formatter.string(from: Date())
+        let key = "entry\(journals.count + 1)"
+        journals[key] = ["text": text, "date": dateString]
         
-        // Add sample mood entries for demo
-        let sampleEntries: [MoodEntry] = [
-            .init(date: Date().addingTimeInterval(-86400 * 0), mood: .meh),
-            .init(date: Date().addingTimeInterval(-86400 * 1), mood: .okay),
-            .init(date: Date().addingTimeInterval(-86400 * 2), mood: .great),
-            .init(date: Date().addingTimeInterval(-86400 * 3), mood: .meh),
-            .init(date: Date().addingTimeInterval(-86400 * 4), mood: .nsg),
-            .init(date: Date().addingTimeInterval(-86400 * 5), mood: .meh),
-            .init(date: Date().addingTimeInterval(-86400 * 6), mood: .nsg)
-        ]
-        sd.moodEntries = sampleEntries
-        sd.updateWeeklyMoodDistribution()
-        
-        return sd
-    }()
-
-    func deductPoints(_ points: Int) {
-        // Deduct from a special key so totalPoints reflects deduction
-        scores["spentUnlocks", default: 0] += points
+        // Award 10 points for journaling
+        addPoints(for: "JOURNAL_ENTRY", points: 10)
         saveToFirestore()
     }
+    
+    func saveCategoryResults(_ rankedResults: [String: String]) {
+        self.categoryResults = rankedResults
+        guard let user = Auth.auth().currentUser else { return }
+        let userRef = Firestore.firestore().collection("Users' info").document(user.uid)
+        userRef.updateData(["categoryResults": rankedResults])
+    }
+}
 
-    /// Clears all user-related data in memory (does NOT touch Firestore)
+// MARK: - Reset
+extension StoreData {
     func reset() {
-        firstName = ""
-        lastName = ""
-        pronouns = ""
-        phoneNumber = ""
-        email = ""
+        firstName = ""; lastName = ""; pronouns = ""; phoneNumber = ""; email = ""
         scores = [
             "ANXIETY DUE TO LIFE CIRCUMSTANCES": 0,
             "NEED PEER/SOCIAL SUPPORT SYSTEM": 0,
             "STRESS DUE TO ACADEMIC PRESSURE": 0,
             "LOW ENERGY / MOTIVATION": 0
         ]
-        moodEntries = []
-        weeklyMoodDistribution = [
-            .great: 0,
-            .okay: 0,
-            .meh: 0,
-            .nsg: 0
-        ]
-        notifications = [
-            "account_created": false,
-            "point_checkpoint": false,
-            "daily_check_in": false
-        ]
-        currentStreak = 0
-        badgeTitles = [
-            "Bike Barn Boss", "Tercero Trekker", "Happy Heifer", "Fourth Badge"
-        ]
-        weeklyMoodData = [
-            "Happiness": 0, "Sadness": 0, "Anxiety": 0
-        ]
-        unlockedBadges = [false, false, false, false]
-        journals = [:]
+        moodEntries = []; currentStreak = 0
+        weeklyMoodDistribution = [.great: 0, .okay: 0, .meh: 0, .nsg: 0]
+        unlockedBadges = Array(repeating: false, count: 12)
+        totalBadgePoints = 0
+        journals = [:]; notifications = ["account_created": false, "point_checkpoint": false, "daily_check_in": false]
+        weeklyMoodData = ["Happiness": 0, "Sadness": 0, "Anxiety": 0]
         categoryResults = [:]
-    }
-
-    /// Returns an array of (weekStart, mood distribution) for each week with mood entries, sorted by weekStart ascending
-    var weeklyMoodDistributions: [(weekStart: Date, distribution: [Emotion: Int])] {
-        // Group entries by week start (Monday)
-        let calendar = Calendar(identifier: .iso8601)
-        let grouped = Dictionary(grouping: moodEntries) { entry -> Date in
-            let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: entry.date)
-            return calendar.date(from: components) ?? entry.date
-        }
-        // For each week, compute the mood distribution
-        let weekDistributions = grouped.map { (weekStart, entries) -> (Date, [Emotion: Int]) in
-            let dist = emotionDistribution(from: entries)
-            return (weekStart, dist)
-        }
-        // Sort by weekStart ascending
-        return weekDistributions.sorted { $0.0 < $1.0 }
-    }
-
-    // Add a new journal entry with unique key and formatted date
-    func addJournalEntry(text: String) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let dateString = formatter.string(from: Date())
-        let nextIndex = journals.count + 1
-        let key = "entry\(nextIndex)"
-        journals[key] = ["text": text, "date": dateString]
-        saveToFirestore()
+        customQuote = "Worrying does not take away tomorrow's troubles. It takes away today's peace."
     }
     
-    // TEAMMATE NOTE: This function saves the ranked category results to Firebase
-    // Call this after processing survey responses to store recommendation data
-    // The ranked results will be available for your recommendation system
-    func saveCategoryResults(_ rankedResults: [String: String]) {
-        self.categoryResults = rankedResults
-        
-        // Save specifically to Firebase
-        guard let currentUser = Auth.auth().currentUser else {
-            print("❌ User not logged in - cannot save category results")
-            return
+    func updateStreakIfNeeded() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let hasEntryToday = moodEntries.contains { calendar.isDate($0.date, inSameDayAs: today) }
+        if !hasEntryToday {
+            currentStreak += 1
+            saveToFirestore()
         }
-        
-        let db = Firestore.firestore()
-        let userRef = db.collection("Users' info").document(currentUser.uid)
-        
-        userRef.updateData([
-            "categoryResults": rankedResults
-        ]) { error in
-            if let error = error {
-                print("❌ Error saving category results: \(error.localizedDescription)")
-            } else {
-                print("✅ Category results saved successfully!")
-                print("TEAMMATE INFO - Saved results: \(rankedResults)")
-                print("TEAMMATE INFO - Access with: storeData.categoryResults[\"first\"], storeData.categoryResults[\"second\"], etc.")
-            }
-        }
+    }
+    
+    func markNotificationAsSeen(_ key: String) {
+        guard let user = Auth.auth().currentUser else { return }
+        notifications[key] = true
+        Firestore.firestore()
+            .collection("Users' info")
+            .document(user.uid)
+            .updateData(["notifications.\(key)": true])
     }
 }

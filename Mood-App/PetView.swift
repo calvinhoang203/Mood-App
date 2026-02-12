@@ -16,22 +16,26 @@ struct PetView: View {
     @State private var showSettingNav = false
 
     private let tabs = ["Colors", "Tops", "Extras", "Pants"]
-    private let colorCost = 50
-    private let topCost = 50
-    private let extraCost = 50
+    private let colorCost = 20
+    private let topCost = 20
+    private let extraCost = 20
 
-    private let colorOptions = ["" /* none */] + ["displayblue", "displaydarkpurple", "displaygreen", "displaylightgreen", "displaypeach", "displaypink", "displaypurple", "displayred", "displayyellow"]
-    private let colorImages = ["" /* none */] + ["bluecow", "darkpurplecow", "darkgreencow", "lightgreencow", "peachcow", "pinkcow", "purplecow", "redcow", "yellowcow"]
-    private let colorNames = ["None"] + ["Blue", "Dark Purple", "Dark Green", "Light Green", "Peach", "Pink", "Purple", "Red", "Yellow"]
+    private let colorOptions = ["" /* none */] + ["displayblue", "displaydarkpurple", "displaygreen", "displaylightgreen", "displaypeach", "displaypink", "displaypurple", "displayred"]
+    private let colorImages = ["" /* none */] + ["bluecow", "darkpurplecow", "darkgreencow", "lightgreencow", "peachcow", "pinkcow", "purplecow", "redcow"]
+    private let colorNames = ["None"] + ["Blue", "Dark Purple", "Dark Green", "Light Green", "Peach", "Pink", "Purple", "Red"]
 
-    private let topImages = ["" /* none */] + ["suit", "iloved3c", "ilovemood",  "greenshirt", "pinkshirt", "peachshirt", "ruffle", "redshirt", "cyanshirt"]
-    private let topNames = ["None"] + ["Suit", "D3C Shirt", "Moo'd Shirt",  "Green Shirt", "Pink Shirt", "Peach Shirt", "Ruffle Shirt", "Red Shirt", "Cyan Shirt"]
+    private let topImages = ["" /* none */] + ["suit", "iloved3c", "ilovemood",  "greenshirt", "pinkshirt", "peachshirt", "redshirt", "cyanshirt"]
+    private let topNames = ["None"] + ["Suit", "D3C Shirt", "Moo'd Shirt",  "Green Shirt", "Pink Shirt", "Peach Shirt", "Red Shirt", "Cyan Shirt"]
+    private let topDisplayImages = ["" /* none */] + [
+            "suitview", "iloved3cview", "ilovemoodview", "greenshirtview",
+            "pinkshirtview", "peachshirtview", "redshirtview", "cyanshirtview"
+        ]
 
     private let extraDisplayImages = ["" /* none */] + ["earingview", "glassesview", "hatview", "necklaceview", "videogameview", "basketballview", "bowview", "bobaview", "maskview", "airpodsview"]
     private let extraImages = ["" /* none */] + ["earing", "glasses", "hat", "necklace", "videogame", "basketball", "bow", "boba", "mask", "airpods"]
     private let extraNames = ["None"] + ["Earring", "Glasses", "Hat", "Necklace", "Video Game", "Basketball", "Bow", "Boba", "Mask", "AirPods"]
 
-    private let pantsDisplayImages = ["" /* none */] + ["pants", "brownpants", "bluepants", "blackpants"]
+    private let pantsDisplayImages = ["" /* none */] + ["pantsview", "brownpantsview", "bluepantsview", "blackpantsview"]
     private let pantsImages = ["" /* none */] + ["pants", "brownpants", "bluepants", "blackpants"]
     private let pantsNames = ["None"] + ["Pants", "Brown Pants", "Blue Pants", "Black Pants"]
 
@@ -196,7 +200,7 @@ struct PetView: View {
                                     }
                                 }
                             } else if selectedTab == "Tops" {
-                                itemGrid(display: topImages, items: topImages, names: topNames, geometry: geometry) { index in
+                                itemGrid(display: topDisplayImages, items: topImages, names: topNames, geometry: geometry) { index in
                                     let name = topImages[index]
                                     if petCustomization.unlockedItems.contains(name) {
                                         petCustomization.updateTop(name)
