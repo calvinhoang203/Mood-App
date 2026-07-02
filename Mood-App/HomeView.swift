@@ -2,17 +2,6 @@ import SwiftUI
 import Combine
 import UIKit
 
-// Custom shape for rounded corners
-struct HomeCornerShape: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
-}
-
 struct HomeView: View {
     @EnvironmentObject var savedItems: SavedItems
     @EnvironmentObject private var storeData: StoreData
@@ -29,9 +18,6 @@ struct HomeView: View {
     @State private var showSetGoal = false
     @State private var showAnalyticsNav = false
     @State private var showSettingNav = false
-    
-    // Alert state for check-in limit
-    @State private var showLimitAlert = false
 
     // Layout constants
     private let headerImageHeight: CGFloat = 360
@@ -301,8 +287,11 @@ struct HomeView: View {
                 .frame(width: 100, height: 100)
 
             let total = storeData.totalPoints
+            let progressFraction: CGFloat = storeData.goalPoints > 0
+                ? min(CGFloat(total) / CGFloat(storeData.goalPoints), 1.0)
+                : 0
             Circle()
-                .trim(from: 0, to: CGFloat(total) / CGFloat(storeData.goalPoints))
+                .trim(from: 0, to: progressFraction)
                 .stroke(accentColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: 100, height: 100)
@@ -375,7 +364,7 @@ struct HomeView: View {
         .padding(.bottom, 8)
         .background(
             Color.white
-                .clipShape(HomeCornerShape(radius: 30, corners: [.topLeft, .topRight]))
+                .cornerRadius(30, corners: [.topLeft, .topRight])
                 .edgesIgnoringSafeArea(.bottom)
                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
         )

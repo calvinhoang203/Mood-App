@@ -2,8 +2,6 @@ import SwiftUI
 
 struct ResourcesView: View {
     @State private var searchText: String = ""
-    @StateObject private var savedItems = SavedItems()
-    @State private var navigateToSaved = false
     @State private var navigateToHome = false
     @State private var showHomeNav = false
     @State private var showResource = false
@@ -227,6 +225,64 @@ struct ResourcesView: View {
     }
 }
 
+// MARK: – FlipCard container
+// Generic tap-to-flip container: shows `front`, and on tap rotates 180°
+// to reveal `back`. Tapping again flips it back.
+struct FlipCard<Front: View, Back: View>: View {
+    @State private var isFlipped = false
+    private let front: Front
+    private let back: Back
+
+    init(@ViewBuilder front: () -> Front, @ViewBuilder back: () -> Back) {
+        self.front = front()
+        self.back = back()
+    }
+
+    var body: some View {
+        ZStack {
+            front
+                .opacity(isFlipped ? 0 : 1)
+            back
+                .opacity(isFlipped ? 1 : 0)
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+        }
+        .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.45)) {
+                isFlipped.toggle()
+            }
+        }
+    }
+}
+
+// MARK: – Shared tag row used on card backs
+
+private struct CardTagRow: View {
+    let tags: [String]
+    let topTags: [String]
+
+    var body: some View {
+        HStack {
+            ForEach(tags.prefix(2), id: \.self) { tag in
+                HStack(spacing: 4) {
+                    Text(tag.capitalized)
+                        .font(.caption2)
+                    if topTags.contains(tag) {
+                        Image(systemName: "star.fill")
+                            .resizable()
+                            .frame(width: 10, height: 10)
+                            .foregroundColor(.yellow)
+                    }
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.purple.opacity(0.15))
+                .cornerRadius(8)
+            }
+        }
+    }
+}
+
 // MARK: – ActivityCard
 
 struct ActivityCard: View {
@@ -234,53 +290,66 @@ struct ActivityCard: View {
     let topTags: [String]
     @EnvironmentObject var savedItems: SavedItems
 
+    // Scaled down from the original 230x300 to take up less room in the
+    // horizontal scroll rows (roughly 65% size).
+    private let cardWidth: CGFloat = 150
+    private let cardHeight: CGFloat = 195
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(activity.imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 150)
-                .cornerRadius(10)
-                .frame(maxWidth: .infinity, alignment: .center)
+        FlipCard {
+            // Front: illustration only
+            ZStack(alignment: .bottom) {
+                Image(activity.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: cardWidth, height: cardHeight)
+                    .clipped()
 
-            HStack {
-                Text(activity.name)
-                    .font(.custom("Alexandria-Regular", size: 15))
-                    .bold()
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                ForEach(activity.tags.prefix(2), id: \.self) { tag in
-                    HStack(spacing: 4) {
-                        Text(tag.capitalized)
-                            .font(.caption2)
-                        if topTags.contains(tag) {
-                            Image(systemName: "star.fill")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                                .foregroundColor(.yellow)
-                        }
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.purple.opacity(0.15))
-                    .cornerRadius(8)
+                LinearGradient(
+                    colors: [.black.opacity(0.55), .clear],
+                    startPoint: .bottom,
+                    endPoint: .center
+                )
+
+                HStack {
+                    Text(activity.name)
+                        .font(.custom("Alexandria-Regular", size: 11))
+                        .bold()
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                    Spacer()
+                    Image(systemName: "arrow.2.squarepath")
+                        .foregroundColor(.white.opacity(0.9))
+                        .font(.system(size: 9, weight: .bold))
                 }
+                .padding(7)
             }
+            .frame(width: cardWidth, height: cardHeight)
+        } back: {
+            // Back: name, tags, description
+            VStack(alignment: .leading, spacing: 6) {
+                Text(activity.name)
+                    .font(.custom("Alexandria-Regular", size: 12))
+                    .bold()
+                    .fixedSize(horizontal: false, vertical: true)
 
-            Text(activity.description)
-                .font(.custom("Alexandria-Regular", size: 12))
-                .foregroundColor(.gray)
-                .fixedSize(horizontal: false, vertical: true)
+                CardTagRow(tags: activity.tags, topTags: topTags)
 
-            // Pushes content up since the button is no longer taking space here
-            Spacer()
+                Text(activity.description)
+                    .font(.custom("Alexandria-Regular", size: 9.5))
+                    .foregroundColor(.gray)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer()
+            }
+            .padding(10)
+            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
+            .background(Color.white)
         }
-        .padding()
-        .frame(width: 230, height: 300)
-        .background(Color.white)
+        .frame(width: cardWidth, height: cardHeight)
         .cornerRadius(12)
         .shadow(radius: 2)
-        // MARK: - Overlay Heart Icon
+        // MARK: - Overlay Heart Icon (always available, doesn't require flipping)
         .overlay(alignment: .topTrailing) {
             Button(action: {
                 savedItems.toggleActivity(activity)
@@ -288,15 +357,15 @@ struct ActivityCard: View {
                 ZStack {
                     Circle()
                         .fill(Color.white)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 24, height: 24)
                         .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 1)
-                    
+
                     Image(systemName: savedItems.isActivitySaved(activity) ? "heart.fill" : "heart")
                         .foregroundColor(.blue)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                 }
             }
-            .padding(12) // Padding from the top-right edges
+            .padding(8) // Padding from the top-right edges
         }
     }
 }
@@ -308,52 +377,66 @@ struct ResourceCard: View {
     let topTags: [String]
     @EnvironmentObject var savedItems: SavedItems
 
+    // Scaled down from the original 230x350 to take up less room in the
+    // horizontal scroll rows (roughly 65% size).
+    private let cardWidth: CGFloat = 150
+    private let cardHeight: CGFloat = 228
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(resource.imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 160)
-                .cornerRadius(10)
-                .frame(maxWidth: .infinity, alignment: .center)
+        FlipCard {
+            // Front: illustration only
+            ZStack(alignment: .bottom) {
+                Image(resource.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: cardWidth, height: cardHeight)
+                    .clipped()
 
-            HStack {
-                Text(resource.name)
-                    .font(.custom("Alexandria-Regular", size: 15))
-                    .bold()
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                ForEach(resource.tags.prefix(2), id: \.self) { tag in
-                    HStack(spacing: 4) {
-                        Text(tag.capitalized)
-                            .font(.caption2)
-                        if topTags.contains(tag) {
-                            Image(systemName: "star.fill")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                                .foregroundColor(.yellow)
-                        }
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.purple.opacity(0.15))
-                    .cornerRadius(8)
+                LinearGradient(
+                    colors: [.black.opacity(0.55), .clear],
+                    startPoint: .bottom,
+                    endPoint: .center
+                )
+
+                HStack {
+                    Text(resource.name)
+                        .font(.custom("Alexandria-Regular", size: 11))
+                        .bold()
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                    Spacer()
+                    Image(systemName: "arrow.2.squarepath")
+                        .foregroundColor(.white.opacity(0.9))
+                        .font(.system(size: 9, weight: .bold))
                 }
+                .padding(7)
             }
+            .frame(width: cardWidth, height: cardHeight)
+        } back: {
+            // Back: name, tags, description
+            VStack(alignment: .leading, spacing: 6) {
+                Text(resource.name)
+                    .font(.custom("Alexandria-Regular", size: 12))
+                    .bold()
+                    .fixedSize(horizontal: false, vertical: true)
 
-            Text(resource.description)
-                .font(.custom("Alexandria-Regular", size: 12))
-                .foregroundColor(.gray)
-                .fixedSize(horizontal: false, vertical: true)
+                CardTagRow(tags: resource.tags, topTags: topTags)
 
-            Spacer()
+                Text(resource.description)
+                    .font(.custom("Alexandria-Regular", size: 9.5))
+                    .foregroundColor(.gray)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer()
+            }
+            .padding(10)
+            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
+            .background(Color.white)
         }
-        .padding()
-        .frame(width: 230, height: 350)
-        .background(Color.white)
+        .frame(width: cardWidth, height: cardHeight)
         .cornerRadius(12)
         .shadow(radius: 2)
-        // MARK: - Overlay Bookmark Icon
+        // MARK: - Overlay Bookmark Icon (always available, doesn't require flipping)
         .overlay(alignment: .topTrailing) {
             Button(action: {
                 savedItems.toggleResource(resource)
@@ -361,15 +444,15 @@ struct ResourceCard: View {
                 ZStack {
                     Circle()
                         .fill(Color.white)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 24, height: 24)
                         .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 1)
-                    
+
                     Image(systemName: savedItems.isResourceSaved(resource) ? "bookmark.fill" : "bookmark")
                         .foregroundColor(.blue)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                 }
             }
-            .padding(12) // Padding from the top-right edges
+            .padding(8) // Padding from the top-right edges
         }
     }
 }

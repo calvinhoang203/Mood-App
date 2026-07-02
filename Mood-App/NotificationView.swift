@@ -19,7 +19,6 @@ struct NotificationView: View {
     @State private var showAnalyticsNav = false
     @State private var showPet = false
     @State private var showSettingNav = false
-    @State private var showNotification = false
 
     // Popup state
     @State private var selectedEntry: DiaryEntry? = nil
@@ -44,8 +43,10 @@ struct NotificationView: View {
             })
             .compactMap { (_, value) in
                 guard let text = value["text"], let dateStr = value["date"] else { return nil }
-                let randomImage = imageOptions.randomElement() ?? "SurveyIcon"
-                return DiaryEntry(date: dateStr, imageName: randomImage, content: text)
+                // Deterministic pick (rather than .randomElement()) so each entry keeps
+                // the same icon across view re-renders instead of flickering.
+                let index = abs((dateStr + text).hashValue) % imageOptions.count
+                return DiaryEntry(date: dateStr, imageName: imageOptions[index], content: text)
             }
 
         return userEntries + [welcome] // Welcome always at bottom
@@ -63,22 +64,6 @@ struct NotificationView: View {
                         .padding(.leading, 5)
 
                     Spacer()
-/*
-                    Button {
-                        showHomeNav = true
-                    } label: {
-                        Image(systemName: "house.fill")
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                            .foregroundColor(Color("darkd3cpurple"))
-                            .padding(.top, 12)
-                            .padding(.trailing, 9)
-                    }
-
-                    Image("notification")
-                        .resizable()
-                        .frame(width: 30, height: 35)
-                        .padding(.top, 15) */
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
@@ -145,9 +130,6 @@ struct NotificationView: View {
             .navigationDestination(isPresented: $showAnalyticsNav) { AnalyticsPageView() }
             .navigationDestination(isPresented: $showPet) { PetView() }
             .navigationDestination(isPresented: $showSettingNav) { SettingView() }
-            .navigationDestination(isPresented: $showNotification) {
-                NotificationView().environmentObject(storeData)
-            }
         }
         // --- POPUP SHEET ---
         .sheet(item: $selectedEntry) { entry in

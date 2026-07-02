@@ -8,6 +8,9 @@ struct QuestionData {
 
 struct QuestionaireView: View {
     @EnvironmentObject var storeData: StoreData
+    // Persists login state so a new user who finishes onboarding stays
+    // logged in after force-quitting/relaunching the app.
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @State private var rankedResults: [String: String] = [:]
     @State private var showResources = false
     @State private var currentIndex = 0
@@ -153,6 +156,7 @@ struct QuestionaireView: View {
                     LoadingView()
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                isLoggedIn = true
                                 isFinished = true
                             }
                         }

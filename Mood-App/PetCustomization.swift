@@ -15,8 +15,6 @@ class PetCustomization: ObservableObject {
     @Published var unlockedItems: Set<String> = ["defaultcow"]
 
     private var listener: ListenerRegistration?
-    private let unlockCost = 50
-    private let lockedCost = 50
 
     var colorcow: Image {
         let name = colorName.isEmpty ? defaultColorName : colorName
@@ -173,10 +171,10 @@ class PetCustomization: ObservableObject {
             }
     }
 
-    func unlockItem(_ item: String, storeData: StoreData, completion: ((Bool) -> Void)? = nil) {
+    func unlockItem(_ item: String, cost: Int, storeData: StoreData, completion: ((Bool) -> Void)? = nil) {
         guard !unlockedItems.contains(item) else { completion?(true); return }
-        if storeData.totalPoints >= unlockCost {
-            storeData.deductPoints(unlockCost)
+        if storeData.totalPoints >= cost {
+            storeData.deductPoints(cost)
             let newSet = unlockedItems.union([item])
             self.unlockedItems = newSet
             guard let uid = Auth.auth().currentUser?.uid else { completion?(false); return }

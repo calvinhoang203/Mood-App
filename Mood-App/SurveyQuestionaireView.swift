@@ -18,13 +18,8 @@ struct SurveyQuestionaireView: View {
     @State private var currentIndex = 0
     @State private var selectedOptions: Set<String> = []
     @State private var showAlert = false
-    @State private var isFinished = false
     @State private var showLoading = false
     @State private var goToHome = false // New navigation state
-
-    
-
-    @Environment(\.dismiss) private var dismiss
 
     // Navigation state for all main screens
     @State private var showHomeNav = false
@@ -34,9 +29,6 @@ struct SurveyQuestionaireView: View {
     @State private var showPet = false
     @State private var showSettingNav = false
     private let navBarHeight: CGFloat = 64
-    
- 
-    private let moodPoints = 0 // Reset to 0 so we can award flat 25 at the end
 
     let questions: [SurveyQuestionData] = [
         SurveyQuestionData(
@@ -155,7 +147,7 @@ struct SurveyQuestionaireView: View {
                         Spacer()
 
                         Text("Let's get to know you better.")
-                            .font(.custom("Alexandria", size: 24))
+                            .font(.custom("Alexandria-Regular", size: 24))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
 
@@ -301,10 +293,6 @@ struct SurveyQuestionaireView: View {
             storeData.addPoints(for: "SURVEY_COMPLETED", points: 10)
             storeData.checkAndUnlockBadges()
             storeData.saveToFirestore()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                isFinished = true
-            }
         }
     }
 

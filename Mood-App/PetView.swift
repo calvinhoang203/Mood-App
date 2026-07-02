@@ -305,7 +305,7 @@ struct PetView: View {
                         .foregroundColor(.gray)
                     Button {
                         if !petCustomization.unlockedItems.contains(items[index]) {
-                            petCustomization.unlockItem(items[index], storeData: storeData) { success in
+                            petCustomization.unlockItem(items[index], cost: cost(index), storeData: storeData) { success in
                                 if !success {
                                     alertMessage = "You need \(cost(index)) points to unlock this item."
                                     showAlert = true

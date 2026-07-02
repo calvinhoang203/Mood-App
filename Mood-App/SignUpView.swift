@@ -5,9 +5,6 @@
 
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestore
-
-let db = Firestore.firestore()
 
 struct SignUpView: View {
     @State private var email = ""
@@ -36,7 +33,7 @@ struct SignUpView: View {
                         .frame(width: 150, height: 150)
 
                     Text("Create an Account")
-                        .font(.custom("Alexandria", size: 24))
+                        .font(.custom("Alexandria-Regular", size: 24))
                         .foregroundColor(.black)
 
                     customTextField(title: "Email *", text: $email)
@@ -59,7 +56,7 @@ struct SignUpView: View {
                         goToLogin = true
                     }) {
                         Text("Already have an account? Log in")
-                            .font(.custom("Alexandria", size: 16))
+                            .font(.custom("Alexandria-Regular", size: 16))
                             .foregroundColor(.blue)
                             .padding(.top, 10)
                     }

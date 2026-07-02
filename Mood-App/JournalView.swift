@@ -12,7 +12,6 @@ struct JournalView: View {
 
     // MARK: – Journal State
     @State private var journalEntry    = "Enter your thoughts here..."
-    @State private var entries: [String] = []
     @State private var userEdited      = false
 
     // MARK: – Camera State
@@ -115,8 +114,11 @@ struct JournalView: View {
                             
                             // — Submit Button —
                             Button {
-                                storeData.addJournalEntry(text: journalEntry)
-                                storeData.addPoints(for: "JOURNAL_ENTRY", points: 5) // Set to 5 Points
+                                let trimmed = journalEntry.trimmingCharacters(in: .whitespacesAndNewlines)
+                                guard userEdited, !trimmed.isEmpty else { return }
+                                // addJournalEntry already awards points for the entry and saves it,
+                                // so we only need to check for newly-unlocked badges afterward.
+                                storeData.addJournalEntry(text: trimmed)
                                 storeData.checkAndUnlockBadges()
                                 storeData.saveToFirestore()
                                 journalEntry = ""
@@ -205,15 +207,6 @@ struct JournalView: View {
                 .edgesIgnoringSafeArea(.bottom)
                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: -2)
         )
-    }
-
-    // MARK: – Save Logic
-    private func saveEntry() {
-        let trimmed = journalEntry.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, userEdited else { return }
-        entries.append(trimmed)
-        journalEntry = ""
-        userEdited    = false
     }
 }
 

@@ -21,7 +21,6 @@ struct SettingView: View {
     
     // Navigation State
     @State private var showPetView = false
-    @State private var notificationsEnabled: Bool = false
     @State private var showHomeNav = false
     @State private var showResource = false
     @State private var showSetGoal = false

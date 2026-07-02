@@ -9,7 +9,6 @@ import SwiftUI
 
 struct LoadingView: View {
     @State private var progress: CGFloat = 0.0
-    @State private var navigate = false
 
     var body: some View {
         NavigationStack {
@@ -52,7 +51,7 @@ struct LoadingView: View {
                     .padding(.top, -10) // Pull progress bar up
 
                     Text("We’re on the moove . . .")
-                        .font(.custom("Alexandria", size: 18))
+                        .font(.custom("Alexandria-Regular", size: 18))
                         .foregroundColor(.black)
 
                     Spacer()
@@ -64,9 +63,6 @@ struct LoadingView: View {
                         self.progress += 0.02
                     } else {
                         timer.invalidate()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigate = true
-                        }
                     }
                 }
             }

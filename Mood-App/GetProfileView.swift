@@ -32,7 +32,7 @@ struct GetProfileView: View {
                         .frame(width: 150, height: 150)
 
                     Text("Complete Your Profile")
-                        .font(.custom("Alexandria", size: 24))
+                        .font(.custom("Alexandria-Regular", size: 24))
                         .foregroundColor(.black)
 
                     customTextField(title: "First Name *", text: $firstName)
@@ -80,6 +80,7 @@ struct GetProfileView: View {
             storeData.lastName = lastName
             storeData.pronouns = pronouns
             storeData.phoneNumber = phoneNumber
+            storeData.saveToFirestore()
             goToQuestion1 = true
         }
     }

@@ -41,10 +41,7 @@ class StoreData: ObservableObject {
     ]
     
     @Published var currentStreak: Int = 0
-    @Published var weeklyMoodData: [String: Double] = [
-        "Happiness": 0, "Sadness": 0, "Anxiety": 0
-    ]
-    
+
     @Published var badgeTitles: [String] = [
         "Library Scholar", "Boba Enthusiast", "Rec Sports MVP", "Spa Day Specialist",
         "Bike Barn Boss", "Library Scholar", "Piercing Perfectionist", "Farmer’s Market Fashionista",
@@ -165,7 +162,6 @@ class StoreData: ObservableObject {
     static let demo: StoreData = {
         let sd = StoreData()
         sd.currentStreak = 5
-        sd.weeklyMoodData = ["Happiness": 4, "Sadness": 1, "Anxiety": 2]
         sd.moodEntries = [
             .init(date: Date().addingTimeInterval(-86400 * 0), mood: .meh),
             .init(date: Date().addingTimeInterval(-86400 * 1), mood: .okay)
@@ -181,6 +177,7 @@ extension StoreData {
         let newEntry = MoodEntry(date: Date(), mood: mood)
         moodEntries.append(newEntry)
         updateWeeklyMoodDistribution()
+        updateStreakIfNeeded()
         saveToFirestore()
     }
     
@@ -366,19 +363,36 @@ extension StoreData {
         unlockedBadges = Array(repeating: false, count: 12)
         totalBadgePoints = 0
         journals = [:]; notifications = ["account_created": false, "point_checkpoint": false, "daily_check_in": false]
-        weeklyMoodData = ["Happiness": 0, "Sadness": 0, "Anxiety": 0]
         categoryResults = [:]
         customQuote = "Worrying does not take away tomorrow's troubles. It takes away today's peace."
     }
     
+    // Recomputes the consecutive-day check-in streak from moodEntries.
+    // Counts backwards from today (or from the most recent check-in day)
+    // as long as each preceding day also has an entry.
     func updateStreakIfNeeded() {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let hasEntryToday = moodEntries.contains { calendar.isDate($0.date, inSameDayAs: today) }
-        if !hasEntryToday {
-            currentStreak += 1
-            saveToFirestore()
+        let uniqueDays = Set(moodEntries.map { calendar.startOfDay(for: $0.date) }).sorted(by: >)
+
+        guard let mostRecentDay = uniqueDays.first,
+              calendar.isDateInToday(mostRecentDay) else {
+            // No check-in today means today's streak hasn't been earned yet;
+            // leave currentStreak as-is rather than resetting it mid-day.
+            return
         }
+
+        var streak = 0
+        var expectedDay = mostRecentDay
+        for day in uniqueDays {
+            if day == expectedDay {
+                streak += 1
+                guard let previousDay = calendar.date(byAdding: .day, value: -1, to: expectedDay) else { break }
+                expectedDay = previousDay
+            } else {
+                break
+            }
+        }
+        currentStreak = streak
     }
     
     func markNotificationAsSeen(_ key: String) {

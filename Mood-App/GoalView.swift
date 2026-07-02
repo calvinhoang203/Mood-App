@@ -60,7 +60,7 @@ struct GoalView: View {
                         // Top Title
                         HStack {
                             Text("Goal Setting")
-                                .font(.custom("Alexandria", size: 30))
+                                .font(.custom("Alexandria-Regular", size: 30))
                                 .foregroundColor(.black)
                                 .padding(.leading)
                             Spacer()
